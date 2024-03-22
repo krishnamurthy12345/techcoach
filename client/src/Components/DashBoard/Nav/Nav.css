@@ -1,0 +1,38 @@
+.header{
+    height: 70px;
+    width: 100%;
+    background-color: #868282;
+    box-shadow: 0 6px 7px -3px rgba(0, 0, 0, 0.35);
+}
+.menu-icon{
+    display: none;
+}
+.header-right{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 70px;
+    color: white;
+}
+.list-unstyled{
+    display: flex;
+    gap: 50px;
+}
+li{
+    text-decoration: none;
+    list-style: none;
+    color: white;
+    
+}
+.icon{
+    font-size: 25px;
+    cursor: pointer;
+}
+
+/* Extra Small <=576px */
+
+@media screen and (max-width:992px) {
+    .header-left{
+     display: none;
+    }
+ }

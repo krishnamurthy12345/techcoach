@@ -1,0 +1,58 @@
+# dependencies
+/node_modules
+ 
+# testing
+/coverage
+ 
+# production
+/build
+/dist
+./dist
+./server/dist
+server/dist
+# misc
+.DS_Store
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+ 
+/client/node_modules
+ 
+# testing
+/client/coverage
+ 
+# production
+/client/build
+ 
+/client/.env
+ 
+/client/dist
+ 
+#server
+ 
+/server/node_modules
+ 
+# testing
+/server/coverage
+ 
+# production
+/server/build
+ 
+ 
+/server/.env
+ 
+/server/uploads
+/server/src/uploads
+ 
+ 
+ 
+/server/.env
+ 
+/server/uploads
+/server/src/uploads
+ 
+ 
+ 
+/server/upload
+/server/src/upload
