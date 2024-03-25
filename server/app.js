@@ -22,7 +22,7 @@ app.use(cors({
     optionsSuccessStatus: 200 // Respond with this status code for preflight requests
 }));
 
-const PORT = 6005;
+const PORT = process.env.PORT;
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
