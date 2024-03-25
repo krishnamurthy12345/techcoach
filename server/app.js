@@ -57,16 +57,16 @@ const JWT_SECRET_KEY = 'cats';
 
 // Passport Configuration
 passport.use(new GoogleStrategy({
-    
+
     clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET ,
+    clientSecret: process.env.CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const connection = await pool.getConnection();
-        const [existingUser] = await connection.query("SELECT * FROM taskk.task1 WHERE googleId=?", [profile.id]);
+        const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.task1 WHERE googleId=?", [profile.id]);
         if (!existingUser) {
-            await connection.query("INSERT INTO taskk.task1 (googleId, displayName, email) VALUES (?, ?, ?)", [profile.id, profile.displayName, profile.email]);
+            await connection.query("INSERT INTO techcoach_lite.task1 (googleId, displayName, email) VALUES (?, ?, ?)", [profile.id, profile.displayName, profile.email]);
         }
         connection.release();
         const token = jwt.sign({ id: profile.id, email: profile.email }, JWT_SECRET_KEY);
@@ -116,44 +116,44 @@ app.get('/userdata', (req, res) => {
     }
 });
 
-// Route to handle POST requests to insert data
-app.post('/insert_data', async (req, res) => {
-    const { googleId, displayName, email, image } = req.body;
-    console.log(email)
+// // Route to handle POST requests to insert data
+// app.post('/insert_data', async (req, res) => {
+//     const { googleId, displayName, email, image } = req.body;
+//     console.log(email)
 
-    try {
-        const conn = await getConnection();
-        // Execute the SQL query to insert data
-        const result = await conn.query("INSERT INTO  taskk.task1 (googleId, displayName, email,image) VALUES (?, ?, ?,?)",
-            [googleId, displayName, email, image]);
+//     try {
+//         const conn = await getConnection();
+//         // Execute the SQL query to insert data
+//         const result = await conn.query("INSERT INTO  taskk.task1 (googleId, displayName, email,image) VALUES (?, ?, ?,?)",
+//             [googleId, displayName, email, image]);
 
-        // Release the connection back to the pool
-        conn.release();
+//         // Release the connection back to the pool
+//         conn.release();
 
-        // Send response indicating success
-        res.status(200).json({ message: 'Data inserted successfully' });
-    } catch (error) {
-        console.error('Error inserting data:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    }
-});
+//         // Send response indicating success
+//         res.status(200).json({ message: 'Data inserted successfully' });
+//     } catch (error) {
+//         console.error('Error inserting data:', error);
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     }
+// });
 
-app.get('/insert_data', async (req, res) => {
-    try {
-        const conn = await getConnection();
-        // Execute the SQL query to fetch data
-        const result = await conn.query("SELECT * FROM taskk.task1");
+// app.get('/insert_data', async (req, res) => {
+//     try {
+//         const conn = await getConnection();
+//         // Execute the SQL query to fetch data
+//         const result = await conn.query("SELECT * FROM taskk.task1");
 
-        // Release the connection back to the pool
-        conn.release();
+//         // Release the connection back to the pool
+//         conn.release();
 
-        // Send response with the fetched data
-        res.status(200).json({ data: result });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    }
-});
+//         // Send response with the fetched data
+//         res.status(200).json({ data: result });
+//     } catch (error) {
+//         console.error('Error fetching data:', error);
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     }
+// });
 
 // app.put('/profile/:id', async (req, res) => {
 //     try {
@@ -290,7 +290,7 @@ app.get('/insert_data', async (req, res) => {
 app.post('/api/details', async (req, res) => {
     const { decisionName, decisionReason, created_by, user_Creation, user_Statement, tags } = req.body;
     let conn;
-
+    console.log('bbb')
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -300,10 +300,9 @@ app.post('/api/details', async (req, res) => {
 
         // Insert decision data
         const decisionResult = await conn.query(
-            "INSERT INTO loginn.decision (decisionName, decisionReason, created_by, user_Creation, user_Statement) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO techcoach_lite.decision (decisionName, decisionReason, created_by, user_Creation, user_Statement) VALUES (?, ?, ?, ?, ?)",
             [decisionName, decisionReason, created_by, formattedDateTime, user_Statement]
         );
-
 
         const decisionId = decisionResult.insertId;
 
@@ -312,16 +311,28 @@ app.post('/api/details', async (req, res) => {
 
         // Insert tags and associate them with the decision
         for (const tagName of tagsArray) {
-            // Your database insertion logic goes here
-            const tagResult = await conn.query(
-                "INSERT INTO loginn.tag (tag_name) VALUES (?)",
+            // Check if the tag already exists in the database
+            const [existingTag] = await conn.query(
+                "SELECT * FROM techcoach_lite.tag WHERE tag_name = ?",
                 [tagName]
             );
 
-            const tagId = tagResult.insertId; 
+            let tagId;
+            if (existingTag && existingTag.length > 0) {
+                // If the tag exists, retrieve its ID
+                tagId = existingTag[0].id;
+            } else {
+                // If the tag doesn't exist, insert it and retrieve its ID
+                const tagInsertResult = await conn.query(
+                    "INSERT INTO techcoach_lite.tag (tag_name) VALUES (?)",
+                    [tagName]
+                );
+                tagId = tagInsertResult.insertId;
+            }
 
+            // Associate the tag with the decision
             await conn.query(
-                "INSERT INTO loginn.decision_tag (decision_id, tag_id) VALUES (?, ?)",
+                "INSERT INTO techcoach_lite.decision_tag (decision_id, tag_id) VALUES (?, ?)",
                 [decisionId, tagId]
             );
         }
@@ -341,6 +352,7 @@ app.post('/api/details', async (req, res) => {
         }
     }
 });
+
 
 
 
@@ -407,16 +419,16 @@ app.post('/api/details', async (req, res) => {
 
 app.get('/api/all-decisions', async (req, res) => {
     let conn;
-
+    console.log('aa')
     try {
         conn = await getConnection();
 
         // Retrieve all decision details
         const decisionData = await conn.query(
             "SELECT d.*, GROUP_CONCAT(t.tag_name) AS tags " +
-            "FROM loginn.decision d " +
-            "LEFT JOIN loginn.decision_tag dt ON d.decision_id = dt.decision_id " +
-            "LEFT JOIN loginn.tag t ON dt.tag_id = t.tag_id " +
+            "FROM techcoach_lite.decision d " +
+            "LEFT JOIN techcoach_lite.decision_tag dt ON d.decision_id = dt.decision_id " +
+            "LEFT JOIN techcoach_lite.tag t ON dt.tag_id = t.tag_id " +
             "GROUP BY d.decision_id"
         );
 
@@ -445,9 +457,9 @@ app.get('/api/details/:decisionId', async (req, res) => {
         // Retrieve decision details for the specific decision ID
         const decisionData = await conn.query(
             `SELECT d.*, GROUP_CONCAT(t.tag_name) AS tags
-            FROM loginn.decision d
-            LEFT JOIN loginn.decision_tag dt ON d.decision_id = dt.decision_id
-            LEFT JOIN loginn.tag t ON dt.tag_id = t.tag_id
+            FROM techcoach_lite.decision d
+            LEFT JOIN techcoach_lite.decision_tag dt ON d.decision_id = dt.decision_id
+            LEFT JOIN techcoach_lite.tag t ON dt.tag_id = t.tag_id
             WHERE d.decision_id = ?
             GROUP BY d.decision_id`,
             [decisionId]
@@ -477,7 +489,7 @@ app.put('/api/details/:decisionId', async (req, res) => {
     const { decisionId } = req.params;
     const { decisionName, decisionReason, created_by, user_Creation, user_Statement, tags } = req.body;
     let conn;
-
+    console.log('eee')
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -487,35 +499,47 @@ app.put('/api/details/:decisionId', async (req, res) => {
 
         // Update decision data
         await conn.query(
-            "UPDATE loginn.decision SET decisionName = ?, decisionReason = ?, created_by = ?, user_Creation = ?, user_Statement = ? WHERE decision_id = ?",
+            "UPDATE techcoach_lite.decision SET decisionName = ?, decisionReason = ?, created_by = ?, user_Creation = ?, user_Statement = ? WHERE decision_id = ?",
             [decisionName, decisionReason, created_by, formattedDateTime, user_Statement, decisionId]
         );
 
         // Delete existing associated tags
         await conn.query(
-            "DELETE FROM loginn.decision_tag WHERE decision_id = ?",
+            "DELETE FROM techcoach_lite.decision_tag WHERE decision_id = ?",
             [decisionId]
         );
 
         // Ensure tags is an array before iterating over it
         const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-
-        // Insert tags and associate them with the decision
         for (const tagName of tagsArray) {
-            // Your database insertion logic goes here
-            const tagResult = await conn.query(
-                "INSERT INTO loginn.tag (tag_name) VALUES (?)",
-                [tagName]
-            );
+            try {
+                // Attempt to insert the tag
+                const tagResult = await conn.query(
+                    "INSERT INTO techcoach_lite.tag (tag_name) VALUES (?)",
+                    [tagName]
+                );
 
-            const tagId = tagResult.insertId;
+                const tagId = tagResult.insertId;
 
-            await conn.query(
-                "INSERT INTO loginn.decision_tag (decision_id, tag_id) VALUES (?, ?)",
-                [decisionId, tagId]
-            );
+                // Associate the newly inserted tag with the decision
+                await conn.query(
+                    "INSERT INTO techcoach_lite.decision_tag (decision_id, tag_id) VALUES (?, ?)",
+                    [decisionId, tagId]
+                );
+            } catch (tagError) {
+                if (tagError.code === 'ER_DUP_ENTRY') {
+                    // Handle duplicate entry error
+                    console.log(`Tag '${tagName}' already exists. Skipping insertion.`);
+                    // You can retry the operation with a modified tag name here if needed
+                } else {
+                    // Handle other errors
+                    console.error('Error handling tag:', tagError);
+                    await conn.rollback();
+                    conn.release();
+                    return res.status(500).json({ error: 'An error occurred while processing your request' });
+                }
+            }
         }
-
 
         await conn.commit();
         res.status(200).json({ message: 'Decision updated successfully' });
@@ -534,7 +558,6 @@ app.put('/api/details/:decisionId', async (req, res) => {
 });
 
 
-
 // DELETE method
 app.delete('/api/details/:id', async (req, res) => {
     const decisionId = req.params.id;
@@ -546,13 +569,13 @@ app.delete('/api/details/:id', async (req, res) => {
 
         // Delete associated tags
         await conn.query(
-            "DELETE FROM loginn.decision_tag WHERE decision_id = ?",
+            "DELETE FROM techcoach_lite.decision_tag WHERE decision_id = ?",
             [decisionId]
         );
 
         // Delete decision
         await conn.query(
-            "DELETE FROM loginn.decision WHERE decision_id = ?",
+            "DELETE FROM techcoach_lite.decision WHERE decision_id = ?",
             [decisionId]
         );
 

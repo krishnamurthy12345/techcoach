@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate ,Link} from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import './Decision.css';
@@ -78,6 +78,7 @@ const Decision = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log('ccc')
     e.preventDefault();
     const { decisionName, decisionReason, created_by, user_Creation, user_Statement } = formData;
     if (!decisionName || !decisionReason || !created_by || !user_Creation || !user_Statement) {
@@ -119,12 +120,7 @@ const Decision = () => {
             navigate('/readd');
           }
         } catch (error) {
-          if (error.response) {
-            console.error("Request failed with status code:", error.response.status);
-            console.error("Response data:", error.response.data);
-          } else {
-            console.error("Error:", error.message);
-          }
+          console.error("Error:", error.message);
           toast.error("An error occurred while saving the decision");
           console.error(error);
         }
@@ -192,9 +188,9 @@ const Decision = () => {
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />
         </form>
-        {/* <Link to='/readd'>
+        <Link to='/readd'>
           <button>Go</button>
-        </Link> */}
+        </Link>
       </div>
     </div>
   );
