@@ -12,7 +12,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     const token = jwt.sign({ id: req.user.id, email: req.user.email }, JWT_SECRET_KEY);
     req.user.token = token;
-    res.redirect(`http://localhost:3000/dashboard?token=${req.user.token}`);
+    res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${req.user.token}`);
 });
 
 module.exports = router;
