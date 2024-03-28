@@ -8,13 +8,13 @@ const postInfo = async (req, res) => {
       conn = await getConnection();
       await conn.beginTransaction();
   
-      const formattedCreationDate = new Date(creation_date).toISOString().slice(0, 10);
+      const currentDate = new Date().toISOString().slice(0, 10);
       const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
       const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
   
       const decisionResult = await conn.query(
         "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement) VALUES (?, ?, ?, ?, ?, ?)",
-        [decision_name, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement]
+        [decision_name, created_by, currentDate, formattedDueDate, formattedTakenDate, user_statement]
       );
   
       const decisionId = decisionResult.insertId;
@@ -445,7 +445,7 @@ const putInfo = async (req, res) => {
       // Insert new tags for the decision
       const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
       for (const tagName of tagsArray) {
-        const [tag] = await conn.query(
+        const tag = await conn.query(
           "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
           [tagName]
         );

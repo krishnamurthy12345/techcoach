@@ -23,13 +23,21 @@ const Decision = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    if (id) {
+    if (!id) {
+      // Set the current system time as the default creation date
+      const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      setFormData(prevState => ({
+        ...prevState,
+        creation_date: currentDate
+      }));
+    } else {
       axios
         .get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
         .then((resp) => {
           setFormData({
             ...resp.data,
             decision_reason: resp.data.reasons || [''],
+            
           });
           setSelectedTags(resp.data.tags ? resp.data.tags.split(',') : []);
         })
@@ -90,6 +98,7 @@ const Decision = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement } = formData;
+  
     if (!decision_name || decision_reason.some(reason => reason.trim() === '') || !created_by || !creation_date || !decision_due_date || !decision_taken_date || !user_statement) {
       toast.error("Please provide a value for each input field");
     } else {
@@ -104,7 +113,7 @@ const Decision = () => {
         tags: selectedTags.join(','),
         decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })), // Adjust this to match your backend structure
       };
-
+  
       try {
         if (!id) {
           setFormData({
@@ -117,11 +126,12 @@ const Decision = () => {
             user_statement,
             tags: selectedTags.join(','),
             decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
-          })
+          });
+          console.log("Data for POST request:", data); // Log data before POST request
           await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
           toast.success("Decision added successfully");
         } else {
-          console.log(data)
+          console.log("Data for PUT request:", data); // Log data before PUT request
           await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
           toast.success("Decision updated successfully");
         }
@@ -133,6 +143,7 @@ const Decision = () => {
       }
     }
   };
+  
 
 
   return (
@@ -143,28 +154,28 @@ const Decision = () => {
           <div>
             <div>
               <label htmlFor='decision_name'>Decision Name:</label>
-              <input type='text' id='decision_name' value={formData.decision_name} onChange={handleInputChange} />
+              <input type='text' id='decision_name' value={formData.decision_name} onChange={handleInputChange} placeholder='enter the decision name' />
             </div>
 
             <div>
               <label htmlFor='created_by'>Created By:</label>
-              <input type='text' id='created_by' value={formData.created_by} onChange={handleInputChange} />
+              <input type='text' id='created_by' value={formData.created_by} onChange={handleInputChange} placeholder='enter the creater...'/>
             </div>
             <div>
               <label htmlFor='creation_date'>Creation Date:</label>
-              <input type='datetime-local' id='creation_date' value={formData.creation_date} onChange={handleInputChange} />
+              <input type='datetime-local' id='creation_date' value={formData.creation_date} onChange={handleInputChange} placeholder='yyyy-mm-dd'/>
             </div>
             <div>
               <label htmlFor='decision_due_date'>Decision Due Date:</label>
-              <input type='datetime-local' id='decision_due_date' value={formData.decision_due_date} onChange={handleInputChange} />
+              <input type='datetime' id='decision_due_date' value={formData.decision_due_date} onChange={handleInputChange} placeholder='yyyy-mm-dd'/>
             </div>
             <div>
               <label htmlFor='decision_taken_date'>Decision Taken Date:</label>
-              <input type='datetime-local' id='decision_taken_date' value={formData.decision_taken_date} onChange={handleInputChange} />
+              <input type='datetime' id='decision_taken_date' value={formData.decision_taken_date} onChange={handleInputChange} placeholder='yyyy-mm-dd'/>
             </div>
             <div>
               <label htmlFor='user_statement'>User Statement:</label>
-              <input type='text' id='user_statement' value={formData.user_statement} onChange={handleInputChange} />
+              <input type='text' id='user_statement' value={formData.user_statement} onChange={handleInputChange} placeholder='enter the statement'/>
             </div>
           </div>
           <div className='col-lg-4 col-md-6'>
@@ -197,14 +208,14 @@ const Decision = () => {
                 </div>
               ))}
             </div>
-            <div>
+            <div className='d-flex'>
               <label>Decision Reasons:</label>
               {formData.decision_reason && formData.decision_reason.map((reason, index) => (
                 <div key={index}>
-                  <input type='text' value={reason} onChange={e => handleReasonChange(index, e.target.value)} />
+                  <input type='text' value={reason} onChange={e => handleReasonChange(index, e.target.value)} placeholder='enter the decision name'/>
                 </div>
               ))}
-              <button type="button" onClick={handleAddReason}>+</button>
+              <button type="button" onClick={handleAddReason}>Add </button>
             </div>
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />
