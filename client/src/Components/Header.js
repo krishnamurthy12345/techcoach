@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Header.css';
 import { Link } from 'react-router-dom';
+import tech from './assets/tech.png'
 
 const Header = () => {
     // State to track user authentication status
@@ -19,7 +20,8 @@ const Header = () => {
             <header className='header1'>
                 <nav>
                     <div className='left'>
-                        <h1>RAIDD</h1>
+                        <h4>TechCoach_lite</h4>
+                        <img src={tech} alt='' className='image' />
                     </div>
                     <div className='right'>
                         <ul>
