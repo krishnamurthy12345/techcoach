@@ -9,20 +9,21 @@ const Readd = () => {
 
   const loadData = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/all-decisions`);
-      let responseData = response.data;
-  
-      // Check if response is an object with an 'a' property which contains an array
-      if (responseData && typeof responseData === 'object' && responseData.hasOwnProperty('a') && Array.isArray(responseData.a)) {
-        // If so, extract the array
-        responseData = responseData.a;
-      }
-  
-      // Now check if responseData is an array before setting the state
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details`);
+      const responseData = response.data;
+
       if (Array.isArray(responseData)) {
         setData(responseData);
+      } else if (responseData && typeof responseData === 'object') {
+        // If response is an object, assume it contains the array under a key 'decisions'
+        const decisionsArray = responseData.decisions;
+        if (Array.isArray(decisionsArray)) {
+          setData(decisionsArray);
+        } else {
+          console.error("Data received is not an array:", responseData);
+        }
       } else {
-        console.error("Data received is not an array:", responseData);
+        console.error("Invalid response format:", responseData);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -36,9 +37,9 @@ const Readd = () => {
   const deleteDecision = async (id) => {
     if (window.confirm("Are you sure that you want to delete this decision?")) {
       try {
-        await axios.delete(`http://localhost:6005/api/details/${id}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
         toast.success("Decision deleted successfully");
-        setTimeout(() => loadData(),0);
+        loadData(); // No need for setTimeout here
       } catch (error) {
         console.error("Error deleting decision:", error);
       }
@@ -47,11 +48,10 @@ const Readd = () => {
 
   const filteredData = data.filter(decision => {
     return (
-      decision.decisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (decision.tags && decision.tags.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
-  
 
   return (
     <div>
@@ -69,11 +69,14 @@ const Readd = () => {
           <tr>
             <th>#</th>
             <th>Decision Name</th>
-            <th>Decision Reason</th>
+            {/* <th>Decision Reason</th> */}
             <th>Created By</th>
-            <th>User Creation</th>
+            <th>Creation Date</th>
+            <th>Decision Due Date</th>
+            <th>Decision Taken Date</th>
             <th>User Statement</th>
             <th>Tags</th>
+            <th>Decision Reasons</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -81,12 +84,21 @@ const Readd = () => {
           {filteredData.map((decision, index) => (
             <tr key={decision.decision_id}>
               <th scope='row'>{index + 1}</th>
-              <td>{decision.decisionName}</td>
-              <td>{decision.decisionReason}</td>
+              <td>{decision.decision_name}</td>
+             {/* <td>{decision.decision_reason}</td> */}
               <td>{decision.created_by}</td>
-              <td>{decision.user_Creation}</td>
-              <td>{decision.user_Statement}</td>
+              <td>{decision.creation_date}</td>
+              <td>{decision.decision_due_date}</td>
+              <td>{decision.decision_taken_date}</td>
+              <td>{decision.user_statement}</td>
               <td>{decision.tags}</td>
+              {/* <td>{decision.decision_reason_text}</td> */}
+              <td>
+                {/* Render each decision_reason_text individually */}
+                {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
+                  <div key={reason.id}>{reason.decision_reason_text}</div>
+                ))}
+              </td>
               <td>
                 <Link to={`/decision/${decision.decision_id}`}>
                   <button className='btn btn-secondary'>Edit</button>
@@ -95,6 +107,7 @@ const Readd = () => {
               </td>
             </tr>
           ))}
+
         </tbody>
       </table>
     </div>

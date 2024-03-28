@@ -1,39 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate ,Link} from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import './Decision.css';
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [formData, setFormData] = useState({
-    decisionName: '',
-    decisionReason: '', // Initialize as an array with one empty string
+    decision_name: '',
+    decision_reason: [''],
     created_by: '',
-    user_Creation: '',
-    user_Statement: ''
+    creation_date: '',
+    decision_due_date: '',
+    decision_taken_date: '',
+    user_statement: '',
   });
+
+  console.log(formData);
 
   const dropdownHeight = 200;
   const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
-    const dummyFormData = {
-      decisionName: '',
-      decisionReason: '',
-      created_by: '',
-      user_Creation: '',
-      user_Statement: ''
-    };
-
     if (id) {
       axios
         .get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
         .then((resp) => {
           setFormData({
             ...resp.data,
+            decision_reason: resp.data.reasons || [''],
           });
           setSelectedTags(resp.data.tags ? resp.data.tags.split(',') : []);
         })
@@ -45,8 +41,6 @@ const Decision = () => {
             toast.error("An error occurred while fetching decision details");
           }
         });
-    } else {
-      setFormData(dummyFormData);
     }
   }, [id]);
 
@@ -77,56 +71,69 @@ const Decision = () => {
     });
   };
 
+  const handleAddReason = () => {
+    setFormData(prevState => ({
+      ...prevState,
+      decision_reason: [...prevState.decision_reason, '']
+    }));
+  };
+
+  const handleReasonChange = (index, value) => {
+    const updatedReason = [...formData.decision_reason];
+    updatedReason[index] = value;
+    setFormData({
+      ...formData,
+      decision_reason: updatedReason
+    });
+  };
+
   const handleSubmit = async (e) => {
-    console.log('ccc')
     e.preventDefault();
-    const { decisionName, decisionReason, created_by, user_Creation, user_Statement } = formData;
-    if (!decisionName || !decisionReason || !created_by || !user_Creation || !user_Statement) {
+    const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement } = formData;
+    if (!decision_name || decision_reason.some(reason => reason.trim() === '') || !created_by || !creation_date || !decision_due_date || !decision_taken_date || !user_statement) {
       toast.error("Please provide a value for each input field");
     } else {
-      const currentTime = new Date();
+      const data = {
+        decision_name,
+        decision_reason,
+        created_by,
+        creation_date,
+        decision_due_date,
+        decision_taken_date,
+        user_statement,
+        tags: selectedTags.join(','),
+        decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })), // Adjust this to match your backend structure
+      };
 
-      if (!isNaN(currentTime.getTime())) {
-        const isoTime = currentTime.toISOString();
-        const data = {
-          decisionName,
-          decisionReason,
-          created_by,
-          user_Creation,
-          user_Statement,
-          tags: selectedTags.join(','),
-          updated_at: isoTime
-        };
-
-        try {
-          if (!id) {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
-            setFormData({
-              decisionName: '',
-              decisionReason: '',
-              created_by: '',
-              user_Creation: '',
-              user_Statement: ''
-            });
-            const responseData = response.data;
-            setSelectedTags(responseData.tags ? responseData.tags.split(',') : []);
-            toast.success("Decision added successfully");
-            navigate('/readd');
-          } else {
-            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
-            const responseData = response.data;
-            setSelectedTags(responseData.tags ? responseData.tags.split(',') : []);
-            toast.success("Decision updated successfully");
-            navigate('/readd');
-          }
-        } catch (error) {
-          console.error("Error:", error.message);
-          toast.error("An error occurred while saving the decision");
-          console.error(error);
+      try {
+        if (!id) {
+          setFormData({
+            decision_name,
+            decision_reason,
+            created_by,
+            creation_date,
+            decision_due_date,
+            decision_taken_date,
+            user_statement,
+            tags: selectedTags.join(','),
+            decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
+          })
+          await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
+          toast.success("Decision added successfully");
+        } else {
+          console.log(data)
+          await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
+          toast.success("Decision updated successfully");
         }
+        navigate('/readd');
+      } catch (error) {
+        console.error("Error:", error.message);
+        toast.error("An error occurred while saving the decision");
+        console.error(error);
       }
     }
   };
+
 
   return (
     <div>
@@ -135,24 +142,29 @@ const Decision = () => {
         <form onSubmit={handleSubmit}>
           <div>
             <div>
-              <label htmlFor='decisionName'>Decision Name:</label>
-              <input type='text' id='decisionName' value={formData.decisionName} onChange={handleInputChange} />
+              <label htmlFor='decision_name'>Decision Name:</label>
+              <input type='text' id='decision_name' value={formData.decision_name} onChange={handleInputChange} />
             </div>
-            <div>
-              <label htmlFor='decisionReason'>Decision Reason:</label>
-              <input type='text' id='decisionReason' value={formData.decisionReason} onChange={handleInputChange} />
-            </div>
+
             <div>
               <label htmlFor='created_by'>Created By:</label>
               <input type='text' id='created_by' value={formData.created_by} onChange={handleInputChange} />
             </div>
             <div>
-              <label htmlFor='user_Creation'>User Creation:</label>
-              <input type='text' id='user_Creation' value={formData.user_Creation} onChange={handleInputChange} />
+              <label htmlFor='creation_date'>Creation Date:</label>
+              <input type='datetime-local' id='creation_date' value={formData.creation_date} onChange={handleInputChange} />
             </div>
             <div>
-              <label htmlFor='user_Statement'>User Statement:</label>
-              <input type='text' id='user_Statement' value={formData.user_Statement} onChange={handleInputChange} />
+              <label htmlFor='decision_due_date'>Decision Due Date:</label>
+              <input type='datetime-local' id='decision_due_date' value={formData.decision_due_date} onChange={handleInputChange} />
+            </div>
+            <div>
+              <label htmlFor='decision_taken_date'>Decision Taken Date:</label>
+              <input type='datetime-local' id='decision_taken_date' value={formData.decision_taken_date} onChange={handleInputChange} />
+            </div>
+            <div>
+              <label htmlFor='user_statement'>User Statement:</label>
+              <input type='text' id='user_statement' value={formData.user_statement} onChange={handleInputChange} />
             </div>
           </div>
           <div className='col-lg-4 col-md-6'>
@@ -185,6 +197,15 @@ const Decision = () => {
                 </div>
               ))}
             </div>
+            <div>
+              <label>Decision Reasons:</label>
+              {formData.decision_reason && formData.decision_reason.map((reason, index) => (
+                <div key={index}>
+                  <input type='text' value={reason} onChange={e => handleReasonChange(index, e.target.value)} />
+                </div>
+              ))}
+              <button type="button" onClick={handleAddReason}>+</button>
+            </div>
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />
         </form>
@@ -197,3 +218,4 @@ const Decision = () => {
 };
 
 export default Decision;
+

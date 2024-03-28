@@ -15,6 +15,11 @@
   
   header nav .left{
     color: white;
+    display: flex;
+  }
+  header nav .image{
+    height: 50px;
+    width: 50px;
   }
   
   header nav .right ul{
