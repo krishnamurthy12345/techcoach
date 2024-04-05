@@ -1,52 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Nav.css';
-import { BsFillBellFill, BsFillEnvelopeFill, BsPersonCircle, BsJustify } from 'react-icons/bs';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { BsFillBellFill, BsFillEnvelopeFill, BsPersonCircle } from 'react-icons/bs';
 
-function Nav() {
- 
+function Dashboard() {
+  const [navCollapse, setNavCollapse] = useState(false);
+
+  // Function to handle navigation when an option is selected
+  const handleProfileSelect = (event) => {
+    const selectedOption = event.target.value;
+    if (selectedOption === 'basic') {
+      // Navigate to the Basic Information route
+      window.location.href = '/basic';
+    } else if (selectedOption === 'personal') {
+      // Navigate to the Personal Info route
+      window.location.href = '/personal';
+    }
+  };
+
   return (
-    <header className='header '>
-      <div className='menu-icon'>
-        <BsJustify className='icon' />
-      </div>
-      <div className='header-right '>
-        <ul className="list-unstyled">
-          <Link to='/notification'>
+    <div>
+      <nav className='nav'>
+        <div className='logo'>
+          <i className='bi bi-justify largeDeviceIcon' onClick={() => setNavCollapse(!navCollapse)}></i>
+        </div>
+        <ul>
+          <li><Link to='/decision'><BsFillEnvelopeFill className='icon' /> Decision</Link></li>
+          <li><Link to='/notification'><BsFillBellFill className='icon' /> Notification</Link></li>
           <li>
-            <div>
-              <BsFillBellFill className='icon' />
-              <p>Notification</p>
-            </div>
+            <BsPersonCircle className='icon' />
+            Profile
+            <select onChange={handleProfileSelect}>
+              <option value=""></option>
+              <option value="basic">Basic Information</option>
+              <option value="personal">Personal info</option>
+            </select>
           </li>
-          </Link>
-          <Link to='/decision'>
-          <li>
-            <div>
-              <BsFillEnvelopeFill className='icon' />
-              <p>Decision</p>
-            </div>
-          </li>
-          </Link>
-          <Link><li>
-            <div>
-              <BsPersonCircle className='icon' />
-              <p>Profile</p>
-              <ul>
-                <li>
-                  Basic Profile
-                </li>
-                <li>
-                  Personal Info
-                </li>
-              </ul>
-            </div>
-          </li>
-          </Link>
         </ul>
-      </div>
-    </header>
-  )
+      </nav>
+    </div>
+  );
 }
 
-export default Nav;
+export default Dashboard;

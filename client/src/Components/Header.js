@@ -18,7 +18,7 @@ const Header = () => {
     return (
         <div>
             <header className='header1'>
-                <nav>
+                <nav className='navbar'>
                     <div className='left'>
                         <h4>TechCoach_lite</h4>
                         <img src={tech} alt='' className='image' />

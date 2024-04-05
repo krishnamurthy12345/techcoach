@@ -7,39 +7,38 @@ const Readd = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadData = async () => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details`);
-      const responseData = response.data;
-
-      if (Array.isArray(responseData)) {
-        setData(responseData);
-      } else if (responseData && typeof responseData === 'object') {
-        // If response is an object, assume it contains the array under a key 'decisions'
-        const decisionsArray = responseData.decisions;
-        if (Array.isArray(decisionsArray)) {
-          setData(decisionsArray);
-        } else {
-          console.error("Data received is not an array:", responseData);
-        }
-      } else {
-        console.error("Invalid response format:", responseData);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   useEffect(() => {
-    loadData();
+    const loadData = async () => {
+      try {
+        const id = localStorage.getItem('user_id');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
+        const responseData = response.data;
+  
+        if (Array.isArray(responseData)) {
+          // If responseData is an array, assume it's the decisions array
+          setData(responseData);
+        } else if (typeof responseData === 'object' && responseData !== null) {
+          // If responseData is an object, assume it's a single decision object
+          setData([responseData]); // Wrap the single decision object in an array
+        } else {
+          console.error("Invalid response format:", responseData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+        // Handle error
+      }
+    };
+  
+    loadData(); // Call loadData on component mount
   }, []);
+  
 
   const deleteDecision = async (id) => {
     if (window.confirm("Are you sure that you want to delete this decision?")) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
         toast.success("Decision deleted successfully");
-        loadData(); // No need for setTimeout here
+        setData(prevData => prevData.filter(decision => decision.decision_id !== id)); // Update data state after deletion
       } catch (error) {
         console.error("Error deleting decision:", error);
       }
@@ -77,6 +76,7 @@ const Readd = () => {
             <th>User Statement</th>
             <th>Tags</th>
             <th>Decision Reasons</th>
+            <th> User Id </th>
             <th>Action</th>
           </tr>
         </thead>
@@ -99,6 +99,8 @@ const Readd = () => {
                   <div key={reason.id}>{reason.decision_reason_text}</div>
                 ))}
               </td>
+              <td>{decision.user_id}</td>
+
               <td>
                 <Link to={`/decision/${decision.decision_id}`}>
                   <button className='btn btn-secondary'>Edit</button>
@@ -107,7 +109,6 @@ const Readd = () => {
               </td>
             </tr>
           ))}
-
         </tbody>
       </table>
     </div>

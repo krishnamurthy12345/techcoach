@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import './Decision.css';
+
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +16,7 @@ const Decision = () => {
     decision_due_date: '',
     decision_taken_date: '',
     user_statement: '',
+    user_id:''
   });
 
   console.log(formData);
@@ -28,8 +31,8 @@ const Decision = () => {
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       setFormData(prevState => ({
         ...prevState,
-        creation_date: currentDate
-      }));
+        creation_date: currentDate,
+        }));
     } else {
       axios
         .get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
@@ -51,6 +54,9 @@ const Decision = () => {
         });
     }
   }, [id]);
+
+
+
 
   const tags = [
     "Personal", "Career", "Work", "Family", "Money", "Health", "Spiritual",
@@ -97,21 +103,22 @@ const Decision = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement } = formData;
+    const { decision_name, decision_reason,created_by,  creation_date, decision_due_date, decision_taken_date, user_statement,user_id } = formData;
   
-    if (!decision_name || decision_reason.some(reason => reason.trim() === '') || !created_by || !creation_date || !decision_due_date || !decision_taken_date || !user_statement) {
+    if (!decision_name || decision_reason.some(reason => reason.trim() === '') ||!created_by || !creation_date || !decision_due_date || !decision_taken_date || !user_statement ||!user_id) {
       toast.error("Please provide a value for each input field");
     } else {
       const data = {
         decision_name,
         decision_reason,
-        created_by,
+        created_by, 
         creation_date,
         decision_due_date,
         decision_taken_date,
         user_statement,
         tags: selectedTags.join(','),
-        decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })), // Adjust this to match your backend structure
+        decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
+        user_id, // Adjust this to match your backend structure
       };
   
       try {
@@ -126,6 +133,7 @@ const Decision = () => {
             user_statement,
             tags: selectedTags.join(','),
             decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
+            user_id,
           });
           console.log("Data for POST request:", data); // Log data before POST request
           await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
@@ -149,7 +157,7 @@ const Decision = () => {
   return (
     <div>
       <h4>Details</h4>
-      <div className='col-lg-8 col-md-6'>
+      <div className='form'>
         <form onSubmit={handleSubmit}>
           <div>
             <div>
@@ -176,6 +184,10 @@ const Decision = () => {
             <div>
               <label htmlFor='user_statement'>User Statement:</label>
               <input type='text' id='user_statement' value={formData.user_statement} onChange={handleInputChange} placeholder='enter the statement'/>
+            </div>
+            <div>
+              <label htmlFor='user_id'>User Id:</label>
+              <input type='text' id='user_id' value={formData.user_id} onChange={handleInputChange} placeholder='enter the user_id'/>
             </div>
           </div>
           <div className='col-lg-4 col-md-6'>
