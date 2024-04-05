@@ -233,9 +233,6 @@ const getallInfo =  async (req, res) => {
     try {
         conn = await getConnection();
 
-        const user_id = req.user.id;
-
-
         const decisionData = await conn.query(
             `SELECT 
             d.*, 
@@ -259,21 +256,21 @@ const getallInfo =  async (req, res) => {
             techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
         LEFT JOIN 
             techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
-        WHERE
-            d.user_id=?
-        `,
-        [user_id]
+        GROUP BY 
+             d.decision_id;
+        `
 
         );
         console.log(decisionData)
         // Check if decisionData is defined and not empty
         if (!decisionData || decisionData.length === 0) {
-            console.error('Decision not found for ID:', id);
-            return res.status(404).json({ error: 'Decision not found' });
+          console.error('No decisions found');
+          return res.status(404).json({ error: 'Decision not found' });
         }
         // Assign individual ID to the decision
         const decisions = decisionData;
-        res.status(200).json({ decisions: decisionData });
+        res.status(200).json({ decisions });
+        console.log(decisions)
       } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).json({ error: 'An error occurred while processing your request' });
@@ -286,7 +283,7 @@ const getallInfo =  async (req, res) => {
 
 
 const getInfo = async (req, res) => {
-  const { id } = req.params;
+  const { user_id } = req.params;
   let conn;
 
   try {
@@ -315,24 +312,23 @@ const getInfo = async (req, res) => {
           techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
       LEFT JOIN 
           techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
-      GROUP BY
-          d.decision_id = ?
+      WHERE
+          d.user_id = ?
      
-      `, [ id] 
+      `, [user_id] 
     );
 
     // Check if decisionData is defined and not empty
     if (!decisionData || decisionData.length === 0) {
-      console.error('Decision not found for ID:', userid || id);
+      console.error('Decision not found for ID:',user_id);
       return res.status(404).json({ error: 'Decision not found' });
     }
 
 
     // Assign individual ID to the decision
-    const decision = decisionData[0];
-    decision.id = decision.decision_id; // Assigning decision_id to id property
-
-    res.status(200).json(decision);
+   // Assigning decision_id to id property
+   const decisions = decisionData;
+   res.status(200).json({ decisions });
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'An error occurred while processing your request' });

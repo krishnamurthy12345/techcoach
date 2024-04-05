@@ -156,7 +156,7 @@ const Decision = () => {
 
   return (
     <div>
-      <h4>Details</h4>
+      <h4 className='heading'>Details</h4>
       <div className='form'>
         <form onSubmit={handleSubmit}>
           <div>
@@ -190,7 +190,7 @@ const Decision = () => {
               <input type='text' id='user_id' value={formData.user_id} onChange={handleInputChange} placeholder='enter the user_id'/>
             </div>
           </div>
-          <div className='col-lg-4 col-md-6'>
+          <div className=''>
             <label>Select Tags:</label>
             <input
               type="text"
@@ -205,7 +205,7 @@ const Decision = () => {
                 overflowY: 'auto',
                 border: '1px solid #ccc',
                 borderRadius: '5px',
-                marginTop: '5px',
+                // marginTop: '5px',
               }}
             >
               {filteredTags.map((tag, index) => (
@@ -227,7 +227,7 @@ const Decision = () => {
                   <input type='text' value={reason} onChange={e => handleReasonChange(index, e.target.value)} placeholder='enter the decision name'/>
                 </div>
               ))}
-              <button type="button" onClick={handleAddReason}>Add </button>
+              <button className="btn" onClick={handleAddReason}>Add </button>
             </div>
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />

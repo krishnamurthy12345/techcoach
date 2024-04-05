@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import './Decision.css'
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -105,7 +106,7 @@ const Readd = () => {
                 <Link to={`/decision/${decision.decision_id}`}>
                   <button className='btn btn-secondary'>Edit</button>
                 </Link>
-                <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button>
+                <button className='btn btn-danger' onClick={() => deleteDecision(decision.decision_id)}>Delete</button>
               </td>
             </tr>
           ))}

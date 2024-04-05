@@ -1,10 +1,10 @@
-import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { Routes, Route } from 'react-router-dom';
 import Home from './Components/Home';
 import Header from './Components/Header';
 import Login from './Components/Login';
 import Dashboard from './Components/DashBoard/Dashboard';
-// import Error from './Components/Error';
+import Error from './Components/Error';
 import Notification from './Components/pages/Notification';
 import BasicInform from './Components/pages/Basic_Inform.js';
 import Personal from './Components/pages/Personal_Inform.js';
@@ -51,7 +51,7 @@ function App() {
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
         <Route path='/readd' element={<Readd />} />
-        {/* <Route path='*' element={<Error/>}/> */}
+        <Route path='*' element={<Error/>}/>
       </Routes>
     </div>
   );
