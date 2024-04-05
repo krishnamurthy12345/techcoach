@@ -5,13 +5,10 @@ import { Link } from 'react-router-dom';
 import tech from './assets/tech.png';
 
 const Header = () => {
-    // State to track user authentication status and profile picture
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 
-    // Function to handle logout
     const handleLogout = () => {
-        // Perform logout actions and update isLoggedIn state accordingly
         setIsLoggedIn(false);
     };
 
@@ -25,7 +22,7 @@ const Header = () => {
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarScroll">
-                        <ul class="navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll" >
+                        <ul class="navbar-nav ms-auto " >
                             <li class="nav-item">
                                 <Link to='/' class="nav-link active" aria-current="page" href="#home">Home</Link>
                             </li>
