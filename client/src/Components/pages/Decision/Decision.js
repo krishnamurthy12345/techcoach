@@ -220,7 +220,7 @@ const Decision = () => {
                 </div>
               ))}
             </div>
-            <div className='d-flex'>
+            <div className=''>
               <label>Decision Reasons:</label>
               {formData.decision_reason && formData.decision_reason.map((reason, index) => (
                 <div key={index}>

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import tech from './assets/tech.png';
 
 const Header = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
 
 
     const handleLogout = () => {
@@ -14,31 +14,31 @@ const Header = () => {
 
     return (
         <div>
-            <nav class="navbar navbar-expand-lg f-5">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#home">TechCoach_lite</a>
+            <nav className="navbar navbar-expand-lg f-5">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="#home">TechCoach_lite</a>
                     <img src={tech} alt='' className='image' />
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+                        <span className="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse" id="navbarScroll">
-                        <ul class="navbar-nav ms-auto " >
-                            <li class="nav-item">
-                                <Link to='/' class="nav-link active" aria-current="page" href="#home">Home</Link>
+                    <div className="collapse navbar-collapse" id="navbarScroll">
+                        <ul className="navbar-nav ms-auto " >
+                            <li className="nav-item">
+                                <Link to='/' className="nav-link active" aria-current="page" href="#home">Home</Link>
                             </li>
                             {isLoggedIn && (
-                                <li class="nav-item">
-                                    <Link to='/dashboard' class="nav-link" href="#dashboard">Dashboard</Link>
+                                <li className="nav-item">
+                                    <Link to='/dashboard' className="nav-link" href="#dashboard">Dashboard</Link>
                                 </li>
                             )}
                             {!isLoggedIn && (
-                                <li class="nav-item">
-                                    <Link to='/login' class="nav-link" href="#login">Login</Link>
+                                <li className="nav-item">
+                                    <Link to='/login' className="nav-link" href="#login">Login</Link>
                                 </li>
                             )}
                             {isLoggedIn && (
-                                <li class="nav-item">
-                                    <button onClick={handleLogout} class="btn btn-link nav-link">Logout</button>
+                                <li className="nav-item">
+                                    <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>
                                 </li>
                             )}
                         </ul>
