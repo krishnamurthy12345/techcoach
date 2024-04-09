@@ -2,44 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import './Decision.css'
 
 const Readd = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadData = async () => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details`);
-      const responseData = response.data;
-
-      if (Array.isArray(responseData)) {
-        setData(responseData);
-      } else if (responseData && typeof responseData === 'object') {
-        // If response is an object, assume it contains the array under a key 'decisions'
-        const decisionsArray = responseData.decisions;
-        if (Array.isArray(decisionsArray)) {
-          setData(decisionsArray);
-        } else {
-          console.error("Data received is not an array:", responseData);
-        }
-      } else {
-        console.error("Invalid response format:", responseData);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api`);
+        const responseData = response.data;
+        console.log("Response Data:", responseData);
+        if (Array.isArray(responseData.decisionData)) {
+          setData(responseData.decisionData);
+        } else {
+          console.error("Invalid response format:", responseData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
     loadData();
   }, []);
+
+
+
 
   const deleteDecision = async (id) => {
     if (window.confirm("Are you sure that you want to delete this decision?")) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
         toast.success("Decision deleted successfully");
-        loadData(); // No need for setTimeout here
+        setData(prevData => prevData.filter(decision => decision.decision_id !== id)); // Update data state after deletion
       } catch (error) {
         console.error("Error deleting decision:", error);
       }
@@ -52,6 +48,7 @@ const Readd = () => {
       (decision.tags && decision.tags.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
+  console.log('Filtered Data:', filteredData);
 
   return (
     <div>
@@ -70,13 +67,14 @@ const Readd = () => {
             <th>#</th>
             <th>Decision Name</th>
             {/* <th>Decision Reason</th> */}
-            <th>Created By</th>
+            {/* <th>Created By</th> */}
             <th>Creation Date</th>
             <th>Decision Due Date</th>
             <th>Decision Taken Date</th>
             <th>User Statement</th>
             <th>Tags</th>
             <th>Decision Reasons</th>
+            {/* <th> User Id </th> */}
             <th>Action</th>
           </tr>
         </thead>
@@ -85,29 +83,34 @@ const Readd = () => {
             <tr key={decision.decision_id}>
               <th scope='row'>{index + 1}</th>
               <td>{decision.decision_name}</td>
-             {/* <td>{decision.decision_reason}</td> */}
-              <td>{decision.created_by}</td>
+              {/* <td>{decision.decision_reason}</td> */}
+              {/* <td>{decision.created_by}</td> */}
               <td>{decision.creation_date}</td>
               <td>{decision.decision_due_date}</td>
               <td>{decision.decision_taken_date}</td>
               <td>{decision.user_statement}</td>
-              <td>{decision.tags}</td>
-              {/* <td>{decision.decision_reason_text}</td> */}
               <td>
-                {/* Render each decision_reason_text individually */}
-                {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
-                  <div key={reason.id}>{reason.decision_reason_text}</div>
+                {decision.tag_name && decision.tag_name.split(',').map(tag => (
+                  <div key={tag}>{tag}</div>
                 ))}
               </td>
+
+              {/* <td>{decision.decision_reason_text}</td> */}
+
+              <td>
+                {decision.decision_reason_text && decision.decision_reason_text.split(',').map(reason => (
+                  <div key={reason}>{reason}</div>
+                ))}
+              </td>
+              {/* <td>{decision.user_id}</td> */}
               <td>
                 <Link to={`/decision/${decision.decision_id}`}>
-                  <button className='btn btn-secondary'>Edit</button>
+                  <button className='btn btn-edit'>Edit</button>
                 </Link>
                 <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button>
               </td>
             </tr>
           ))}
-
         </tbody>
       </table>
     </div>
