@@ -25,7 +25,7 @@ function Dashboard() {
           <i className='bi bi-justify largeDeviceIcon' onClick={() => setNavCollapse(!navCollapse)}></i>
         </div>
         <ul>
-          <li><Link to='/decision'><BsFillEnvelopeFill className='icon' /> Decision</Link></li>
+          <li><Link to='/readd'><BsFillEnvelopeFill className='icon' /> Decision</Link></li>
           <li><Link to='/notification'><BsFillBellFill className='icon' /> Notification</Link></li>
           <li>
             <BsPersonCircle className='icon' />

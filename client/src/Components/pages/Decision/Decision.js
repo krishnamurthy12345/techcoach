@@ -11,7 +11,7 @@ const Decision = () => {
   const [formData, setFormData] = useState({
     decision_name: '',
     decision_reason: [''],
-    created_by: '',
+    // created_by: '',
     creation_date: '',
     decision_due_date: '',
     decision_taken_date: '',
@@ -27,7 +27,6 @@ const Decision = () => {
 
   useEffect(() => {
     if (!id) {
-      // Set the current system time as the default creation date
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       setFormData(prevState => ({
         ...prevState,
@@ -79,10 +78,10 @@ const Decision = () => {
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData({
+    setFormData(formData => ({
       ...formData,
-      [id]: value || ''
-    });
+      [id]: value 
+    }));
   };
 
   const handleAddReason = () => {
@@ -105,20 +104,20 @@ const Decision = () => {
     e.preventDefault();
     const { decision_name, decision_reason,created_by,  creation_date, decision_due_date, decision_taken_date, user_statement,user_id } = formData;
   
-    if (!decision_name || decision_reason.some(reason => reason.trim() === '') ||!created_by || !creation_date || !decision_due_date || !decision_taken_date || !user_statement ||!user_id) {
+    if (!decision_name || decision_reason.some(reason => reason.trim() === '') || !creation_date || !decision_due_date || !decision_taken_date || !user_statement ) {
       toast.error("Please provide a value for each input field");
     } else {
       const data = {
         decision_name,
         decision_reason,
-        created_by, 
+        // created_by, 
         creation_date,
         decision_due_date,
         decision_taken_date,
         user_statement,
         tags: selectedTags.join(','),
         decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
-        user_id, // Adjust this to match your backend structure
+        user_id, 
       };
   
       try {
@@ -126,7 +125,7 @@ const Decision = () => {
           setFormData({
             decision_name,
             decision_reason,
-            created_by,
+            // created_by,
             creation_date,
             decision_due_date,
             decision_taken_date,
@@ -165,10 +164,10 @@ const Decision = () => {
               <input type='text' id='decision_name' value={formData.decision_name} onChange={handleInputChange} placeholder='enter the decision name' />
             </div>
 
-            <div>
+             {/* <div>
               <label htmlFor='created_by'>Created By:</label>
               <input type='text' id='created_by' value={formData.created_by} onChange={handleInputChange} placeholder='enter the creater...'/>
-            </div>
+            </div>  */}
             <div>
               <label htmlFor='creation_date'>Creation Date:</label>
               <input type='datetime-local' id='creation_date' value={formData.creation_date} onChange={handleInputChange} placeholder='yyyy-mm-dd'/>
@@ -185,10 +184,10 @@ const Decision = () => {
               <label htmlFor='user_statement'>User Statement:</label>
               <input type='text' id='user_statement' value={formData.user_statement} onChange={handleInputChange} placeholder='enter the statement'/>
             </div>
-            <div>
+            {/* <div>
               <label htmlFor='user_id'>User Id:</label>
               <input type='text' id='user_id' value={formData.user_id} onChange={handleInputChange} placeholder='enter the user_id'/>
-            </div>
+            </div> */}
           </div>
           <div className=''>
             <label>Select Tags:</label>

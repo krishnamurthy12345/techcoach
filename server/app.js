@@ -678,6 +678,8 @@ app.use('/', authRoutes);
 app.use('/', userRoutes);
 app.use('/api', decisionRoutes);
 
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

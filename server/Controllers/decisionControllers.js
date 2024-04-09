@@ -9,13 +9,17 @@ const postInfo = async (req, res) => {
     conn = await getConnection();
     await conn.beginTransaction();
 
+    const id  = req.user.id;
+    console.log(id) // assuming 'user' is the key for user information
+
+
     const currentDate = new Date().toISOString().slice(0, 10);
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
 
     const decisionResult = await conn.query(
       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [decision_name, created_by, currentDate, formattedDueDate, formattedTakenDate, user_statement, user_id]
+      [decision_name, created_by, currentDate, formattedDueDate, formattedTakenDate, user_statement, id]
     );
     console.log(decisionResult)
     const decisionId = decisionResult.insertId;
@@ -66,69 +70,6 @@ const postInfo = async (req, res) => {
 };
 
 
-
-// const postInfo = async (req, res) => {
-//     const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
-//     let conn;
-// console.log('bbb')
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         const formattedCreationDate = new Date(creation_date).toISOString().slice(0, 10);
-//         const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-//         const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
-
-//         const decisionResult = await conn.query(
-//             "INSERT INTO techcoach_lite.techcoach_decision (decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement) VALUES (?, ?, ?, ?, ?, ?, ?)",
-//             [decision_name, decision_reason, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement]
-//         );
-
-//         const decisionId = decisionResult.insertId;
-
-//         const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-
-//         for (const tagName of tagsArray) {
-//             const tag = await conn.query(
-//                 "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-//                 [tagName]
-//             );
-
-//             const tagId = tag.insertId || tag.tag_id;
-
-//             await conn.query(
-//                 "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-//                 [decisionId, tagId]
-//             );
-//         }
-
-//         if (Array.isArray(decision_reason_text)) {
-//             for (const reason of decision_reason_text) {
-//                 const reasonRow = await conn.query(
-//                     "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-//                     [decisionId, reason.decision_reason_text]
-//                 );
-//                 const reasonId = reasonRow.insertId;
-//             }
-//         }
-
-//         await conn.commit();
-//         res.status(200).json({ message: 'Data inserted successfully' });
-//     } catch (error) {
-//         console.error('Error inserting data:', error);
-//         if (conn) {
-//             await conn.rollback();
-//         }
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
-// };
-
-
-
 // const getallInfo = async (req, res) => {
 //     let conn;
 //     console.log('aaa')
@@ -170,65 +111,13 @@ const postInfo = async (req, res) => {
 // };
 
 
-// const getallInfo =  async (req, res) => {
-//     let conn;
 
-//     try {
-//         conn = await getConnection();
-
-//         const decisionData = await conn.query(
-//             `SELECT 
-//             d.*, 
-//             GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
-//             (
-//                 SELECT JSON_ARRAYAGG(
-//                     JSON_OBJECT(
-//                         'id', r.reason_id, 
-//                         'decision_reason_text', r.decision_reason_text
-//                     )
-//                 )
-//                 FROM techcoach_lite.techcoach_reason r
-//                 WHERE d.decision_id = r.decision_id
-//                 GROUP BY r.decision_id
-//             ) AS decision_reason_text
-//         FROM 
-//             techcoach_lite.techcoach_decision d
-//         LEFT JOIN 
-//             techcoach_lite.techcoach_decision_tag dt ON d.decision_id = dt.decision_id
-//         LEFT JOIN 
-//             techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
-//         LEFT JOIN 
-//             techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
-//         GROUP BY 
-//             d.decision_id;
-//         `,
-
-//         );
-
-//         // Check if decisionData is defined and not empty
-//         if (!decisionData || decisionData.length === 0) {
-//             console.error('Decision not found for ID:', id);
-//             return res.status(404).json({ error: 'Decision not found' });
-//         }
-
-//         // Assign individual ID to the decision
-//         const decisions = decisionData;
-
-
-//         res.status(200).json({ decisions: decisionData });
-// } catch (error) {
-//         console.error('Error fetching data:', error);
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
-// };
 
 
 const getallInfo =  async (req, res) => {
     let conn;
+    console.log('qawqaw')
+    console.log(req.user)
 
     try {
         conn = await getConnection();
@@ -283,7 +172,7 @@ const getallInfo =  async (req, res) => {
 
 
 const getInfo = async (req, res) => {
-  const { user_id } = req.params;
+  const { id } = req.params;
   let conn;
 
   try {
@@ -313,18 +202,16 @@ const getInfo = async (req, res) => {
       LEFT JOIN 
           techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
       WHERE
-          d.user_id = ?
+          d.decision_id = ?
      
-      `, [user_id] 
+      `, [id] 
     );
 
     // Check if decisionData is defined and not empty
     if (!decisionData || decisionData.length === 0) {
-      console.error('Decision not found for ID:',user_id);
+      console.error('Decision not found for ID:',id);
       return res.status(404).json({ error: 'Decision not found' });
     }
-
-
     // Assign individual ID to the decision
    // Assigning decision_id to id property
    const decisions = decisionData;
@@ -420,6 +307,7 @@ const putInfo = async (req, res) => {
   const { id } = req.params;
   const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
   let conn;
+  console.log("tags",tags)
 
   try {
     conn = await getConnection();
@@ -580,5 +468,43 @@ const deleteInfo = async (req, res) => {
 };
 
 
+const getall = async (req, res, next) => {
+  let conn;
+  console.log('aaa');
+  console.log(req.user,"sgcjcsdjy")
+  try {
+    conn = await getConnection();
+    const user = req.user;
 
-module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo };
+      if (!user) {
+          throw new Error('Missing user parameter in query');
+      }
+
+      console.log('User:', user);
+
+    const decisionData = await conn.query(
+      `SELECT d.*, GROUP_CONCAT(DISTINCT t.tag_name) AS tag_name, GROUP_CONCAT(DISTINCT r.decision_reason_text) AS decision_reason_text
+      FROM techcoach_lite.techcoach_decision d
+      JOIN techcoach_lite.techcoach_decision_tag dt ON d.decision_id = dt.decision_id
+      JOIN techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
+      JOIN techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+      WHERE d.user_id=${user.id}
+      GROUP BY d.decision_id;`
+
+      // `select * from techcoach_lite.techcoach_decision d where d.user_id=${user.id}`
+
+    )
+    console.log(decisionData)
+
+    await conn.commit();
+    res.status(200).json({decisionData})
+    
+  } catch (err) {
+      console.error('Error processing query parameters:', err);
+      res.status(400).send({ message: 'Invalid query parameters!' });
+  }
+};
+
+
+
+module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall };

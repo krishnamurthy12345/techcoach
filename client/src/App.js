@@ -1,4 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.esm.js';
 import { Routes, Route } from 'react-router-dom';
 import Home from './Components/Home';
 import Header from './Components/Header';

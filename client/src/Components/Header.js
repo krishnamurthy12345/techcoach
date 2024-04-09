@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Header.css';
-import 'bootstrap/dist/js/bootstrap.esm';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
 
 const Header = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const id = localStorage.getItem('user_id')
+        if (token && id) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, []);
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_id')
         setIsLoggedIn(false);
+        navigate("/login");
     };
 
     return (
@@ -22,25 +34,22 @@ const Header = () => {
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse" id="navbarScroll">
-                        <ul className="navbar-nav ms-auto " >
+                        <ul className="navbar-nav ms-auto">
                             <li className="nav-item">
-                                <Link to='/' className="nav-link active" aria-current="page" href="#home">Home</Link>
+                                <Link to='/' className="nav-link active" aria-current="page">Home</Link>
                             </li>
                             {isLoggedIn && (
                                 <li className="nav-item">
-                                    <Link to='/dashboard' className="nav-link" href="#dashboard">Dashboard</Link>
+                                    <Link to='/dashboard' className="nav-link">Dashboard</Link>
                                 </li>
                             )}
-                            {!isLoggedIn && (
-                                <li className="nav-item">
-                                    <Link to='/login' className="nav-link" href="#login">Login</Link>
-                                </li>
-                            )}
-                            {isLoggedIn && (
-                                <li className="nav-item">
+                            <li className="nav-item">
+                                {isLoggedIn ? (
                                     <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>
-                                </li>
-                            )}
+                                ) : (
+                                    <Link to='/login' className="nav-link">Login</Link>
+                                )}
+                            </li>
                         </ul>
                     </div>
                 </div>

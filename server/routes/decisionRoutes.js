@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const getConnection = require('../Models/database');
-const { postInfo, getallInfo, getInfo, putInfo, deleteInfo } = require('../Controllers/decisionControllers');
+const { postInfo, getallInfo, getInfo, putInfo, deleteInfo,getall } = require('../Controllers/decisionControllers');
 
 const router = express.Router();
 
@@ -18,6 +18,7 @@ const authMiddleware = (req, res, next) => {
         }
         const verified = jwt.verify(token, "111")
         req.user = verified;
+        console.log(req.user,"jkdhvjkdhvjkhdk")
         next();
     } catch (err) {
         console.error('Error verifying token:', err);
@@ -26,24 +27,10 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// const authorizationToken = (req, res, next) => {
-//     const authHeader = req.headers['authorizationToken']
-//     const token = authHeader && authHeader.split(' ')[1];
-//     if (!token)
-//         return res.sendstatus(401);
-//     jwt.verify(token, JWT_SECRET_KEY),
-//         (err, user) => {
-//             if (err) {
-//                 return res.sendstatus(403);
-//             }
-//             req.user = user;
-//             next()
-//         }
-// }
-
 
 router.use(authMiddleware);
 
+router.get('/',getall)
 router.post('/details', postInfo);
 router.get('/details', getallInfo);
 router.get('/details/:id', getInfo);
