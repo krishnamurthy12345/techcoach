@@ -16,7 +16,9 @@ const Decision = () => {
     decision_due_date: '',
     decision_taken_date: '',
     user_statement: '',
-    user_id:''
+    user_id:'',
+    tags:'',
+    decision_reason_text:[]
   });
 
   console.log(formData);
@@ -36,12 +38,19 @@ const Decision = () => {
       axios
         .get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
         .then((resp) => {
-          setFormData({
-            ...resp.data,
-            decision_reason: resp.data.reasons || [''],
-            
-          });
-          setSelectedTags(resp.data.tags ? resp.data.tags.split(',') : []);
+          const {decision_name,decision_due_date,decision_taken_date,user_statement,user_id,tags,decision_reason_text}= resp.data.decisions[0]
+          console.log(resp.data.decisions[0])
+          setFormData( prevState => ({
+            ...prevState,
+            decision_name:decision_name,
+            decision_due_date:decision_due_date,
+            decision_taken_date:decision_taken_date,
+            user_id:user_id,
+            user_statement:user_statement,
+            tags:tags,
+            decision_reason_text:decision_reason_text
+          }));
+          setSelectedTags(resp.data.decisions[0].tags ? resp.data.decisions[0].tags.split(',') : []);
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
@@ -102,7 +111,7 @@ const Decision = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { decision_name, decision_reason,created_by,  creation_date, decision_due_date, decision_taken_date, user_statement,user_id } = formData;
+    const { decision_name, decision_reason,  creation_date, decision_due_date, decision_taken_date, user_statement,user_id } = formData;
   
     if (!decision_name || decision_reason.some(reason => reason.trim() === '') || !creation_date || !decision_due_date || !decision_taken_date || !user_statement ) {
       toast.error("Please provide a value for each input field");
