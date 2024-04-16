@@ -2,9 +2,10 @@
 .navbar{
   display: flex;
   justify-content:space-between;
-  background-color:rgb(108, 108, 235);
+  background-color:rgb(13, 13, 237);
   font-size: 20px;
   height: 70px;
+  color: white;
 }
 
 .image {
@@ -13,3 +14,15 @@
   height: 40px;
   margin-right: 10px;
 }
+.navbar-nav .nav-link.active{
+  color: white;
+}
+.nav-link{
+  text-decoration: none;
+  color: white;
+}
+.navbar-brand{
+  color: white;
+  font-family: sans-serif;
+}
+

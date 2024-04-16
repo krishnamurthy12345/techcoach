@@ -109,8 +109,8 @@ const BasicInform = () => {
               <input type={showConfirmPassword ? 'text' : 'password'} id='confirmPassword' name='confirmPassword' value={data.confirmPassword} onChange={handleOnChange} />
               <span className='toggle-password' onClick={handleConfirmShowPassword}>{showConfirmPassword ? <BiShowAlt /> : <BiHide />}</span>
             </div>
-            <button type='submit'>Sign Up</button>
-            <button onClick={handleUpdate}>Update</button>
+            <button type='submit1' className='submit1'>Sign Up</button>
+            <button type='submit1' className='submit1' onClick={handleUpdate}>Update</button>
           </div>
         </form>
         <p className='login-link'>Already have an Account? <Link to={'/login'}>Login</Link></p>

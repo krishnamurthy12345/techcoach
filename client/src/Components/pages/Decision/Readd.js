@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
-import './Decision.css'
+import './Readd.css';
+
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -11,7 +12,12 @@ const Readd = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api`);
+        const token = localStorage.getItem('token'); // Get the token from localStorage
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
+          headers: {
+            Authorization: `Bearer ${token}` // Include the token in the request headers
+          }
+        });
         const responseData = response.data;
         console.log("Response Data:", responseData);
         if (Array.isArray(responseData.decisionData)) {
@@ -23,6 +29,11 @@ const Readd = () => {
         console.error("Error fetching data:", error.message);
       }
     };
+    
+    // const token = localStorage.getItem('token');
+    // if (token) {
+    //   loadData();
+    // }
 
     loadData();
   }, []);
@@ -45,7 +56,7 @@ const Readd = () => {
   const filteredData = data.filter(decision => {
     return (
       (decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (decision.tags && decision.tags.toLowerCase().includes(searchTerm.toLowerCase()))
+      (decision.tag_name && decision.tag_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
   console.log('Filtered Data:', filteredData);
@@ -56,8 +67,8 @@ const Readd = () => {
         <button className='btn btn-info'>Add Decision</button>
       </Link>
       <input
-        type="text"
-        placeholder="Search by tag name or decision name"
+        type="textt" 
+        placeholder="Search by decision name or tag name"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -68,7 +79,7 @@ const Readd = () => {
             <th>Decision Name</th>
             {/* <th>Decision Reason</th> */}
             {/* <th>Created By</th> */}
-            <th>Creation Date</th>
+            {/* <th>Creation Date</th> */}
             <th>Decision Due Date</th>
             <th>Decision Taken Date</th>
             <th>User Statement</th>
@@ -85,7 +96,7 @@ const Readd = () => {
               <td>{decision.decision_name}</td>
               {/* <td>{decision.decision_reason}</td> */}
               {/* <td>{decision.created_by}</td> */}
-              <td>{decision.creation_date}</td>
+              {/* <td>{decision.creation_date}</td> */}
               <td>{decision.decision_due_date}</td>
               <td>{decision.decision_taken_date}</td>
               <td>{decision.user_statement}</td>
@@ -113,6 +124,7 @@ const Readd = () => {
           ))}
         </tbody>
       </table>
+      <ToastContainer/>
     </div>
   );
 };

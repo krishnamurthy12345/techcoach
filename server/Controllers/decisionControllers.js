@@ -1,7 +1,77 @@
 const getConnection = require('../Models/database');
 
+// const postInfo = async (req, res) => {
+//   const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text, user_id } = req.body;
+//   let conn;
+//   console.log('Request Headers:', req.headers);
+//   console.log(decision_name)
+//   try {
+//     conn = await getConnection();
+//     await conn.beginTransaction();
+
+//     const id  = req.user.id;
+//     console.log(id) // assuming 'user' is the key for user information
+
+
+//     const currentDate = new Date().toISOString().slice(0, 10);
+//     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
+//     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
+
+//     const decisionResult = await conn.query(
+//       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+//       [decision_name, created_by, currentDate, formattedDueDate, formattedTakenDate, user_statement, id]
+//     );
+//     console.log(decisionResult)
+//     const decisionId = decisionResult.insertId;
+//     console.log(decisionId)
+
+//     // Processing tags
+//     const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
+//     for (const tagName of tagsArray) {
+//       const tag = await conn.query(
+//         "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
+//         [tagName.trim()]
+//       );
+
+//       const tagId = tag.insertId || tag.tag_id;
+
+//       await conn.query(
+//         "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
+//         [decisionId, tagId]
+//       );
+//     }
+
+//     // Processing decision_reason_text
+//     if (Array.isArray(decision_reason_text)) {
+//       for (const reasonObj of decision_reason_text) {
+//         const reason = reasonObj.decision_reason_text;
+//         await conn.query(
+//           "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+//           [decisionId, reason]
+//         );
+//       }
+//     }
+
+//     // Commit transaction and send success response
+//     await conn.commit();
+//     res.status(200).json({ message: 'Data inserted successfully' });
+
+//   } catch (error) {
+//     console.error('Error inserting data:', error);
+//     if (conn) {
+//       await conn.rollback();
+//     }
+//     res.status(500).json({ error: 'An error occurred while processing your request' });
+//   } finally {
+//     if (conn) {
+//       conn.release();
+//     }
+//   }
+// };
+
+
 const postInfo = async (req, res) => {
-  const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text, user_id } = req.body;
+  const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
   let conn;
   console.log('Request Headers:', req.headers);
   console.log(decision_name)
@@ -9,9 +79,9 @@ const postInfo = async (req, res) => {
     conn = await getConnection();
     await conn.beginTransaction();
 
-    const id  = req.user.id;
-    console.log(id) // assuming 'user' is the key for user information
-
+    // Get current user's ID and name (assuming it's available in req.user)
+    const userId = req.user.id;
+    const userName = req.user.name;
 
     const currentDate = new Date().toISOString().slice(0, 10);
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
@@ -19,7 +89,7 @@ const postInfo = async (req, res) => {
 
     const decisionResult = await conn.query(
       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [decision_name, created_by, currentDate, formattedDueDate, formattedTakenDate, user_statement, id]
+      [decision_name, userName, currentDate, formattedDueDate, formattedTakenDate, user_statement, userId]
     );
     console.log(decisionResult)
     const decisionId = decisionResult.insertId;
@@ -305,63 +375,66 @@ const getInfo = async (req, res) => {
 
 const putInfo = async (req, res) => {
   const { id } = req.params;
-  const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
+  const { decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
   let conn;
-  console.log("tags",tags)
 
   try {
     conn = await getConnection();
     await conn.beginTransaction();
 
-    const formattedCreationDate = new Date(creation_date).toISOString().slice(0, 10);
+    // Format dates
+    const formattedCreationDate = creation_date ? new Date(creation_date).toISOString().slice(0, 10) : null;
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
 
-    // Format decision_reason array into a string
-    const formattedDecisionReason = decision_reason.join(', ');
-
     // Update the decision record
     await conn.query(
-      "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, decision_reason = ?, created_by = ?, creation_date = ?, decision_due_date = ?, decision_taken_date = ?, user_statement = ? WHERE decision_id = ?",
-      [decision_name, formattedDecisionReason, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement, id]
+      "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, created_by = ?, creation_date = ?, decision_due_date = ?, decision_taken_date = ?, user_statement = ? WHERE decision_id = ?",
+      [decision_name, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement, id]
     );
 
-    // Delete existing tags associated with the decision
-    await conn.query(
-      "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
-      [id]
-    );
-
-    // Insert new tags for the decision
-    const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-    for (const tagName of tagsArray) {
-      const tag = await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-        [tagName]
-      );
-
-      const tagId = tag.insertId || tag.tag_id;
-
+    // Handle tags
+    if (tags) {
+      // Delete existing tags associated with the decision
       await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-        [id, tagId]
+        "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
+        [id]
       );
+
+      // Insert new tags for the decision
+      const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
+      for (const tagName of tagsArray) {
+        const tag = await conn.query(
+          "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = VALUES(tag_name)",
+          [tagName.trim()]
+        );
+
+        const tagId = tag.insertId || tag.tag_id;
+
+        await conn.query(
+          "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
+          [id, tagId]
+        );
+      }
     }
 
-    // Delete existing reasons associated with the decision
-    await conn.query(
-      "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
-      [id]
-    );
+    // Handle decision_reason_text
+    if (decision_reason_text) {
+      // Delete existing reasons associated with the decision
+      await conn.query(
+        "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
+        [id]
+      );
 
-    // Insert new reasons for the decision
-    if (Array.isArray(decision_reason_text)) {
-      for (const reasonObj of decision_reason_text) {
-        const reason = reasonObj.decision_reason_text;
-        await conn.query(
-          "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-          [id, reason]
-        );
+      // Insert new reasons for the decision
+      if (Array.isArray(decision_reason_text)) {
+        for (const reasonObj of decision_reason_text) {
+          const reason = reasonObj.decision_reason_text;
+          await conn.query(
+            "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+            [id, reason]
+          );
+        }
       }
     }
 
@@ -381,6 +454,85 @@ const putInfo = async (req, res) => {
     }
   }
 };
+
+// const putInfo = async (req, res) => {
+//   const { id } = req.params;
+//   const { decision_name,  created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
+//   let conn;
+//   console.log("tags",tags)
+
+//   try {
+//     conn = await getConnection();
+//     await conn.beginTransaction();
+
+//     const formattedCreationDate = new Date(creation_date).toISOString().slice(0, 10);
+//     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
+//     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
+
+//     // Format decision_reason array into a string
+//     // const formattedDecisionReason = decision_reason.join(', ');
+
+//     // Update the decision record
+//     await conn.query(
+//       "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, created_by = ?, creation_date = ?, decision_due_date = ?, decision_taken_date = ?, user_statement = ? WHERE decision_id = ?",
+//       [decision_name, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement, id]
+//     );
+
+//     // Delete existing tags associated with the decision
+//     await conn.query(
+//       "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
+//       [id]
+//     );
+
+//     // Insert new tags for the decision
+//     const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
+//     for (const tagName of tagsArray) {
+//       const tag = await conn.query(
+//         "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
+//         [tagName]
+//       );
+
+//       const tagId = tag.insertId || tag.tag_id;
+
+//       await conn.query(
+//         "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
+//         [id, tagId]
+//       );
+//     }
+
+//     // Delete existing reasons associated with the decision
+//     await conn.query(
+//       "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
+//       [id]
+//     );
+
+//     // Insert new reasons for the decision
+//     if (Array.isArray(decision_reason_text)) {
+//       for (const reasonObj of decision_reason_text) {
+//         const reason = reasonObj.decision_reason_text;
+//         await conn.query(
+//           "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+//           [id, reason]
+//         );
+//       }
+//     }
+
+//     // Commit transaction and send success response
+//     await conn.commit();
+//     res.status(200).json({ message: 'Data updated successfully' });
+
+//   } catch (error) {
+//     console.error('Error updating data:', error);
+//     if (conn) {
+//       await conn.rollback();
+//     }
+//     res.status(500).json({ error: 'An error occurred while processing your request' });
+//   } finally {
+//     if (conn) {
+//       conn.release();
+//     }
+//   }
+// };
 
 
 
@@ -491,7 +643,7 @@ const getall = async (req, res, next) => {
       WHERE d.user_id=${user.id}
       GROUP BY d.decision_id;`
 
-      // `select * from techcoach_lite.techcoach_decision d where d.user_id=${user.id}`
+      /// `select * from techcoach_lite.techcoach_decision d where d.user_id=${user.id}`
 
     )
     console.log(decisionData)
