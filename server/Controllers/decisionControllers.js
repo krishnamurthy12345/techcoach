@@ -1,5 +1,5 @@
 const getConnection = require('../Models/database');
-
+const crypto = require('crypto');
 // const postInfo = async (req, res) => {
 //   const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text, user_id } = req.body;
 //   let conn;
@@ -87,20 +87,25 @@ const postInfo = async (req, res) => {
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
 
+   const hashedDecisionName = crypto.createHash('sha256').update(decision_name).digest('hex');
+   const hashedUserStatement = crypto.createHash('sha256').update(user_statement).digest('hex');
+   const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
+   const hashedTags = tagsArray.map(tag => crypto.createHash('sha256').update(tag).digest('hex'));
+   const hashedDecisionReasonText = decision_reason_text.map(reasonObj => crypto.createHash('sha256').update(reasonObj.decision_reason_text).digest('hex'));
+
     const decisionResult = await conn.query(
       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [decision_name, userName, currentDate, formattedDueDate, formattedTakenDate, user_statement, userId]
+      [hashedDecisionName, userName, currentDate, formattedDueDate, formattedTakenDate, hashedUserStatement, userId]
     );
     console.log(decisionResult)
     const decisionId = decisionResult.insertId;
     console.log(decisionId)
 
     // Processing tags
-    const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-    for (const tagName of tagsArray) {
+    for (const hashedTag of hashedTags) {
       const tag = await conn.query(
         "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-        [tagName.trim()]
+        [hashedTag]
       );
 
       const tagId = tag.insertId || tag.tag_id;
@@ -113,11 +118,11 @@ const postInfo = async (req, res) => {
 
     // Processing decision_reason_text
     if (Array.isArray(decision_reason_text)) {
-      for (const reasonObj of decision_reason_text) {
-        const reason = reasonObj.decision_reason_text;
+      for (const hashedReasonText of hashedDecisionReasonText) {
+        // const reason = reasonObj.decision_reason_text;
         await conn.query(
           "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-          [decisionId, reason]
+          [decisionId, hashedReasonText]
         );
       }
     }

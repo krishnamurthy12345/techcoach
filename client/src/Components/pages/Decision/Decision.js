@@ -342,10 +342,11 @@ const Decision = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { decision_name,  decision_due_date, decision_taken_date, user_statement } = formData;
-
-    if (!decision_name  || !decision_due_date || !decision_taken_date || !user_statement || selectedTags.length === 0 || formData.decision_reason && formData.decision_reason.some(reason => reason.trim() === '')) {
-      toast.error("Please provide a value for each input field");
+    const { decision_name,  decision_due_date, decision_taken_date, user_statement,decision_reason } = formData;
+    console.log(formData,"THis is form data")
+    console.log(decision_reason)
+    if (!decision_name  || !decision_due_date || !decision_taken_date || !user_statement || selectedTags.length === 0 || !decision_reason || decision_reason.some(reason => reason.trim() === ''))  {
+      toast.error("Please provide a value for each input fields");
       return;
     }
 
@@ -357,7 +358,7 @@ const Decision = () => {
       user_statement,
       user_id: '', 
       tags: selectedTags.join(','),
-      decision_reason_text: formData.decision_reason.map(reason => ({ decision_reason_text: reason })),
+      decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
     };
 
     try {
@@ -370,7 +371,7 @@ const Decision = () => {
           user_statement,
           user_id: '',
           tags: selectedTags.join(','),
-          decision_reason_text: formData.decision_reason.map(reason => ({ decision_reason_text: reason })),
+          decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
         })
         console.log("Data for POST request:", data); 
         await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
@@ -516,8 +517,8 @@ const Decision = () => {
                   />
                 </div>
               ))}
-              <button className='btnn' onClick={handleAddReason}>Add</button>
               
+              <button className='btnn'type='button' onClick={handleAddReason}>Add</button>
             </div>
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />
