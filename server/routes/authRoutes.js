@@ -23,7 +23,7 @@ router.get('/auth/google/callback', (req, res, next) => {
             console.log(user,req.user,info,"gfgccghgchcgchghcghc")
             const token = jwt.sign({ id: req.user.id, email: req.user.email }, "111");
             console.log(token)
-            res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${token}&user_id=${req.user.id}`);
+            res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${token}`);
 
         });
     })(req, res, next);

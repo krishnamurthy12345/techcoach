@@ -1,5 +1,8 @@
+.form{
+    max-width: 1200px;
+}
 input[type="text"],
-input[type="datetime"],
+input[type="date"],
 input[type="datetime-local"],
 select{
     width: 50%;
@@ -19,7 +22,7 @@ input[type="submit"]{
     padding: 14px 20px;
     margin: 8px 0;
 }
-input[type="button"]{
+/* input[type="button"]{
     width: 50%;
     background-color: #40453e;
     color: white;
@@ -27,57 +30,42 @@ input[type="button"]{
     border-radius: 4px;
     padding: 14px 20px;
     margin: 8px 0;
-}
+} */
 input[type="submit"]:hover{
     background-color: #08067f;
 }
-.heading{
+.header{
     text-align: center;
     font-size:20px ;
 }
-
-
-.styled-table{
-    margin: auto;
-    font-size: 0.9em;
-    font-family: sans-serif;
-    max-width: 900px;
-    box-shadow: 0 0 20px rgba(0,0,0, 0.15);
-}
-.styled-table thead tr{
-    background-color: rgb(0, 76, 255);
-    color: white;
-    text-align: center;
-}
-
-.styled-table th,
-.styled-table td{
-    padding: 10px 15px;
-} 
-.styled-table tbody tr{
-    border-bottom: 1px solid white;
-}
-
 .btnn{
+    background:#08067f;
     border: none;
     color: white;
-    text-align: center;
     border-radius: 5px;
-    font-size: 16px;
-    margin: 4px 2px;
-    display: inline-block;
+    height: 40px;
+    max-width: 50px;
 }
-.btn-edit{
-    background-color: rgb(84, 173, 173);
-}
-.btn-delete{
-    background-color: red;
-}
-.btn-view{
-    background-color: rgb(133, 127, 127);
-    color: black;
-}
-.btn-person{
-    background-color: #e82764;
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center; 
     margin-bottom: 10px;
 }
+.tag-label {
+    align-items: center; 
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+.reason-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+  
+.reason-item {
+    margin-bottom: 5px; 
+}
+  

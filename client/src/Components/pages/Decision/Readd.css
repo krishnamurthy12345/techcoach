@@ -1,0 +1,54 @@
+input[type="textt"]{
+    width:30%;
+    /* background-color: #78b37a; */
+    /* color: white; */
+    /* border: none; */
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin: 8px 0;
+    margin-left: 300px;
+}
+
+
+.styled-table{
+    margin: auto;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    max-width: 900px;
+    box-shadow: 0 0 20px rgba(0,0,0, 0.15);
+}
+.styled-table thead tr{
+    background-color: rgb(0, 76, 255);
+    color: white;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td{
+    padding: 10px 15px;
+} 
+.styled-table tbody tr{
+    border-bottom: 1px solid white;
+}
+
+.btn-edit{
+    background-color: rgb(84, 173, 173);
+    color:white;
+}
+.btn-delete{
+    background-color: red;
+    color: white;
+}
+.btn-view{
+    background-color: rgb(133, 127, 127);
+    color: black;
+}
+.btn-info{
+    margin-left: 120px;
+    color: white;
+}
+.btn-person{
+    background-color: #e82764;
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
