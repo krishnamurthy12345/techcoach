@@ -29,7 +29,7 @@ const Readd = () => {
         console.error("Error fetching data:", error.message);
       }
     };
-    
+
     // const token = localStorage.getItem('token');
     // if (token) {
     //   loadData();
@@ -49,9 +49,12 @@ const Readd = () => {
         setData(prevData => prevData.filter(decision => decision.decision_id !== id)); // Update data state after deletion
       } catch (error) {
         console.error("Error deleting decision:", error);
+        toast.error("An error occurred while deleting the decision");
       }
     }
   };
+  
+  console.log("dataaaaaaaaaaaaaa", data);
 
   const filteredData = data.filter(decision => {
     return (
@@ -59,7 +62,7 @@ const Readd = () => {
       (decision.tag_name && decision.tag_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
-  console.log('Filtered Data:', filteredData);
+  console.log('Filtered Dataaaaaaaaaaaaaaaaaa:', filteredData);
 
   return (
     <div>
@@ -67,7 +70,7 @@ const Readd = () => {
         <button className='btn btn-info'>Add Decision</button>
       </Link>
       <input
-        type="textt" 
+        type="textt"
         placeholder="Search by decision name or tag name"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
@@ -100,16 +103,15 @@ const Readd = () => {
               <td>{decision.decision_due_date}</td>
               <td>{decision.decision_taken_date}</td>
               <td>{decision.user_statement}</td>
-              <td>
-                {decision.tag_name && decision.tag_name.split(',').map(tag => (
+              <td>{decision.tagsArray && decision.tagsArray.join(', ')}
+                {/* {decision.tag_name && decision.tag_name.split(',').map(tag => (
                   <div key={tag}>{tag}</div>
-                ))}
+                ))} */}
               </td>
 
               {/* <td>{decision.decision_reason_text}</td> */}
-
               <td>
-                {decision.decision_reason_text && decision.decision_reason_text.split(',').map(reason => (
+                {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
                   <div key={reason}>{reason}</div>
                 ))}
               </td>
@@ -124,7 +126,7 @@ const Readd = () => {
           ))}
         </tbody>
       </table>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 };
