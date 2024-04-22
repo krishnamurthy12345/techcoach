@@ -285,12 +285,13 @@ const Decision = () => {
     decision_reason: [],
   });
 
-  console.log(formData);
+  console.log(formData,"jjjjjjjj");
 
   const dropdownHeight = 200;
   const dropdownwidth = 500;
   const navigate = useNavigate();
   const { id } = useParams();
+
 
   useEffect(() => {
     if (id) {
@@ -371,7 +372,7 @@ const Decision = () => {
           user_statement,
           user_id: '',
           tags: selectedTags.join(','),
-          decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
+          decision_reason_text: formData.decision_reason, // Keep it as an array of strings
         })
         console.log("Data for POST request:", data); 
         await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
@@ -466,6 +467,21 @@ const Decision = () => {
               />
             </div>
             <div className='form-group'>
+              <label>Decision Reasons:</label>
+              {formData.decision_reason && formData.decision_reason.map((reason, index) => (
+                <div key={index}>
+                  <input
+                    type='text'
+                    value={reason}
+                    onChange={e => handleReasonChange(index, e.target.value)}
+                    placeholder='Enter the decision reason'
+                  />
+                </div>
+              ))}
+              
+              <button className='btnn'type='button' onClick={handleAddReason}>Add</button>
+            </div>
+            <div className='form-group'>
               <label>Select Tags:</label>
               <input
                 type="text"
@@ -505,21 +521,7 @@ const Decision = () => {
                 ))}
               </div>
             </div>
-            <div className='form-group'>
-              <label>Decision Reasons:</label>
-              {formData.decision_reason && formData.decision_reason.map((reason, index) => (
-                <div key={index}>
-                  <input
-                    type='text'
-                    value={reason}
-                    onChange={e => handleReasonChange(index, e.target.value)}
-                    placeholder='Enter the decision reason'
-                  />
-                </div>
-              ))}
-              
-              <button className='btnn'type='button' onClick={handleAddReason}>Add</button>
-            </div>
+            
           </div>
           <input type='submit' value={id ? "Update" : "Save"} />
         </form>
