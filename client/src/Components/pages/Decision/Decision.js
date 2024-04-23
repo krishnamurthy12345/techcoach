@@ -298,7 +298,10 @@ const Decision = () => {
       axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
         .then((resp) => {
           const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
-          console.log(resp.data.decisions[0])
+          console.log(resp.data.decisions[0]);
+
+        const tagsArray = Array.isArray(tags) ? tags : (tags ? tags.split(',') : []);
+
           setFormData(prevState => ({
             ...prevState,
             decision_name: decision_name,
@@ -306,11 +309,10 @@ const Decision = () => {
             decision_taken_date: decision_taken_date,
             user_id: user_id,
             user_statement: user_statement,
-            tags: tags,
+            tags: tagsArray,
             decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
           }));
           // setSelectedTags(resp.data.decisions[0].tags ? resp.data.decisions[0].tags.split(',') : []);
-          // setSelectedTags(tags ? tags.split(',') : []);
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
@@ -388,6 +390,7 @@ const Decision = () => {
       console.error("Error:", error.message);
       toast.error("An error occurred while saving the decision");
     }
+    console.log("Selected Tags:", selectedTags);
   };
 
   const handleTagSelection = (tag) => {

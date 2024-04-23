@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BiShowAlt, BiHide } from 'react-icons/bi';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Basic_Inform.css';
 
@@ -109,11 +109,11 @@ const BasicInform = () => {
               <input type={showConfirmPassword ? 'text' : 'password'} id='confirmPassword' name='confirmPassword' value={data.confirmPassword} onChange={handleOnChange} />
               <span className='toggle-password' onClick={handleConfirmShowPassword}>{showConfirmPassword ? <BiShowAlt /> : <BiHide />}</span>
             </div>
-            <button type='submit1' className='submit1'>Sign Up</button>
+            {/* <button type='submit1' className='submit1'>Sign Up</button> */}
             <button type='submit1' className='submit1' onClick={handleUpdate}>Update</button>
           </div>
         </form>
-        <p className='login-link'>Already have an Account? <Link to={'/login'}>Login</Link></p>
+        {/* <p className='login-link'>Already have an Account? <Link to={'/login'}>Login</Link></p> */}
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ const authMiddleware = (req, res, next) => {
         if (!token) {
             throw new Error('Authentication failed');
         }
-        const verified = jwt.verify(token, "111")
+        const verified = jwt.verify(token, JWT_SECRET_KEY)
         req.user = verified;
         console.log(req.user, "jkdhvjkdhvjkhdk")
         next();
