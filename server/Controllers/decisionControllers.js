@@ -490,18 +490,38 @@ const getallInfo =  async (req, res) => {
           console.error('No decisions found');
           return res.status(404).json({ error: 'Decision not found' });
         }
-        // Assign individual ID to the decision
-        const decisions = decisionData;
-        res.status(200).json({ decisions });
-        console.log(decisions)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-       } finally {
-        if (conn) {
-            conn.release();
-        }
+       // Define decryptText function
+    const decryptText = (text, key) => {
+      const decipher = crypto.createDecipher('aes-256-cbc', key);
+      let decryptedText = decipher.update(text, 'hex', 'utf8');
+      decryptedText += decipher.final('utf8');
+      return decryptedText;
+    };
+
+    const decryptedDecisions = decisionData.map(decision => ({
+      ...decision,
+      decision_name: decryptText(decision.decision_name, req.user.key),
+      user_statement: decryptText(decision.user_statement, req.user.key),
+      tags: decision.tags ? decision.tags.split(',') : [],
+      decision_reason_text: Array.isArray(decision.decision_reason_text)
+        ? decision.decision_reason_text.map(reason => ({
+          id: reason.id,
+          decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
+        }))
+        : typeof decision.decision_reason_text === 'string'
+          ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
+          : []
+    }));
+
+    res.status(200).json({ decisions: decryptedDecisions });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request' });
+  } finally {
+    if (conn) {
+      conn.release();
     }
+  }
 };
 
 
