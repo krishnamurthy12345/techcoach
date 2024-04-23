@@ -54,15 +54,15 @@ const Readd = () => {
     }
   };
   
-  console.log("dataaaaaaaaaaaaaa", data);
+  console.log("data", data);
 
   const filteredData = data.filter(decision => {
     return (
-      (decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (decision.tag_name && decision.tag_name.toLowerCase().includes(searchTerm.toLowerCase()))
+      decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
     );
   });
-  console.log('Filtered Dataaaaaaaaaaaaaaaaaa:', filteredData);
+  console.log('Filtered Data:', filteredData);
 
   return (
     <div>

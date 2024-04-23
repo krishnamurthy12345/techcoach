@@ -285,7 +285,7 @@ const Decision = () => {
     decision_reason: [],
   });
 
-  console.log(formData,"jjjjjjjj");
+  console.log(formData);
 
   const dropdownHeight = 200;
   const dropdownwidth = 500;
@@ -309,7 +309,8 @@ const Decision = () => {
             tags: tags,
             decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
           }));
-          setSelectedTags(resp.data.decisions[0].tags ? resp.data.decisions[0].tags.split(',') : []);
+          // setSelectedTags(resp.data.decisions[0].tags ? resp.data.decisions[0].tags.split(',') : []);
+          // setSelectedTags(tags ? tags.split(',') : []);
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
