@@ -58,10 +58,11 @@ const Readd = () => {
 
   const filteredData = data.filter(decision => {
     return (
-      decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
     );
   });
+  
   console.log('Filtered Data:', filteredData);
 
   return (

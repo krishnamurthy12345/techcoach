@@ -1,8 +1,9 @@
+import React, { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.js';
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Routes, Route } from 'react-router-dom';
 import Home from './Components/Home';
 import Header from './Components/Header';
 import Login from './Components/Login';
@@ -16,24 +17,19 @@ import View from './Components/pages/Profile_Table/View';
 import Decision from './Components/pages/Decision/Decision.js';
 import Readd from './Components/pages/Decision/Readd.js';
 import Profile from './Components/DashBoard/Profile.js';
-import { useEffect } from 'react';
-import axios from 'axios';
 
 function App() {
   console.log("one is working")
 
-  const setAuthToken = () => {
-    
-    const token = localStorage.getItem('token');
-
-    if (token) {
-      axios.defaults.headers.common['authorization'] = `Bearer ${token}`;
-    }
-  };
-  setAuthToken();
-
   useEffect(() => {
-  }, []);
+    const setAuthToken = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        axios.defaults.headers.common['authorization'] = `Bearer ${token}`;
+      }
+    };
+    setAuthToken();
+  }, []); 
 
   return (
     <div>

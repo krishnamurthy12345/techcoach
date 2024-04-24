@@ -285,7 +285,8 @@ const Decision = () => {
     decision_reason: [],
   });
 
-  console.log(formData);
+  console.log(formData,"hshshs");
+  
 
   const dropdownHeight = 200;
   const dropdownwidth = 500;
@@ -300,8 +301,7 @@ const Decision = () => {
           const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
           console.log(resp.data.decisions[0]);
 
-        const tagsArray = Array.isArray(tags) ? tags : (tags ? tags.split(',') : []);
-
+        // console.log(Array.isArray(tags),'yyyyy')
           setFormData(prevState => ({
             ...prevState,
             decision_name: decision_name,
@@ -309,10 +309,10 @@ const Decision = () => {
             decision_taken_date: decision_taken_date,
             user_id: user_id,
             user_statement: user_statement,
-            tags: tagsArray,
+            tags: tags,
             decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
           }));
-          // setSelectedTags(resp.data.decisions[0].tags ? resp.data.decisions[0].tags.split(',') : []);
+          setSelectedTags( resp.data.decisions[0].tags);
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
@@ -324,6 +324,7 @@ const Decision = () => {
         });
     }
   }, [id]);
+  console.log(formData,'avavav')
 
   const tags = [
     "Personal", "Career", "Work", "Family", "Money", "Health", "Spiritual",
@@ -421,6 +422,7 @@ const Decision = () => {
     }));
   };
 
+  console.log(selectedTags,'weeee')
   return (
     <div>
       <h4 className='header'>Details</h4>
@@ -470,6 +472,7 @@ const Decision = () => {
                 placeholder='Enter the statement'
               />
             </div>
+          
             <div className='form-group'>
               <label>Decision Reasons:</label>
               {formData.decision_reason && formData.decision_reason.map((reason, index) => (
