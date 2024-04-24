@@ -13,6 +13,7 @@ const Readd = () => {
     const loadData = async () => {
       try {
         const token = localStorage.getItem('token'); // Get the token from localStorage
+        // console.log('sesees',token)
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
           headers: {
             Authorization: `Bearer ${token}` // Include the token in the request headers
