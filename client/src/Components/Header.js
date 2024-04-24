@@ -64,20 +64,37 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
-
+ 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        console.log('2',token);
         if (token) {
             setIsLoggedIn(true);
         } else {
             setIsLoggedIn(false);
         }
-    }, []);
+    }, []); 
 
+    useEffect(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            console.log('1',token);
+
+            if (token) {
+                localStorage.setItem('token', token); 
+                setIsLoggedIn(true); // Set isLoggedIn to true after saving token
+            }
+        } catch (error) {
+            console.error('Error setting auth token:', error);
+        }
+    }, []);
+    
+   
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);

@@ -9,6 +9,7 @@ const Nav = () => {
     const loadData = async () => {
       try {
         const token = localStorage.getItem('token');
+        // console.log('wewewe',token)
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
           headers: {
             Authorization: `Bearer ${token}`

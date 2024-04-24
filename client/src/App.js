@@ -6,10 +6,8 @@ import 'bootstrap/dist/js/bootstrap.js';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/Home';
 import Header from './Components/Header';
-import Login from './Components/Login';
 import Dashboard from './Components/DashBoard/Dashboard';
 import Error from './Components/Error';
-// import Notification from './Components/pages/Notification';
 import BasicInform from './Components/pages/Basic_Inform.js';
 import Personal from './Components/pages/Personal_Inform.js';
 import Read from './Components/pages/Profile_Table/Read';
@@ -29,7 +27,7 @@ function App() {
       }
     };
     setAuthToken();
-  }, []); 
+  }); 
 
   return (
     <div>
@@ -37,11 +35,10 @@ function App() {
       <Routes>
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
+        {/* <Route path='/login' element={<Login />} /> */}
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/decision' element={<Decision />} />
-        {/* <Route path='/notification' element={<Notification />} /> */}
 
         {/* Profile Routes */}
         <Route path='/basic' element={<BasicInform />} />
