@@ -82,7 +82,7 @@ const BasicInform = () => {
           ) : (
             <div className='no-image'>
               <p>No image uploaded</p>
-            </div>
+            </div> 
           )}
           <label htmlFor='profileImage'>
             <div className='upload-button'>
