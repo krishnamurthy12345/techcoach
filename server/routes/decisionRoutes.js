@@ -59,7 +59,7 @@ const createUserKey = async (req, res, next) => {
         }
 
         const encryptedKey = encryptText(keyData, PUBLIC_KEY);
-        console.log('Encrypted key using username, email, id:', encryptedKey);
+        // console.log('Encrypted key using username, email, id:', encryptedKey);
 
         req.user.key = encryptedKey;
         console.log('Ukkkkkkkkkkkkkkser:', req.user.key);

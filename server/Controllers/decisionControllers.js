@@ -177,7 +177,7 @@ const postInfo = async (req, res) => {
   let conn;
   // console.log('Request Headers:', req.headers);
   console.log(decision_name);
-  console.log('key from encrypt', req.user.key);
+  // console.log('key from encrypt', req.user.key);
   try {
     conn = await getConnection();
     await conn.beginTransaction();
@@ -948,7 +948,7 @@ const getall = async (req, res, next) => {
   let conn;
   console.log('aaa');
   console.log(req.user, "sgcjcsdjy");
-  console.log('key get from:', req.user.key);
+  // console.log('key get from:', req.user.key);
   try {
     conn = await getConnection();
     const user = req.user;
@@ -969,7 +969,7 @@ const getall = async (req, res, next) => {
       GROUP BY d.decision_id;`
     );
 
-    console.log('vvvvvv', decisionData)
+    // console.log('vvvvvv', decisionData);
 
     // Define decryptText function
     const decryptText = (text, key) => {
@@ -978,10 +978,10 @@ const getall = async (req, res, next) => {
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
         decryptedText += decipher.final('utf8');
-        return decryptedText.toString();
+        return decryptedText;
       } catch (error) {
         console.error('Error decrypting text:', error);
-        throw error;
+        return null; // Return null or handle the error as appropriate for your application
       }
     };
 
@@ -992,7 +992,7 @@ const getall = async (req, res, next) => {
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(reason, 'hex', 'utf8');
         decryptedText += decipher.final('utf8');
-        return decryptedText.toString();
+        return decryptedText;
       } catch (error) {
         console.error('Error decrypting reason text:', error);
         return null; // Return null or handle the error as appropriate for your application
@@ -1011,16 +1011,24 @@ const getall = async (req, res, next) => {
         : []
     }));
 
-    console.log("hhhh", decryptedDecisionData)
+    console.log("hhhh", decryptedDecisionData);
     await conn.commit();
 
-    res.status(200).json({ decisionData: decryptedDecisionData})
+    res.status(200).json({ decisionData: decryptedDecisionData });
 
   } catch (err) {
     console.error('Error processing query parameters:', err);
-    res.status(400).send({ message: 'Invalid query parameters!' });
+    if (conn) {
+      await conn.rollback(); // Rollback the transaction in case of error
+    }
+    res.status(500).send({ message: 'Internal Server Error' }); // Handle the error gracefully
+  } finally {
+    if (conn) {
+      conn.release(); // Release the connection in any case
+    }
   }
 };
+
 
 
 
