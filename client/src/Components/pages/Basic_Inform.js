@@ -74,7 +74,7 @@ const BasicInform = () => {
   return (
     <div className='container'>
       <div className='form'>
-        <h1 className='title'>SignUp</h1>
+        {/* <h1 className='title'>SignUp</h1> */}
         {alertMessage && <div className="alert">{alertMessage}</div>}
         <div className='image-upload'>
           {data.image ? (
