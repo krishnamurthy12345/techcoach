@@ -4,14 +4,14 @@
   justify-content:space-between;
   background-color:rgb(13, 13, 237);
   font-size: 20px;
-  height: 70px;
+  height: 90px;
   color: white;
 }
 
 .image {
   display: flex;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   margin-right: 10px;
 }
 .navbar-nav .nav-link.active{

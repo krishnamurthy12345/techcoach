@@ -102,8 +102,10 @@ const Readd = () => {
               {/* <td>{decision.decision_reason}</td> */}
               {/* <td>{decision.created_by}</td> */}
               {/* <td>{decision.creation_date}</td> */}
-              <td>{decision.decision_due_date}</td>
-              <td>{decision.decision_taken_date}</td>
+              {/* <td>{decision.decision_due_date}</td> */}
+              {/* <td>{decision.decision_taken_date}</td> */}
+              <td>{new Date(decision.decision_due_date).toLocaleDateString()}</td>
+              <td>{new Date(decision.decision_taken_date).toLocaleDateString()}</td>
               <td>{decision.user_statement}</td>
               <td>{decision.tagsArray && decision.tagsArray.join(', ')}
                 {/* {decision.tag_name && decision.tag_name.split(',').map(tag => (
