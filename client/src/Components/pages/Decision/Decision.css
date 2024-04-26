@@ -45,6 +45,13 @@ input[type="submit"]:hover{
     border-radius: 5px;
     height: 40px;
     max-width: 50px;
+    margin-top:-5px;
+}
+.btnn1{
+    color: white;
+    border-radius: 5px;
+    height: 40px;
+    max-width: 90px;
 }
 .tag-container {
     display: flex;

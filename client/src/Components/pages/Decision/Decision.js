@@ -347,10 +347,10 @@ const Decision = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { decision_name,  decision_due_date, decision_taken_date, user_statement,decision_reason } = formData;
+    const { decision_name, decision_taken_date,  decision_due_date, user_statement,decision_reason } = formData;
     console.log(formData,"THis is form data")
     console.log(decision_reason)
-    if (!decision_name  || !decision_due_date || !decision_taken_date || !user_statement || selectedTags.length === 0 || !decision_reason || decision_reason.some(reason => reason.trim() === ''))  {
+    if (!decision_name  || !decision_due_date  || !user_statement || selectedTags.length === 0 || !decision_reason || decision_reason.some(reason => reason.trim() === ''))  {
       toast.error("Please provide a value for each input fields");
       return;
     }
@@ -422,7 +422,16 @@ const Decision = () => {
     }));
   };
 
-  console.log(selectedTags,'weeee')
+  const removeReason = (indexToRemove) =>{
+    const updatedReasons = [...formData.decision_reason];
+    updatedReasons.splice(indexToRemove,1);
+    setFormData({
+      ...formData,
+      decision_reason:updatedReasons,
+    });
+  }
+  console.log(selectedTags,'weeee');
+
   return (
     <div>
       <h4 className='header'>Details</h4>
@@ -483,6 +492,7 @@ const Decision = () => {
                     onChange={e => handleReasonChange(index, e.target.value)}
                     placeholder='Enter the decision reason'
                   />
+                  <button className='btnn1' type='button' onClick={() =>removeReason(index)}>Remove</button>
                 </div>
               ))}
               
