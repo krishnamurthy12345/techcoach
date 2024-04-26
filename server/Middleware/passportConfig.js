@@ -3,6 +3,7 @@ const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mariadb = require('mariadb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const sendWelcomeEmail = require('../Utility/mail');
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
@@ -29,14 +30,16 @@ passport.use(new GoogleStrategy({
         if (!existingUser || existingUser.length === 0) { // Check if existingUser is undefined or empty array
             // Insert the new user
             const user=await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email) VALUES (?, ?) RETURNING* ", [ profile.displayName, profile.email]);
-            console.log(user,"jfjyfku")
+            // console.log(user,"jfjyfku")
+            sendWelcomeEmail(user);
             return done(null, { id: user[0].user_id, email: profile.email}); // Pass user info along with token
         }
-        console.log(existingUser,"kkkkkkkkk")
+        // console.log(existingUser,"kkkkkkkkk")
         return done(null, { id: existingUser.user_id, email: profile.email}); // Pass user info along with token
         
         // Sign JWT token with user id and email
         // const token = jwt.sign({ id: profile.id, email: profile.email }, "111")
+
     } catch (error) {
         console.error("Error during authentication:", error);
         return done(error, null);

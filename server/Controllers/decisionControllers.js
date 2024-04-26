@@ -1,6 +1,7 @@
 const getConnection = require('../Models/database');
 
 const crypto = require('crypto');
+
 // const postInfo = async (req, res) => {
 //   const { decision_name, decision_reason, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text, user_id } = req.body;
 //   let conn;
@@ -69,108 +70,6 @@ const crypto = require('crypto');
 //     }
 //   }
 // };
-
-
-/* const postInfo = async (req, res) => {
-  const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
-  let conn;
-  // console.log('Request Headers:', req.headers);
-  console.log(decision_name);
-  console.log('key from encrypt', req.user.key);
-  try {
-    conn = await getConnection();
-    await conn.beginTransaction();
-
-    // Get current user's ID and name (assuming it's available in req.user)
-    const userId = req.user.id;
-    const userName = req.user.name;
-
-    const currentDate = new Date().toISOString().slice(0, 10);
-    const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-    const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
-
-    function encryptText(text, key) {
-      const cipher = crypto.createCipher('aes-256-cbc', key);
-      let encryptedText = cipher.update(text, 'utf8', 'hex');
-      encryptedText += cipher.final('hex');
-      return encryptedText;
-    }
-
-    // Ensure decision_reason_text is converted to a string if it's an object
-    console.log("text",decision_reason_text);
-    const decisionReasonTexts = decision_reason_text.map(item => item.decision_reason_text);
-    //const decisionReasonTextString = Array.isArray(decision_reason_text) ? decision_reason_text.join(', ') : decision_reason_text;
-    console.log("decision reason encrypt", decisionReasonTexts);
-
-    const encryptedReasonTexts = [];
-
-    for (const reasonText of decisionReasonTexts) {
-      const encryptedReasonText = encryptText(reasonText, req.user.key);
-      encryptedReasonTexts.push(encryptedReasonText);
-    }
-
-    console.log("array",encryptedReasonTexts)
-
-    const encryptedDesicionName = encryptText(decision_name, req.user.key);
-    const encrypedUserStatement = encryptText(user_statement, req.user.key);
-    //const encryptedDecisionReasonText = encryptText(decisionReasonTexts, req.user.key);
-
-    const decisionResult = await conn.query(
-      "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [encryptedDesicionName, userName, currentDate, formattedDueDate, formattedTakenDate, encrypedUserStatement, userId]
-    );
-    console.log(decisionResult);
-    const decisionId = decisionResult.insertId;
-    console.log(decisionId);
-
-    // Processing tags
-    const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-    for (const tagName of tagsArray) {
-      const tag = await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-        [tagName.trim()]
-      );
-
-      const tagId = tag.insertId || tag.tag_id;
-
-      await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-        [decisionId, tagId]
-      );
-    }
-
-    // Processing decision_reason_text
-    // if (Array.isArray(decision_reason_text)) {
-    //   for (const reasonText of encrypedDecisionReasonText) {
-    //     await conn.query(
-    //       "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-    //       [decisionId, reasonText]
-    //     );
-    //   }
-    // } else {
-    await conn.query(
-      "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-      [decisionId, encryptedReasonText]
-    );
-    // }
-
-    // Commit transaction and send success response
-    await conn.commit();
-    res.status(200).json({ message: 'Data inserted successfully' });
-
-  } catch (error) {
-    console.error('Error inserting data:', error);
-    if (conn) {
-      await conn.rollback();
-    }
-    res.status(500).json({ error: 'An error occurred while processing your request' });
-  } finally {
-    if (conn) {
-      conn.release();
-    }
-  }
-}; */
-
 
 const postInfo = async (req, res) => {
   const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
@@ -262,51 +161,6 @@ const postInfo = async (req, res) => {
     }
   }
 };
-
-
-
-// const getallInfo = async (req, res) => {
-//     let conn;
-//     console.log('aaa')
-//     try {
-//         conn = await getConnection();
-
-//         // Execute query to fetch decision data
-//         const decisionRows = await conn.query(
-//             "SELECT * FROM techcoach_lite.techcoach_decision"
-//         );
-
-//         // Execute query to fetch associated tags for each decision
-//         for (const decisionRow of decisionRows) {
-//             const tagRows = await conn.query(
-//                 "SELECT t.tag_name FROM techcoach_lite.techcoach_tag t INNER JOIN techcoach_lite.techcoach_decision_tag dt ON t.tag_id = dt.tag_id WHERE dt.decision_id = ?",
-//                 [decisionRow.decision_id]
-//             );
-//             decisionRow.tags = Array.isArray(tagRows) ? tagRows.map(tagRow => tagRow.tag_name) : [];
-//         }
-
-//         // Execute query to fetch associated reasons for each decision
-//         for (const decisionRow of decisionRows) {
-//             const reasonRows = await conn.query(
-//                 "SELECT r.decision_reason_text FROM techcoach_lite.techcoach_reason r INNER JOIN techcoach_lite.techcoach_reason dr ON r.reason_id = dr.reason_id WHERE dr.decision_id = ?",
-//                 [decisionRow.decision_id]
-//             );
-//             decisionRow.reasons = Array.isArray(reasonRows) ? reasonRows.map(reasonRow => reasonRow.decision_reason_text) : [];
-//         }
-
-//         res.status(200).json({ decisions: decisionRows });
-//     } catch (error) {
-//         console.error('Error retrieving data:', error);
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
-// };
-
-
-
 
 
 // const getallInfo = async (req, res) => {
@@ -601,87 +455,7 @@ const getallInfo =  async (req, res) => {
 //     }
 // };
 
-// const putInfo = async (req, res) => {
-//   const { id } = req.params;
-//   const { decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
-//   let conn;
 
-//   try {
-//     conn = await getConnection();
-//     await conn.beginTransaction();
-
-//     // Format dates
-//     const formattedCreationDate = creation_date ? new Date(creation_date).toISOString().slice(0, 10) : null;
-//     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-//     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
-
-//     // Update the decision record
-//     await conn.query(
-//       "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, created_by = ?, creation_date = ?, decision_due_date = ?, decision_taken_date = ?, user_statement = ? WHERE decision_id = ?",
-//       [decision_name, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, user_statement, id]
-//     );
-
-//     // Handle tags
-//     if (tags) {
-//       // Delete existing tags associated with the decision
-//       await conn.query(
-//         "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
-//         [id]
-//       );
-
-//       // Insert new tags for the decision
-//       const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-//       for (const tagName of tagsArray) {
-//         const tag = await conn.query(
-//           "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = VALUES(tag_name)",
-//           [tagName.trim()]
-//         );
-
-//         const tagId = tag.insertId || tag.tag_id;
-
-//         await conn.query(
-//           "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-//           [id, tagId]
-//         );
-//       }
-//     }
-
-//     // Handle decision_reason_text
-//     if (decision_reason_text) {
-//       // Delete existing reasons associated with the decision
-//       await conn.query(
-//         "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
-//         [id]
-//       );
-
-//       // Insert new reasons for the decision
-//       if (Array.isArray(decision_reason_text)) {
-//         for (const reasonObj of decision_reason_text) {
-//           const reason = reasonObj.decision_reason_text;
-//           await conn.query(
-//             "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-//             [id, reason]
-//           );
-//         }
-//       }
-//     }
-
-//     // Commit transaction and send success response
-//     await conn.commit();
-//     res.status(200).json({ message: 'Data updated successfully' });
-
-//   } catch (error) {
-//     console.error('Error updating data:', error);
-//     if (conn) {
-//       await conn.rollback();
-//     }
-//     res.status(500).json({ error: 'An error occurred while processing your request' });
-//   } finally {
-//     if (conn) {
-//       conn.release();
-//     }
-//   }
-// };
 
 // const putInfo = async (req, res) => {
 //   const { id } = req.params;
@@ -760,50 +534,6 @@ const getallInfo =  async (req, res) => {
 //       conn.release();
 //     }
 //   }
-// };
-
-
-
-// const deleteInfo = async (req, res) => {
-//     const decision_id = req.params.id;
-//     let conn;
-
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         // Delete associated tags
-//         await conn.query(
-//             "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
-//             [decision_id]
-//         );
-
-//         // Delete associated reason
-//         await conn.query(
-//             "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
-//             [decision_id]
-//         );
-
-//         // Delete decision
-//         await conn.query(
-//             "DELETE FROM techcoach_lite.techcoach_decision WHERE decision_id = ?",
-//             [decision_id]
-//         );
-
-//         await conn.commit();
-//         res.status(200).json({ message: 'Data deleted successfully' });
-//     } catch (error) {
-//         console.error('Error deleting data:', error);
-//         if (conn) {
-//             await conn.rollback();
-//             conn.release();
-//         }
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
 // };
 
 
