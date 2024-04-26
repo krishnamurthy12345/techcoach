@@ -7,6 +7,9 @@
   height: 90px;
   color: white;
 }
+.navbar-toggler-icon{
+  background-color:rgb(13, 13, 237);
+}
 
 .image {
   display: flex;
