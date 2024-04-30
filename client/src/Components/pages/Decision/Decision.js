@@ -289,7 +289,7 @@ const Decision = () => {
   
 
   const dropdownHeight = 200;
-  const dropdownwidth = 500;
+  const dropdownwidth = 550;
   const navigate = useNavigate();
   const { id } = useParams();
 

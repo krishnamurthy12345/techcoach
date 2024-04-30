@@ -704,7 +704,7 @@ const getall = async (req, res, next) => {
     // Define decryptText function
     const decryptText = (text, key) => {
       try {
-        console.log('Key length:', key);
+        // console.log('Key length:', key);
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
         decryptedText += decipher.final('utf8');
@@ -718,7 +718,7 @@ const getall = async (req, res, next) => {
     // Define decryptReasonText function
     const decryptReasonText = (reason, key) => {
       try {
-        console.log('Key length:', key);
+        // console.log('Key length:', key);
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(reason, 'hex', 'utf8');
         decryptedText += decipher.final('utf8');
@@ -738,8 +738,8 @@ const getall = async (req, res, next) => {
       tagsArray: decision.tag_name ? decision.tag_name.split(',') : [], // Splitting tag names into an array
       decision_reason_text: decision.decision_reason_text
         ? decision.decision_reason_text.split(',').map(reason => decryptReasonText(reason, req.user.key))
-        : []
-    }));
+        : [],
+      }));
 
     console.log("hhhh", decryptedDecisionData);
     await conn.commit();

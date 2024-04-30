@@ -5,7 +5,7 @@ input[type="text"],
 input[type="date"],
 input[type="datetime-local"],
 select{
-    width: 50%;
+    width: 70%;
     padding: 12px 20px;
     margin: 8px 0;
     display: inline-block;
@@ -22,15 +22,6 @@ input[type="submit"]{
     padding: 14px 20px;
     margin: 8px 0;
 }
-/* input[type="button"]{
-    width: 50%;
-    background-color: #40453e;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 14px 20px;
-    margin: 8px 0;
-} */
 input[type="submit"]:hover{
     background-color: #08067f;
 }
@@ -39,18 +30,19 @@ input[type="submit"]:hover{
     font-size:20px ;
 }
 .btnn{
-    background:#08067f;
+    background:rgb(82, 109, 130);
     border: none;
     color: white;
     border-radius: 5px;
-    height: 40px;
-    max-width: 50px;
+    height: 50px;
+    max-width: 90px;
     margin-top:-5px;
 }
 .btnn1{
+    background: rgb(82, 109, 130);
     color: white;
     border-radius: 5px;
-    height: 40px;
+    height: 50px;
     max-width: 90px;
 }
 .tag-container {

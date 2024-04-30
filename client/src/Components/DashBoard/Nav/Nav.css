@@ -22,6 +22,31 @@
 }
 .page-link:hover{
     color: black;
-    background-color: red;
-    text-decoration: dashed;
+    background-color:#27374D;
+}
+.homepage{
+    margin-top: 2rem;
+    padding-left: 30px ;
+    text-align: center;
+}
+.card {
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 25px;
+    color: #333;
+  }
+  .card-text {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .card-body1{
+    background-color: rgb(187, 241, 107);
+    border-radius: 10px;
+  }
+.card-body2{
+    background-color: rgb(240, 232, 95);
+    border-radius: 10px;
 }

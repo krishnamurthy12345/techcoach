@@ -208,9 +208,10 @@ const Readd = () => {
   });
 
   return (
-    <div>
+    <div className='styled-table'>
+      <div className='heAd'>
       <Link to='/decision'>
-        <button className='btn btn-info'>Add Decision</button>
+        <button className='decision'>Add Decision</button>
       </Link>
       <input
         type="text"
@@ -218,7 +219,8 @@ const Readd = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <table className='styled-table'>
+      </div>
+      <table >
         <thead>
           <tr>
             <th>#</th>
