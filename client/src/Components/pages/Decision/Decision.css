@@ -1,6 +1,20 @@
 .form{
     max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
+.input-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
 input[type="text"],
 input[type="date"],
 input[type="datetime-local"],
@@ -14,7 +28,7 @@ select{
     box-sizing: border-box;
 }
 input[type="submit"]{
-    width:50%;
+    width:70%;
     background-color: #4caf50;
     color: white;
     border: none;
@@ -52,12 +66,21 @@ input[type="submit"]:hover{
     justify-content: center; 
     margin-bottom: 10px;
 }
+.tag-item {
+    margin-right: 15px;
+  }
 .tag-label {
+    display: flex;
     align-items: center; 
     justify-content: center;
-    gap: 10px;
+    gap: 2px;
     margin-top: 10px;
+
 }
+.tag-label input {
+    margin-right: 5px;
+  }
+  
 .reason-container {
     display: flex;
     flex-direction: column;
@@ -67,4 +90,10 @@ input[type="submit"]:hover{
 .reason-item {
     margin-bottom: 5px; 
 }
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
   

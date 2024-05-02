@@ -125,7 +125,7 @@ const Header = () => {
                                         <Link to='/readd' className="nav-link">Decision</Link>
                                     </li>
                                     <li className="nav-item">
-                                        <a href="https://techcoach4u.com/" target="_blank" rel="noopener noreferrer" className="nav-link">Resources</a>
+                                        <a href=" https://techcoach4u.wordpress.com/make-decisions-with-confidence/" target="_blank" rel="noopener noreferrer" className="nav-link">Resources</a>
                                     </li>
                                     <li className="nav-item">
                                         <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>

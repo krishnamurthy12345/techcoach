@@ -8,7 +8,7 @@
 // const Readd = () => {
 //   const [data, setData] = useState([]);
 //   const [searchTerm, setSearchTerm] = useState('');
-  
+
 
 //   useEffect(() => {
 //     const loadData = async () => {
@@ -50,7 +50,7 @@
 //       }
 //     }
 //   };
-  
+
 //   console.log("data", data);
 
 //   const filteredData = data.filter(decision => {
@@ -59,7 +59,7 @@
 //       (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
 //     );
 //   });
-  
+
 //   console.log('Filtered Data:', filteredData);
 
 //   return (
@@ -198,7 +198,7 @@ const Readd = () => {
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
-  
+
 
   const filteredData = currentRecords.filter(decision => {
     return (
@@ -210,15 +210,15 @@ const Readd = () => {
   return (
     <div className='styled-table'>
       <div className='heAd'>
-      <Link to='/decision'>
-        <button className='decision'>Add Decision</button>
-      </Link>
-      <input
-        type="text"
-        placeholder="Search by decision name or tag name"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+        <Link to='/decision'>
+          <button className='decision'>Add Decision</button>
+        </Link>
+        <input
+          type="text"
+          placeholder="Search by decision name or tag name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
       <table >
         <thead>
@@ -258,14 +258,14 @@ const Readd = () => {
         </tbody>
       </table>
       <Pagination>
-  <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-  {pageNumbers.map(number => (
-    <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-      {number}
-    </Pagination.Item>
-  ))}
-  <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pageNumbers.length} />
-</Pagination>
+        <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+        {pageNumbers.map(number => (
+          <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+            {number}
+          </Pagination.Item>
+        ))}
+        <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pageNumbers.length} />
+      </Pagination>
 
       <ToastContainer />
     </div>

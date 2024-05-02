@@ -10,9 +10,11 @@ input[type="textt"]{
 .styled-table{
     margin: auto;
     font-size: 0.9em;
-    font-family: sans-serif;
+    font-family: 'Roboto',sans-serif;
     max-width: 800px;
     box-shadow: 0 0 20px rgba(0,0,0, 0.15);
+    overflow-x: auto;
+    /* overflow: hidden; */
 }
 .styled-table thead th,
 .styled-table thead tr{
@@ -20,6 +22,8 @@ input[type="textt"]{
     padding: 10px 15px;
     color: white;
     text-align: center;
+    font-family: "Lato", sans-serif; 
+
 }
 .styled-table tbody tr,
 .styled-table tbody th,
@@ -65,3 +69,41 @@ input[type="textt"]{
     margin-bottom: 10px;
     margin-top: 15px;
 }
+input[type="text"] {
+    width: 70%; 
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin: 8px 0;
+    margin-left: 10px; 
+  }
+
+
+  @media only screen and (max-width: 768px) {
+    .styled-table {
+      width: 100%; 
+    }
+  
+    .styled-table td,
+    .styled-table th {
+      white-space: nowrap; 
+    }
+  
+    .heAd {
+      flex-direction: column; 
+      align-items: flex-start;
+    }
+  
+    .decision {
+      margin-left: 10px;
+      margin-top: 10px;
+    }
+  
+    .btn-info {
+      margin-left: 10px;
+    }
+  
+    input[type="text"] {
+      width: 90%; 
+      margin-left: 10px;
+    }
+  }
