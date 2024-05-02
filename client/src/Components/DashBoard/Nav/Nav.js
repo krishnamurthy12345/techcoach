@@ -142,7 +142,7 @@ const Nav = () => {
         <div className="col">
           <div className="card">
             <div className="card-body1">
-              <h5 className="card-title">Total Create Decisions</h5>
+              <h5 className="card-title">Total Logged Decisions</h5>
               <p className="card-text">{liveDecisionsCount}</p>
             </div>
           </div>

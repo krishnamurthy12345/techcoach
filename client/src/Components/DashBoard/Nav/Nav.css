@@ -32,21 +32,23 @@
 .card {
     border: 2px solid #ddd; 
     border-radius: 8px; 
-    padding: 20px;
+    padding: 10px;
   }
   .card-title {
     font-size: 25px;
-    color: #333;
+    /* color: #333; */
   }
   .card-text {
     font-size: 20px;
     font-weight: 700;
   }
   .card-body1{
-    background-color: rgb(187, 241, 107);
+    background-color: rgb(216, 248, 169);
     border-radius: 10px;
+    font-weight: 900;
   }
 .card-body2{
-    background-color: rgb(240, 232, 95);
+    background-color: rgb(247, 242, 158);
     border-radius: 10px;
+    font-weight: 800;
 }
