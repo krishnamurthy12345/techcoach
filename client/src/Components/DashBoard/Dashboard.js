@@ -1,23 +1,20 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Nav from '../DashBoard/Nav/Nav';
 
 function Dashboard() {
-  useEffect(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-      const id = urlParams.get('user_id')
-      console.log(token);
-      console.log(id);
+  // useEffect(() => {
+  //   try {
+  //     const urlParams = new URLSearchParams(window.location.search);
+  //     const token = urlParams.get('token');
+  //     console.log('1',token);
 
-      if (token && id) {
-        localStorage.setItem('token', token); 
-        localStorage.setItem('user_id',id);
-      }
-    } catch (error) {
-      console.error('Error setting auth token:', error);
-    }
-  }, []);
+  //     if (token) {
+  //       localStorage.setItem('token', token); 
+  //     }
+  //   } catch (error) {
+  //     console.error('Error setting auth token:', error);
+  //   }
+  // }, []);
 
   return (
     <div>
