@@ -147,6 +147,8 @@ const postInfo = async (req, res) => {
 
     // Commit transaction and send success response
     await conn.commit();
+    if (conn) conn.release() 
+
     res.status(200).json({ message: 'Data inserted successfully' });
 
   } catch (error) {
@@ -289,6 +291,8 @@ const getInfo = async (req, res) => {
             : []
       };
     });
+    if (conn) conn.release() 
+
 
     res.status(200).json({ decisions: decryptedDecisionData });
   } catch (error) {
@@ -366,6 +370,8 @@ const getallInfo =  async (req, res) => {
           ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
           : []
     }));
+    if (conn) conn.release() 
+
 
     res.status(200).json({ decisions: decryptedDecisions });
   } catch (error) {
@@ -615,6 +621,8 @@ function encryptText(text, key) {
 
     // Commit transaction and send success response
     await conn.commit();
+    if (conn) conn.release() 
+
     res.status(200).json({ message: 'Data updated successfully' });
 
   } catch (error) {
@@ -658,6 +666,8 @@ const deleteInfo = async (req, res) => {
 
     // Commit transaction and send success response
     await conn.commit();
+    if (conn) conn.release() 
+
     res.status(200).json({ message: 'Data deleted successfully' });
 
   } catch (error) {
@@ -742,8 +752,8 @@ const getall = async (req, res, next) => {
       }));
 
     console.log("hhhh", decryptedDecisionData);
-    await conn.commit();
-
+    if (conn) conn.release() 
+    // await conn.commit();
     res.status(200).json({ decisionData: decryptedDecisionData });
 
   } catch (err) {
