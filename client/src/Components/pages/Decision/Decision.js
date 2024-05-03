@@ -321,12 +321,15 @@ const Decision = () => {
           const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
           console.log(resp.data.decisions[0]);
 
+          const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
+          const formattedDecisionTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().split('T')[0] : '';
+
         // console.log(Array.isArray(tags),'yyyyy')
           setFormData(prevState => ({
             ...prevState,
             decision_name: decision_name,
-            decision_due_date: decision_due_date,
-            decision_taken_date: decision_taken_date,
+            decision_due_date: formattedDecisionDueDate,
+            decision_taken_date: formattedDecisionTakenDate,
             user_id: user_id,
             user_statement: user_statement,
             tags: tags,
@@ -359,11 +362,27 @@ const Decision = () => {
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [id]: value
+    let formattedValue = value; // Initialize with the value as is
+  
+    if (id === 'decision_due_date' || id === 'decision_taken_date') {
+      // Parse the input value as a Date object
+      const date = new Date(value);
+      
+      // Format the date as "yyyy-MM-dd"
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+  
+      // Construct the formatted date string
+      formattedValue = `${year}-${month}-${day}`;
+    }
+  
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: formattedValue,
     }));
   };
+  
 
   const handleTagSelection = (tag) => {
     setSelectedTags(prevTags => {
@@ -421,7 +440,7 @@ const Decision = () => {
       errors.selectedTags = 'Select at least one tag';
     }
     if (formData.decision_reason.some(reason => !reason.trim())) {
-      errors.decision_reason = 'at least one reason must be filled';
+      errors.decision_reason = 'At least one reason must be filled';
     }
 
     setErrors(errors);
@@ -492,12 +511,13 @@ const Decision = () => {
                     </div>
                     <div className='form-group'>
                       <label htmlFor='decision_due_date'>Decision Due Date:</label>
+                      {/* {formData.decision_due_date} */}
                       <input
                         type='date'
                         id='decision_due_date'
                         value={formData.decision_due_date}
                         onChange={handleInputChange}
-                        placeholder='yyyy-mm-dd'
+                        // placeholder='yyyy-mm-dd'
                       />
                     {errors.decision_due_date && <span className="error">{errors.decision_due_date}</span>}
                     </div>
@@ -508,7 +528,7 @@ const Decision = () => {
                         id='decision_taken_date'
                         value={formData.decision_taken_date}
                         onChange={handleInputChange}
-                        placeholder='yyyy-mm-dd'
+                        // placeholder='yyyy-mm-dd'
                       />
                     {errors.decision_taken_date && <span className="error">{errors.decision_taken_date}</span>}
                     </div>
