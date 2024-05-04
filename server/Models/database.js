@@ -6,13 +6,13 @@ const pool = mariadb.createPool({
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   connectTimeout: 100000,
-  connectionLimit: 25,
+  connectionLimit: 10,
   port: process.env.DB_PORT,
   waitForConnections: true,
 });
 
-const connection =  pool.getConnection();
 async function getConnection(querys) {
+  const connection =await  pool.getConnection();
   try {
     console.log(
       pool.activeConnections(),
@@ -24,6 +24,7 @@ async function getConnection(querys) {
     // if (connection) connection.release();
     return connection;
   } catch (error) {
+    if (connection) connection.end()
     console.error("Error connecting to MariaDB:", error);
     throw error;
   }
