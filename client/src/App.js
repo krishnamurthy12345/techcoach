@@ -23,11 +23,11 @@ function App() {
     const setAuthToken = () => {
       const token = localStorage.getItem('token');
       if (token) {
-        axios.defaults.headers.common['authorization'] = `Bearer ${token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
     };
     setAuthToken();
-  }); 
+  },[]); 
 
   return (
     <div>
