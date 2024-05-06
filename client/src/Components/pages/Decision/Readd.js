@@ -1,10 +1,11 @@
-  import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Pagination } from 'react-bootstrap';
+import { Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import './Readd.css';
+import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 
 const Readd = () => {
@@ -12,6 +13,7 @@ const Readd = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage] = useState(10);
+  const [showCompletedDecisions, setShowCompletedDecisions] = useState(false); // Change initial state to false
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +38,37 @@ const Readd = () => {
     loadData();
   }, []);
 
+  // Filtering logic
+  const filteredData = data.filter(decision => {
+    if (showCompletedDecisions) {
+      return !decision.decision_taken_date;
+    } else {
+      return true;
+    }
+  }).filter(decision => {
+    return (
+      decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+    );
+  });
+
+  // Pagination logic
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
+
+  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
+
+  // Event handler for page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Function to delete a decision
   const deleteDecision = async (id) => {
     if (window.confirm("Are you sure that you want to delete this decision?")) {
       try {
@@ -49,36 +82,28 @@ const Readd = () => {
     }
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-
-  const totalPages = Math.ceil(data.length / recordsPerPage);
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
-
-
-  const filteredData = currentRecords.filter(decision => {
-    return (
-      decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
-    );
-  });
-
   return (
     <div className='styled-table'>
       <div className='heAd'>
         <Link to='/decision'>
           <button className='decision'>Add Decision</button>
         </Link>
+        <div className='togglebutton'>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="tooltip">Show pending decisions</Tooltip>}
+          >
+            <div
+              type="checkbox"
+              onClick={() => setShowCompletedDecisions(!showCompletedDecisions)}
+            >
+              {showCompletedDecisions ? <FaToggleOn /> : <FaToggleOff />}
+            </div>
+          </OverlayTrigger>
+        </div>
         <input
           type="text"
+          className='texttt'
           placeholder="Search by decision name or tag name"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -91,19 +116,19 @@ const Readd = () => {
             <th>Decision Name</th>
             <th>Decision Due Date</th>
             <th>Decision Taken Date</th>
-            <th>User Statement</th>
+            <th>Decision Details</th>
             <th>Tags</th>
             <th>Decision Reasons</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((decision, index) => (
+          {currentRecords.map((decision, index) => (
             <tr key={decision.decision_id}>
               <th scope='row'>{indexOfFirstRecord + index + 1}</th>
               <td>{decision.decision_name}</td>
               <td>{new Date(decision.decision_due_date).toLocaleDateString()}</td>
-              <td>{decision.decision_taken_date}</td>
+              <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : ""}</td>
               <td>{decision.user_statement}</td>
               <td>{decision.tagsArray && decision.tagsArray.join(', ')}</td>
               <td>
@@ -137,4 +162,3 @@ const Readd = () => {
 };
 
 export default Readd;
-
