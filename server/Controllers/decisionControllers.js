@@ -158,9 +158,9 @@ const getInfo = async (req, res) => {
         tags: decision.tags ? decision.tags.split(',') : [],
         decision_reason_text: Array.isArray(decision.decision_reason_text)
           ? decision.decision_reason_text.map(reason => ({
-              id: reason.id,
-              decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
-            }))
+            id: reason.id,
+            decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
+          }))
           : typeof decision.decision_reason_text === 'string'
             ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
             : []
@@ -178,19 +178,19 @@ const getInfo = async (req, res) => {
       conn.release();
     }
   }
-}; 
+};
 
 
 const getallInfo =  async (req, res) => {
-    let conn;
-    console.log('qawqaw')
-    console.log(req.user)
+  let conn;
+  console.log('qawqaw')
+  console.log(req.user)
 
-    try {
-        conn = await getConnection();
+  try {
+    conn = await getConnection();
 
-        const decisionData = await conn.query(
-            `SELECT 
+    const decisionData = await conn.query(
+      `SELECT 
             d.*, 
             GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
             (
@@ -216,14 +216,14 @@ const getallInfo =  async (req, res) => {
              d.decision_id;
         `
 
-        );
-        console.log(decisionData)
-        // Check if decisionData is defined and not empty
-        if (!decisionData || decisionData.length === 0) {
-          console.error('No decisions found');
-          return res.status(404).json({ error: 'Decision not found' });
-        }
-       // Define decryptText function
+    );
+    console.log(decisionData)
+    // Check if decisionData is defined and not empty
+    if (!decisionData || decisionData.length === 0) {
+      console.error('No decisions found');
+      return res.status(404).json({ error: 'Decision not found' });
+    }
+    // Define decryptText function
     const decryptText = (text, key) => {
       const decipher = crypto.createDecipher('aes-256-cbc', key);
       let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -272,15 +272,21 @@ const putInfo = async (req, res) => {
     // Format dates
     const formattedCreationDate = creation_date ? new Date(creation_date).toISOString().slice(0, 10) : null;
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-    const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
+    const formattedTakenDate = decision_taken_date ? (isValidDate(decision_taken_date) ? new Date(decision_taken_date).toISOString().slice(0, 10) : null) : null;
 
+    // Function to check if a value is a valid date
+    function isValidDate(dateString) {
+      const regEx = /^\d{4}-\d{2}-\d{2}$/;
+      return dateString.match(regEx) !== null;
+    }
+    
     // Function to encrypt text
-function encryptText(text, key) {
-  const cipher = crypto.createCipher('aes-256-cbc', key);
-  let encryptedText = cipher.update(text, 'utf8', 'hex');
-  encryptedText += cipher.final('hex');
-  return encryptedText;
-}
+    function encryptText(text, key) {
+      const cipher = crypto.createCipher('aes-256-cbc', key);
+      let encryptedText = cipher.update(text, 'utf8', 'hex');
+      encryptedText += cipher.final('hex');
+      return encryptedText;
+    }
     // Encrypt decision_name and user_statement
     const encryptedDecisionName = encryptText(decision_name, req.user.key);
     const encryptedUserStatement = encryptText(user_statement, req.user.key);
@@ -423,7 +429,8 @@ const getall = async (req, res, next) => {
       JOIN techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
       JOIN techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
       WHERE d.user_id=${user.id}
-      GROUP BY d.decision_id;`
+      GROUP BY d.decision_id
+      ORDER BY d.creation_date DESC;`
     );
 
     // console.log('vvvvvv', decisionData);
@@ -466,7 +473,7 @@ const getall = async (req, res, next) => {
       decision_reason_text: decision.decision_reason_text
         ? decision.decision_reason_text.split(',').map(reason => decryptReasonText(reason, req.user.key))
         : [],
-      }));
+    }));
 
     console.log("hhhh", decryptedDecisionData);
     if (conn) conn.release() 
