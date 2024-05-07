@@ -32,7 +32,7 @@ passport.use(new GoogleStrategy({
             const user = await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email) VALUES (?, ?) RETURNING* ", [profile.displayName, profile.email]);
             // console.log(user,"jfjyfku")
             sendWelcomeEmail(user);
-            logLoginHistory(user.user_id); // Log login history
+            logLoginHistory(user.user_id);
 
             return done(null, { id: user[0].user_id, email: profile.email }); // Pass user info along with token
         }
