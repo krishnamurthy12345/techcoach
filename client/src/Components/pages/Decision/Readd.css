@@ -49,6 +49,7 @@ input[type="textt"]{
     background-color: rgb(82, 109, 130);
     color: white;
     border: none;
+    margin-left: 10px;
 }
 .btn-edit{
     /* background-color: rgb(84, 173, 173); */
@@ -82,12 +83,14 @@ input[type="textt"]{
 }
 
 .togglebutton{
-  font-size: 25px;
+  font-size: 28px;
   background-color:rgb(82, 105, 123);
   border-radius: 10px;
-  width:40px ;
+  width:50px ;
   text-align: center;
   color: white;
+  margin-left: 15px;
+  margin-top: 5px;
 }
 
   @media only screen and (max-width: 768px) {
