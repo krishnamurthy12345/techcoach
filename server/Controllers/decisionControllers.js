@@ -354,7 +354,6 @@ const putInfo = async (req, res) => {
 };
 
 
-
 const deleteInfo = async (req, res) => {
   const { id } = req.params;
   let conn;
@@ -482,9 +481,6 @@ const getall = async (req, res, next) => {
     }
   }
 };
-
-
-
 
 
 module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall };

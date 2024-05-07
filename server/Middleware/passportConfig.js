@@ -26,17 +26,22 @@ passport.use(new GoogleStrategy({
         const connection = await pool.getConnection();
         const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_task WHERE email=?", [profile.email]);
         connection.release();
-        
+
         if (!existingUser || existingUser.length === 0) { // Check if existingUser is undefined or empty array
             // Insert the new user
-            const user=await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email) VALUES (?, ?) RETURNING* ", [ profile.displayName, profile.email]);
+            const user = await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email) VALUES (?, ?) RETURNING* ", [profile.displayName, profile.email]);
             // console.log(user,"jfjyfku")
             sendWelcomeEmail(user);
-            return done(null, { id: user[0].user_id, email: profile.email}); // Pass user info along with token
+            logLoginHistory(user.user_id); // Log login history
+
+            return done(null, { id: user[0].user_id, email: profile.email }); // Pass user info along with token
         }
+
+        logLoginHistory(existingUser.user_id); // Log login history
+        console.log(logLoginHistory, 'history')
         // console.log(existingUser,"kkkkkkkkk")
-        return done(null, { id: existingUser.user_id, email: profile.email}); // Pass user info along with token
-        
+        return done(null, { id: existingUser.user_id, email: profile.email }); // Pass user info along with token
+
         // Sign JWT token with user id and email
         // const token = jwt.sign({ id: profile.id, email: profile.email }, "111")
 
@@ -55,4 +60,15 @@ passport.deserializeUser((user, done) => {
     done(null, user); // Deserialize user data
 });
 
+// Function to log login history
+async function logLoginHistory(userId) {
+    try {
+        const connection = await pool.getConnection();
+        await connection.query("INSERT INTO techcoach_lite.techcoach_login_history (user_id, login_time) VALUES (?, NOW())", [userId]);
+        connection.release();
+    } catch (error) {
+        console.error("Error logging login history:", error);
+    }
+}
 module.exports = passport;
+
