@@ -42,7 +42,7 @@ const createUserKey = async (req, res, next) => {
         const conn = await getConnection();
         const userData = await conn.query('SELECT displayName, email FROM techcoach_lite.techcoach_task WHERE email = ?', req.user.email);
         console.log('assss',userData);
-
+        if (conn){conn.release()}
 
         if (!userData || userData.length === 0) {
             throw new Error('User not found');
