@@ -6,6 +6,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import './Readd.css';
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { MdDelete,MdModeEdit } from "react-icons/md";
+
+
 
 
 const Readd = () => {
@@ -102,7 +105,6 @@ const Readd = () => {
           </OverlayTrigger>
         </div>
         <input
-          type="text"
           className='texttt'
           placeholder="Search by decision name or tag name"
           value={searchTerm}
@@ -136,11 +138,13 @@ const Readd = () => {
                   <div key={reason}>{reason}</div>
                 ))}
               </td>
-              <td>
+              <td className='action'>
                 <Link to={`/decision/${decision.decision_id}`}>
-                  <button className='btn btn-edit'>Edit</button>
+                  {/* <button className='btn btn-edit'>Edit</button> */}
+                  <MdModeEdit   className='btn-edit'/>
                 </Link>
-                <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button>
+                {/* <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button> */}
+                <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
               </td>
             </tr>
           ))}

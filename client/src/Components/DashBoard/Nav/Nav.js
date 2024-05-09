@@ -6,7 +6,7 @@ import './Nav.css';
 const Nav = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const loggedInUserId = // Get the logged-in user ID from the authentication context or local storage
+  const loggedInUserId = 
 
   useEffect(() => {
     const loadData = async () => {
