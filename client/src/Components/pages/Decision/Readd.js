@@ -142,7 +142,6 @@ const Readd = () => {
                 <Link to={`/decision/${decision.decision_id}`}>
                   {/* <button className='btn btn-edit'>Edit</button> */}
                   <MdModeEdit   className='btn-edit'/>
-                  
                 </Link>
                 {/* <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button> */}
                 <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
