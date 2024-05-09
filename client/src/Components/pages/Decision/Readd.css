@@ -62,11 +62,15 @@ input[type="textt"]{
     color: white;
     font-size: 20px;
 }
+.btn-view{
+  /* background-color: rgb(133, 127, 127); */
+  color:white;
+}
 .action{
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 7px;
 }
 .btn-edit:hover{
   color: black;
@@ -76,10 +80,11 @@ input[type="textt"]{
   color:red;
   font-size: 20px;
 }
-.btn-view{
-    background-color: rgb(133, 127, 127);
-    color: black;
+.btn-view:hover{
+  /* background-color: rgb(133, 127, 127); */
+  color:blue;
 }
+
 .btn-info{
     margin-left: 120px;
     color: white;
