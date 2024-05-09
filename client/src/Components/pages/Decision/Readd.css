@@ -12,7 +12,7 @@ input[type="textt"]{
     font-size: 0.9em;
     font-family: 'Roboto',sans-serif;
     max-width: 1000px;
-    box-shadow: 0 0 20px rgba(0,0,0, 0.15);
+    box-shadow: 0 0 20px rgba(0,0,0, 0.55);
     overflow-x: auto;
     /* overflow: hidden; */
 }
@@ -31,6 +31,7 @@ input[type="textt"]{
 .styled-table td{
     padding: 10px 15px ;
     background-color: rgb(162, 179, 190);
+    text-align: center;
     color: white;
     font-size: 16px;
 } 
@@ -54,10 +55,26 @@ input[type="textt"]{
 .btn-edit{
     /* background-color: rgb(84, 173, 173); */
     color:white;
+    font-size: 20px;
 }
 .btn-delete{
     /* background-color: red; */
     color: white;
+    font-size: 20px;
+}
+.action{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.btn-edit:hover{
+  color: black;
+  font-size: 20px;
+}
+.btn-delete:hover{
+  color:red;
+  font-size: 20px;
 }
 .btn-view{
     background-color: rgb(133, 127, 127);
@@ -75,7 +92,7 @@ input[type="textt"]{
 }
 
 .texttt{
-    width: 40%;
+    width: 28.5%;
     border-radius: 4px;
     padding: 14px 20px;
     margin: 8px 0;
