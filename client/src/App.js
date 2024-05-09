@@ -7,13 +7,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/Home';
 import Header from './Components/Header';
 import Dashboard from './Components/DashBoard/Dashboard';
-import Error from './Components/Error';
+// import Error from './Components/Error';
 import BasicInform from './Components/pages/Basic_Inform.js';
 import Personal from './Components/pages/Personal_Inform.js';
 import Read from './Components/pages/Profile_Table/Read';
-import View from './Components/pages/Profile_Table/View';
+// import View from './Components/pages/Profile_Table/View';
 import Decision from './Components/pages/Decision/Decision.js';
 import Readd from './Components/pages/Decision/Readd.js';
+import View from './Components/pages/Decision/View.js';
 import Profile from './Components/DashBoard/Profile.js';
 
 function App() {
@@ -44,13 +45,14 @@ function App() {
         <Route path='/basic' element={<BasicInform />} />
         <Route path='/personal' element={<Personal />} />
         <Route path='/read' element={<Read />} />
-        <Route path='/view' element={<View />} />
+        {/* <Route path='/view' element={<View />} /> */}
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
         <Route path='/readd' element={<Readd />} />
-        <Route path='*' element={<Error/>}/>
+        <Route path='/views/:id' element={<View />} />
+        {/* <Route path='*' element={<Error/>}/> */}
       </Routes>
     </div>
   );
