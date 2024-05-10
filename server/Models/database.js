@@ -1,18 +1,24 @@
 const mariadb = require('mariadb');
-require('dotenv').config();
+require("dotenv").config();
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    connectionLimit: 25,
+    connectTimeout: 60000*20,
+    connectionLimit: 50,
     port: process.env.DB_PORT,
     waitForConnections: true
 });
 
-async function getConnection() {
+const connection =  pool.getConnection();
+async function getConnection(querys) {
     try {
-        const connection = await pool.getConnection();
+        console.log(
+            pool.activeConnections(),
+            pool.idleConnections(),
+            pool.totalConnections()
+          );
         console.log('Connected to MariaDB');
         return connection;
     } catch (error) {

@@ -1,98 +1,5 @@
 const getConnection = require('../Models/database');
-
 const crypto = require('crypto');
-
-// const postInfo = async (req, res) => {
-//   const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
-//   let conn;
-//   // console.log('Request Headers:', req.headers);
-//   console.log(decision_name);
-//   // console.log('key from encrypt', req.user.key);
-//   try {
-//     conn = await getConnection();
-//     await conn.beginTransaction();
-
-//     // Get current user's ID and name (assuming it's available in req.user)
-//     const userId = req.user.id;
-//     const userName = req.user.name;
-
-//     const currentDate = new Date().toISOString().slice(0, 10);
-//     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-//     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
-
-//     function encryptText(text, key) {
-//       const cipher = crypto.createCipher('aes-256-cbc', key);
-//       let encryptedText = cipher.update(text, 'utf8', 'hex');
-//       encryptedText += cipher.final('hex');
-//       return encryptedText;
-//     }
-
-//     // Ensure decision_reason_text is converted to a string if it's an object
-//     console.log("text",decision_reason_text);
-//     const decisionReasonTexts = decision_reason_text.map(item => item.decision_reason_text);
-//     //const decisionReasonTextString = Array.isArray(decision_reason_text) ? decision_reason_text.join(', ') : decision_reason_text;
-//     console.log("decision reason encrypt", decisionReasonTexts);
-
-//     // Array to store encrypted decision reason texts
-//     const encryptedReasonTexts = [];
-
-//     for (const reasonText of decisionReasonTexts) {
-//       const encryptedReasonText = encryptText(reasonText, req.user.key);
-//       encryptedReasonTexts.push(encryptedReasonText);
-//     }
-
-//     const encryptedDesicionName = encryptText(decision_name, req.user.key);
-//     const encrypedUserStatement = encryptText(user_statement, req.user.key);
-
-//     const decisionResult = await conn.query(
-//       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-//       [encryptedDesicionName, userName, currentDate, formattedDueDate, formattedTakenDate, encrypedUserStatement, userId]
-//     );
-//     console.log(decisionResult);
-//     const decisionId = decisionResult.insertId;
-//     console.log(decisionId);
-
-//     // Processing tags
-//     const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-//     for (const tagName of tagsArray) {
-//       const tag = await conn.query(
-//         "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-//         [tagName.trim()]
-//       );
-
-//       const tagId = tag.insertId || tag.tag_id;
-
-//       await conn.query(
-//         "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-//         [decisionId, tagId]
-//       );
-//     }
-
-//     // Processing decision_reason_text
-//     for (const encryptedReasonText of encryptedReasonTexts) {
-//       await conn.query(
-//         "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-//         [decisionId, encryptedReasonText]
-//       );
-//     }
-
-//     // Commit transaction and send success response
-//     await conn.commit();
-//     res.status(200).json({ message: 'Data inserted successfully' });
-
-//   } catch (error) {
-//     console.error('Error inserting data:', error);
-//     if (conn) {
-//       await conn.rollback();
-//     }
-//     res.status(500).json({ error: 'An error occurred while processing your request' });
-//   } finally {
-//     if (conn) {
-//       conn.release();
-//     }
-//   }
-// };
-
 
 const postInfo = async (req, res) => {
   const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
@@ -160,6 +67,7 @@ const postInfo = async (req, res) => {
     }
 
     await conn.commit();
+    if (conn) conn.release() 
     res.status(200).json({ message: 'Data inserted successfully' });
 
   } catch (error) {
@@ -174,7 +82,6 @@ const postInfo = async (req, res) => {
     }
   }
 };
-
 
 
 const getInfo = async (req, res) => {
@@ -246,6 +153,7 @@ const getInfo = async (req, res) => {
             : []
       };
     });
+    if (conn) conn.release()
 
     res.status(200).json({ decisions: decryptedDecisionData });
   } catch (error) {
@@ -323,6 +231,8 @@ const getallInfo =  async (req, res) => {
           ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
           : []
     }));
+    if (conn) conn.release() 
+
 
     res.status(200).json({ decisions: decryptedDecisions });
   } catch (error) {
@@ -425,6 +335,8 @@ const putInfo = async (req, res) => {
 
     // Commit transaction and send success response
     await conn.commit();
+    if (conn) conn.release() 
+
     res.status(200).json({ message: 'Data updated successfully' });
 
   } catch (error) {
@@ -467,6 +379,8 @@ const deleteInfo = async (req, res) => {
 
     // Commit transaction and send success response
     await conn.commit();
+    if (conn) conn.release() 
+
     res.status(200).json({ message: 'Data deleted successfully' });
 
   } catch (error) {
@@ -553,6 +467,8 @@ const getall = async (req, res, next) => {
 
     console.log("hhhh", decryptedDecisionData);
     await conn.commit();
+    if (conn) conn.release() 
+
 
     res.status(200).json({ decisionData: decryptedDecisionData });
 

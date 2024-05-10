@@ -13,9 +13,13 @@ const View = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`, {
+                    headers: {
+                      Authorization: `Bearer ${token}`
+                    }
+                  });
                 const responseData = response.data;
-                console.log(responseData, 'asasasasas');
+                // console.log(responseData, 'asasasasas');
                 if (responseData && responseData.decisions && responseData.decisions.length > 0) {
                     const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = responseData.decisions[0];
                     const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
