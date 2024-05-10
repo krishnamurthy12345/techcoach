@@ -19,7 +19,7 @@ const View = () => {
                     }
                   });
                 const responseData = response.data;
-                // console.log(responseData, 'asasasasas');
+                // console.log(responseData, 'asasasas');
                 if (responseData && responseData.decisions && responseData.decisions.length > 0) {
                     const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = responseData.decisions[0];
                     const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
