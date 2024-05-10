@@ -15,8 +15,8 @@ const postInfo = async (req, res) => {
     const currentDate = new Date().toISOString().slice(0, 10);
     console.log("Current Date:", currentDate);
     
-    console.log("Decision Due Date:", decision_due_date);
-    console.log("Decision Taken Date:", decision_taken_date);
+    // console.log("Decision Due Date:", decision_due_date);
+    // console.log("Decision Taken Date:", decision_taken_date);
 
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;

@@ -21,10 +21,12 @@ async function getConnection(querys) {
           );
         console.log('Connected to MariaDB');
         return connection;
-    } catch (error) {
-        console.error('Error connecting to MariaDB:', error);
+    }catch (error) {
+    if (connection) connection.end()
+        console.error("Error connecting to MariaDB:", error);
         throw error;
     }
 }
 
 module.exports = getConnection;
+
