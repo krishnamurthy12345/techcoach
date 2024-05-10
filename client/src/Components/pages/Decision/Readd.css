@@ -75,16 +75,12 @@ input[type="textt"]{
 }
 .btn-edit:hover{
   color: black;
-  /* font-size: 25px; */
 }
 .btn-delete:hover{
   color:red;
-  /* font-size: 25px; */
 }
 .btn-view:hover{
-  /* background-color: rgb(133, 127, 127); */
   color:blue;
-  /* font-size: 25px; */
 }
 
 .btn-info{
