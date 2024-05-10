@@ -65,6 +65,7 @@ input[type="textt"]{
 .btn-view{
   /* background-color: rgb(133, 127, 127); */
   color:white;
+  font-size: 25px;
 }
 .action{
   display: flex;
@@ -74,14 +75,11 @@ input[type="textt"]{
 }
 .btn-edit:hover{
   color: black;
-  font-size: 20px;
 }
 .btn-delete:hover{
   color:red;
-  font-size: 20px;
 }
 .btn-view:hover{
-  /* background-color: rgb(133, 127, 127); */
   color:blue;
 }
 

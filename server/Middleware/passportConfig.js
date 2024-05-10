@@ -4,12 +4,13 @@ const mariadb = require('mariadb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const sendWelcomeEmail = require('../Utility/mail');
+const getConnection = require('../Models/database');
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    connectionLimit: 20,
+    connectionLimit: 50,
     port: process.env.DB_PORT,
     waitForConnections: true
 });
@@ -23,16 +24,17 @@ passport.use(new GoogleStrategy({
     session: true // Enable session support
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        const connection = await pool.getConnection();
+        const connection = await getConnection();
         const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_task WHERE email=?", [profile.email]);
-        connection.release();
+        // connection.release();
 
-        if (!existingUser || existingUser.length === 0) { // Check if existingUser is undefined or empty array
+        if (!existingUser || existingUser.length === 0) {
             // Insert the new user
             const user = await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email) VALUES (?, ?) RETURNING* ", [profile.displayName, profile.email]);
             // console.log(user,"jfjyfku")
             sendWelcomeEmail(user);
             logLoginHistory(user.user_id);
+            if (connection) connection.release();
 
             return done(null, { id: user[0].user_id, email: profile.email }); // Pass user info along with token
         }
@@ -40,6 +42,10 @@ passport.use(new GoogleStrategy({
         logLoginHistory(existingUser.user_id); // Log login history
         console.log(logLoginHistory, 'history')
         // console.log(existingUser,"kkkkkkkkk")
+        if (connection) {
+            console.log(2);
+            connection.release();
+          }
         return done(null, { id: existingUser.user_id, email: profile.email }); // Pass user info along with token
 
         // Sign JWT token with user id and email
@@ -53,11 +59,11 @@ passport.use(new GoogleStrategy({
 
 
 passport.serializeUser((user, done) => {
-    done(null, user); // Serialize user data
+    done(null, user); 
 });
 
 passport.deserializeUser((user, done) => {
-    done(null, user); // Deserialize user data
+    done(null, user);
 });
 
 // Function to log login history

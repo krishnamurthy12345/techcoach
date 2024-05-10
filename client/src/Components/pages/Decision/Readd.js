@@ -7,7 +7,7 @@ import { Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import './Readd.css';
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { MdDelete,MdModeEdit } from "react-icons/md";
-import { MdOutlinePreview } from "react-icons/md";
+import { GrFormView } from "react-icons/gr";
 
 
 
@@ -146,7 +146,7 @@ const Readd = () => {
                 {/* <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button> */}
                 <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
                 <Link to={`/views/${decision.decision_id}`}>
-                <MdOutlinePreview className='btn-view' />
+                <GrFormView className='btn-view' />
                 </Link>
               </td>
             </tr>
