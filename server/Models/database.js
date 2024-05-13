@@ -5,14 +5,14 @@ const pool = mariadb.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    connectTimeout: 60000*20,
-    connectionLimit: 50,
+    connectTimeout: 1000000,
+    connectionLimit: 10,
     port: process.env.DB_PORT,
     waitForConnections: true
 });
 
-const connection =  pool.getConnection();
 async function getConnection(querys) {
+    const connection =  pool.getConnection();
     try {
         console.log(
             pool.activeConnections(),

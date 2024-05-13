@@ -10,7 +10,7 @@ const pool = mariadb.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    connectionLimit: 50,
+    connectionLimit: 10,
     port: process.env.DB_PORT,
     waitForConnections: true
 });
@@ -23,8 +23,8 @@ passport.use(new GoogleStrategy({
     callbackURL: process.env.CALLBACK_URL,
     session: true // Enable session support
 }, async (accessToken, refreshToken, profile, done) => {
+    const connection = await getConnection();
     try {
-        const connection = await getConnection();
         const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_task WHERE email=?", [profile.email]);
         // connection.release();
 
@@ -52,6 +52,9 @@ passport.use(new GoogleStrategy({
         // const token = jwt.sign({ id: profile.id, email: profile.email }, "111")
 
     } catch (error) {
+        if (connection) {
+            connection.release();
+          }
         console.error("Error during authentication:", error);
         return done(error, null);
     }
