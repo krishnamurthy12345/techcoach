@@ -258,13 +258,15 @@ const putInfo = async (req, res) => {
     // Format dates
     const formattedCreationDate = creation_date ? new Date(creation_date).toISOString().slice(0, 10) : null;
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
+    let formattedTakenDate = null;
 
     // Ensure decision_taken_date is provided and in valid format
-    if (!decision_taken_date || !isValidDate(decision_taken_date)) {
-      throw new Error('Invalid decision_taken_date');
+    if (decision_taken_date) {
+      if (!isValidDate(decision_taken_date)) {
+        throw new Error('Invalid decision_taken_date');
+      }
+      formattedTakenDate = new Date(decision_taken_date).toISOString().slice(0, 10);
     }
-    const formattedTakenDate = new Date(decision_taken_date).toISOString().slice(0, 10);
-
     // Function to check if a value is a valid date
     function isValidDate(dateString) {
       const regEx = /^\d{4}-\d{2}-\d{2}$/;
