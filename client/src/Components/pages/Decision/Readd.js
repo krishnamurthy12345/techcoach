@@ -130,7 +130,7 @@ const Readd = () => {
               <th scope='row'>{indexOfFirstRecord + index + 1}</th>
               <td>{decision.decision_name}</td>
               <td>{new Date(decision.decision_due_date).toLocaleDateString()}</td>
-              <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : ""}</td>
+              <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : "--"}</td>
               <td>{decision.user_statement}</td>
               <td>{decision.tagsArray && decision.tagsArray.join(', ')}</td>
               <td>

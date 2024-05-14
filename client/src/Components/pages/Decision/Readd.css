@@ -85,7 +85,11 @@ input[type="textt"]{
 .btn-view:hover{
   color:blue;
 }
-
+.pagination{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .btn-info{
     margin-left: 120px;
     color: white;
