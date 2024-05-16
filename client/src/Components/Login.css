@@ -1,70 +1,123 @@
-.login-page .login-with-google-btn {
-    transition: background-color .3s, box-shadow .3s;
-    cursor: pointer;
-    margin-top: 20px;
-      
-    padding: 12px 16px 12px 42px;
-    border: none;
-    border-radius: 3px;
-    box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 1px 1px rgba(0, 0, 0, .25);
-    
-    color: #757575;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
-    
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=);
-    background-color: white;
-    background-repeat: no-repeat;
-    background-position: 12px 11px;
-    
-    &:hover {
-      box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 2px 4px rgba(0, 0, 0, .25);
-    }
-    
-    &:active {
-      background-color: #eeeeee;
-    }
-    
-    &:focus {
-      outline: none;
-      box-shadow: 
-        0 -1px 0 rgba(0, 0, 0, .04),
-        0 2px 4px rgba(0, 0, 0, .25),
-        0 0 0 3px #c8dafc;
-    }
-  
-  }
-  /* ----------------- form style */
-  @import url(https://fonts.googleapis.com/css?family=Roboto:300);
+/* General Styles */
+body {
+  font-family: 'Roboto', sans-serif;
+}
 
+.login-page {
+  width: 360px;
+  margin: auto;
+}
+
+.form {
+  position: relative;
+  z-index: 1;
+  background: #FFFFFF;
+  max-width: 360px;
+  margin: 0 auto 100px;
+  padding: 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.form button {
+  font-family: 'Roboto', sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  width: 100%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Google Login Button */
+.login-page .login-with-google-btn {
+  transition: background-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  margin-top: 20px;
+  padding: 12px 16px 12px 42px;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.25);
+  color: #757575;
+  font-size: 14px;
+  font-weight: 500;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 12px 11px;
+}
+
+.login-page .login-with-google-btn:hover {
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.login-page .login-with-google-btn:active {
+  background-color: #eeeeee;
+}
+
+.login-page .login-with-google-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 -1px 0 rgba(0, 0, 0, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 0 0 3px #c8dafc;
+}
+
+/* Testimonial Section */
+.test {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.testimonial {
+  height: 400px;
+  width: 600px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
   .login-page {
-    width: 360px;
-    /* padding: 8% 0 0; */
-    margin: auto;
+    width: 90%;
+    margin: 0 auto;
   }
+
   .form {
-    position: relative;
-    z-index: 1;
-    background: #FFFFFF;
-    max-width: 360px;
-    margin: 0 auto 100px;
-    padding: 45px;
-    text-align: center;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    padding: 20px;
   }
-  .form button {
-    font-family: "Roboto", sans-serif;
-    text-transform: uppercase;
-    outline: 0;
-    /* background: #4CAF50; */
+
+  .login-page .login-with-google-btn {
+    padding: 10px 14px 10px 40px;
+    font-size: 12px;
+  }
+
+  .testimonial {
     width: 100%;
-    border: 0;
-    padding: 15px;
-    color: #FFFFFF;
-    font-size: 14px;
-    -webkit-transition: all 0.3 ease;
-    transition: all 0.3 ease;
-    cursor: pointer;
+    height: auto;
   }
- 
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .form {
+    padding: 15px;
+  }
+
+  .login-page .login-with-google-btn {
+    padding: 8px 12px 8px 38px;
+    font-size: 12px;
+  }
+
+  .testimonial {
+    width: 100%;
+    height: auto;
+  }
+}
