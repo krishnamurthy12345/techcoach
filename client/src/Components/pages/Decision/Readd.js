@@ -146,7 +146,7 @@ const Readd = () => {
                 {/* <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button> */}
                 <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
                 <Link to={`/views/${decision.decision_id}`}>
-                <GrFormView className='btn-view' />
+                {/* <GrFormView className='btn-view' /> */}
                 </Link>
               </td>
             </tr>
