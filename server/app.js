@@ -8,6 +8,8 @@ const passport = require('./Middleware/passportConfig');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const decisionRoutes = require('./routes/decisionRoutes');
+const groupRoutes = require('./routes/group.routes');
+
 require('dotenv').config();
 
 const app = express();
@@ -27,8 +29,7 @@ app.use(passport.session());
 app.use('/', authRoutes);
 app.use('/', userRoutes);
 app.use('/api', decisionRoutes);
-
-
+app.use('/group', groupRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -1,8 +1,8 @@
+require('dotenv').config();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mariadb = require('mariadb');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const sendWelcomeEmail = require('../Utility/mail');
 const getConnection = require('../Models/database');
 

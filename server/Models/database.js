@@ -29,4 +29,3 @@ async function getConnection(querys) {
 }
 
 module.exports = getConnection;
-

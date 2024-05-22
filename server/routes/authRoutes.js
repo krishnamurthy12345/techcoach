@@ -4,12 +4,14 @@ const passport = require('../Middleware/passportConfig');
 const router = express.Router();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+console.log(JWT_SECRET_KEY,"kkkkkkk")
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback', (req, res, next) => {
     passport.authenticate('google', (err, user, info) => {
         if (err) {
+            console.log(err,"sasdasd")
             return res.status(500).json({ message: 'Internal Server Error' });
         }
         if (!user) {

@@ -1,15 +1,14 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const getConnection = require('../Models/database');
-const crypto = require('crypto');
 const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall } = require('../Controllers/decisionControllers');
+const authMiddleware = require('../Utility/AuthMiddleware');
+const createUserKey = require('../Utility/CreateUserKey');
 
 const router = express.Router();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
-const authMiddleware = (req, res, next) => {
+ /* const authMiddleware = (req, res, next) => {
     console.log('req.headers :', req.headers.authorization);
     try {
         const authHeader = req.headers.authorization;
@@ -35,7 +34,7 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-const createUserKey = async (req, res, next) => {
+ const createUserKey = async (req, res, next) => {
     console.log('Request User Id:', req.user.email);
 
     try {
@@ -70,6 +69,7 @@ const createUserKey = async (req, res, next) => {
         res.status(500).json({ error: 'An error occurred while creating user key' });
     }
 };
+ */
 
 router.use(authMiddleware);
 router.use(createUserKey);
