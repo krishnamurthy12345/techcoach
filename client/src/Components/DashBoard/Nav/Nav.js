@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Nav.css';
 
@@ -8,7 +9,10 @@ const Nav = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
-  const loggedInUserId =
+  const [sharedDecisionsCount, setSharedDecisionsCount] = useState(0); // State for shared decisions count
+  const loggedInUserId = ''; // Set loggedInUserId
+
+  const navigate = useNavigate(); // Get navigate function
 
   useEffect(() => {
     const loadData = async () => {
@@ -40,6 +44,14 @@ const Nav = () => {
     setPendingDecisionsData(pendingDecisions);
   }, [data, loggedInUserId]);
 
+  useEffect(() => {
+    // Calculate shared decisions count
+    const sharedDecisions = data.filter(decision => {
+      return decision.user_id === loggedInUserId && decision.shared_decision;
+    });
+    setSharedDecisionsCount(sharedDecisions.length);
+  }, [data, loggedInUserId]);
+
   const filteredData = data.filter(decision => {
     return (
       decision.user_id === loggedInUserId &&
@@ -57,6 +69,11 @@ const Nav = () => {
 
   const togglePendingDecisions = () => {
     setShowPendingDecisions(!showPendingDecisions);
+  };
+
+  // Function to navigate to shared decisions
+  const navigateToSharedDecisions = () => {
+    navigate('/sharedDecisions'); 
   };
 
   return (
@@ -79,6 +96,14 @@ const Nav = () => {
             </div>
           </div>
         </div>
+      </div> 
+      <br />
+      <div style={{display:"flex", justifyContent:"center", cursor:"pointer"}} className="col" onClick={navigateToSharedDecisions}>
+      <div className="card" onClick={togglePendingDecisions}>
+            <div className="card-body1">
+        <p>Shared Decisions</p>
+        </div>
+          </div>
       </div> 
       {showPendingDecisions && (
         <div>
@@ -111,6 +136,3 @@ const Nav = () => {
 };
 
 export default Nav;
-
-
-       

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, Button, IconButton } from '@mui/material';
+import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
+import DoneIcon from '@mui/icons-material/Done'; 
 import { useNavigate } from 'react-router-dom';
 import { shareDecisionInInnerCircle, getSharedMembers } from './Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
 
 const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
+
     const [selectedMember, setSelectedMember] = useState(null);
     const [sharedMembers, setSharedMembers] = useState([]);
     const navigate = useNavigate();
@@ -25,7 +27,8 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
             const response = await shareDecisionInInnerCircle(payload);
             if (response.status === 200) {
                 toast('Decision shared successfully!');
-                setSelectedMember(null); // Deselect after successful submission
+                setSelectedMember(null); 
+                await getSharedMembersList(); 
             } else {
                 toast('Failed to share decision.');
             }
@@ -51,6 +54,8 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
         }
     };
 
+    console.log("hshs", innerCircleDetails);
+
     useEffect(() => {
         getSharedMembersList();
     }, [innerCircleDetails.group.id]); 
@@ -62,7 +67,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                 <List>
                     {innerCircleDetails.members.map(member => {
                         const sharedMember = sharedMembers.find(shared => shared.groupMember === member.user_id);
-                        const isClickable = !sharedMember;
+                        const isClickable = member.status === "Accepted" && !sharedMember;
 
                         return (
                             <ListItem 
@@ -70,10 +75,15 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                                 button={isClickable}
                                 onClick={() => isClickable && handleMemberClick(member.user_id)} 
                                 selected={selectedMember === member.user_id}
-                                style={{cursor: isClickable ? "pointer" : "default"}}
+                                style={{
+                                    cursor: isClickable ? "pointer" : "default",
+                                    backgroundColor: sharedMember ? "#d3d3d3" : "white" // Highlight shared members
+                                }}
                             >
                                 <ListItemAvatar>
-                                    <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>{member.displayname.charAt(0)}</Avatar>
+                                    <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>
+                                        {member.displayname.charAt(0)}
+                                    </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText 
                                     primary={member.displayname} 
@@ -83,15 +93,11 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                                     <CheckIcon color="primary" />
                                 )}
                                 {sharedMember && (
-                                    <>
-                                        {sharedMember.status === "Not Accepted" && (
-                                            <Typography variant="caption" color="error">Not Accepted</Typography>
-                                        )}
-                                        {sharedMember.status === "Accepted" && (
-                                            <Typography variant="caption" color="primary">Accepted</Typography>
-                                        )}
-                                    </>
+                                    <DoneIcon color="action" /> 
                                 )}
+                                <Typography variant="caption" color={member.status === "Accepted" ? "primary" : "error"}>
+                                    {member.status === "Accepted" ? "Accepted":"Not Acceptedcd "}
+                                </Typography>
                             </ListItem>
                         );
                     })}

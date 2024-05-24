@@ -66,13 +66,13 @@ const Header = () => {
                                         <a href=" https://techcoach4u.wordpress.com/make-decisions-with-confidence/" target="_blank" rel="noopener noreferrer" className="nav-link">Resources</a>
                                     </li>
 
-                                    {/* <li className="nav-item">
+                                    <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
 
                                     <li className="nav-item">
                                         <Link to='/notification' className="nav-link">Notifications</Link>
-                                    </li> */}
+                                    </li>
                                     
                                     <li className="nav-item">
                                         <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>
