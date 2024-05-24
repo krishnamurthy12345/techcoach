@@ -18,6 +18,10 @@ router.put("/addMemberInInnerCircle",groupController.addMemberInInnerCircle);
 router.post("/shareDecisionInInnerCircle",groupController.shareDecisionInInnerCircle);
 router.post("/getSharedMembers",groupController.getSharedMembers);
 router.get("/getInnerCircleAcceptNotification",groupController.getInnerCircleAcceptNotification);
-router.put("/updateInnerCircleAcceptStatus",groupController.updateInnerCircleAcceptStatus);
+router.put("/acceptOrRejectInnerCircle",groupController.acceptOrRejectInnerCircle);
+router.get("/getSharedDecisions",groupController.getSharedDecisions);
+router.put("/postCommentForDecision",groupController.postCommentForDecision);
+router.get("/comments",groupController.getComments);
+router.post("/getSharedComments",groupController.getSharedComments);
 
 module.exports = router;

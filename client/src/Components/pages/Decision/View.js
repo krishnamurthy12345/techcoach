@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import './View.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { checkInnerCircleExists, getInnerCircleDetails } from '../../Group/Network_Call';
+import { Box, Typography, TextField, Button, Avatar } from '@mui/material';
+import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments } from '../../Group/Network_Call';
 import { useNavigate } from 'react-router-dom';
 import ShareModal from '../../Group/ShareModel';
-
 
 const View = () => {
     const [decision, setDecision] = useState({});
@@ -14,6 +12,8 @@ const View = () => {
     const [innerGroup, setInnerGroup] = useState();
     const [showModal, setShowModal] = useState(false);
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
+    const [sharedComments, setSharedComments] = useState([]);
+    const [newReply, setNewReply] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -61,18 +61,31 @@ const View = () => {
 
     useEffect(() => {
         const fetchInnerCircleDetails = async () => {
-            if (innerGroup) {
-                try {
-                    const details = await getInnerCircleDetails();
-                    setInnerCircleDetails(details);
-                } catch (error) {
-                    console.error("Failed to fetch inner circle details", error);
-                }
+            try {
+                const details = await getInnerCircleDetails();
+                console.log("inner circle details", details);
+                setInnerCircleDetails(details);
+            } catch (error) {
+                console.error("Failed to fetch inner circle details", error);
+            }
+        };
+        fetchInnerCircleDetails();
+    }, []);
+
+    useEffect(() => {
+        const fetchSharedComments = async () => {
+            console.log("decision id", id);
+            try {
+                const comments = await getSharedComments(id);
+                console.log("response from shared comments", comments.comments);
+                setSharedComments(comments.comments);
+            } catch (error) {
+                console.error("Failed to fetch shared comments", error);
             }
         };
 
-        fetchInnerCircleDetails();
-    }, [innerGroup]);
+        fetchSharedComments();
+    }, [id]);
 
     const handleShow = () => setShowModal(true);
     const handleClose = () => setShowModal(false);
@@ -81,63 +94,116 @@ const View = () => {
         setShowModal(true);
     };
 
-    return (
-        <div>
-            <div className='header'>
-                <h3>Our Decision Details</h3>
-            </div>
-            <div className='views'>
-                <div className='cards'>
-                    <strong>Decision Name:</strong>
-                    <span>{decision.decision_name}</span>
-                    <br />
-                    <br />
-                    <strong>Decision Details:</strong>
-                    <span>{decision.user_statement}</span>
-                    <br />
-                    <br />
-                    <strong>Decision Reasons:</strong>
-                    <span>{decision.decision_reason_text && decision.decision_reason_text.join(', ')}</span>
-                    <br />
-                    <br />
-                    <strong>Decision Due Date:</strong>
-                    <span>{decision.decision_due_date}</span>
-                    <br />
-                    <br />
-                    <strong>Decision Taken Date:</strong>
-                    <span>{decision.decision_taken_date}</span>
-                    <br />
-                    <br />
-                    <strong>Selected Tags:</strong>
-                    <span>{decision.tagsArray && decision.tagsArray.join(', ')}</span>
-                    <br />
-                    <br />
-                    <Link to='/readd'>
-                        <button className='btn-back'>Go back</button>
-                    </Link>
-                    <div style={{ margin: "2rem", backgroundColor: "#526D82", borderRadius: "1rem", padding: "0.5rem", display: "flex", justifyContent: "center" }}>
-                        {innerGroup ? (
-                            <span style={{ color: "white", textDecoration: "none", cursor: "pointer" }} onClick={handleShare}>
-                                Share The Above Decision in Inner Circle
-                            </span>
-                        ) : (
-                            <span style={{ color: "white", textDecoration: "none", cursor: "pointer" }} onClick={handleShow}>
-                                Create Inner Circle to share this Decision
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </div>
+    const handleReplyChange = (event) => {
+        setNewReply(event.target.value);
+    };
 
-            <ShareModal 
-                showModal={showModal} 
-                handleClose={handleClose} 
-                innerGroup={innerGroup} 
-                innerCircleDetails={innerCircleDetails} 
-                decision={decision} 
-                id={id} 
+    const handleReplySubmit = async (commentId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${process.env.REACT_APP_API_URL}/group/reply`, {
+                commentId,
+                reply: newReply
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setNewReply('');
+            const comments = await getSharedComments(id);
+            setSharedComments(comments);
+        } catch (error) {
+            console.error("Error submitting reply:", error);
+        }
+    };
+
+    console.log("shared comments", sharedComments);
+
+    return (
+        <Box sx={{ margin: "3rem", backgroundColor: "white", borderRadius: "1rem", padding: "2rem" }}>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Decision Name:</b>{decision.decision_name}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Decision Details:</b>{decision.user_statement}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Decision Reasons:</b>{decision.decision_reason_text && decision.decision_reason_text.join(', ')}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Decision Due Date:</b>{decision.decision_due_date}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Decision Taken Date:</b>{decision.decision_taken_date}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="body1"><b>Selected Tags:</b>{decision.tagsArray && decision.tagsArray.join(', ')}</Typography>
+            </Box>
+            <Box sx={{ mb: 2 }}>
+                <Link to='/readd'>
+                    <Button variant="contained">Go back</Button>
+                </Link>
+            </Box>
+            <Box sx={{ mb: 2, p: 2, bgcolor: "#526D82", borderRadius: 2, display: "flex", justifyContent: "center" }}>
+                {innerGroup ? (
+                    <Typography variant="body1" sx={{ color: "white", cursor: "pointer" }} onClick={handleShare}>
+                        Share The Above Decision in Inner Circle
+                    </Typography>
+                ) : (
+                    <Typography variant="body1" sx={{ color: "white", cursor: "pointer" }} onClick={handleShow}>
+                        Create Inner Circle to share this Decision
+                    </Typography>
+                )}
+            </Box>
+            <Box sx={{ mt: 4 }}>
+                <Typography variant="h6">Comments</Typography>
+                {sharedComments.length > 0 ? (
+                    sharedComments.map(comment => (
+                        <Box key={comment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{comment.displayname[0]}</Avatar>
+                                <Box>
+                                    <Typography variant="subtitle1">{comment.displayname}</Typography>
+                                    <Typography variant="body2" color="textSecondary">{comment.email}</Typography>
+                                    {/* <Typography variant="body2" color="textSecondary">{new Date(comment.created_at).toLocaleString()}</Typography> */}
+                                </Box>
+                            </Box>
+                            <Typography variant="body1" sx={{ mb: 1 }}>{comment.comment}</Typography>
+                            <Box sx={{ ml: 4 }}>
+                                {comment.replies && comment.replies.map(reply => (
+                                    <Box key={reply.id} sx={{ mb: 1 }}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{reply.displayname}:</Typography>
+                                        <Typography variant="body2">{reply.reply}</Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+                            {/* <Box sx={{ display: 'flex', mt: 2 }}>
+                                <TextField
+                                    label="Write a reply..."
+                                    variant="outlined"
+                                    fullWidth
+                                    value={newReply}
+                                    onChange={handleReplyChange}
+                                    sx={{ mr: 2 }}
+                                />
+                                <Button variant="contained" onClick={() => handleReplySubmit(comment.id)}>Reply</Button>
+                            </Box> */}
+                        </Box>
+                    ))
+                ) : (
+                    <Typography variant="body2">No comments shared yet.</Typography>
+                )}
+            </Box>
+
+            <ShareModal
+                showModal={showModal}
+                handleClose={handleClose}
+                innerGroup={innerGroup}
+                innerCircleDetails={innerCircleDetails}
+                decision={decision}
+                id={id}
             />
-        </div>
+        </Box>
     );
 };
 

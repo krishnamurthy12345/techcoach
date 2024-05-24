@@ -30,9 +30,11 @@ const DisplayInnerCircle = () => {
     useEffect(() => {
         const fetchPotentialMembers = async () => {
             try {
-                if (innerCircleDetails && innerCircleDetails) {
+                if (innerCircleDetails) {
                     const existingMemberIds = innerCircleDetails.members?.map(member => member.user_id) || [];
                     const membersList = await getAddMemberNameListFetch(existingMemberIds);
+
+                    
                     setPotentialMembers(membersList.result);
                 }
             } catch (error) {
@@ -40,7 +42,7 @@ const DisplayInnerCircle = () => {
             }
         };
 
-        if (innerCircleDetails && innerCircleDetails) {
+        if (innerCircleDetails) {
             fetchPotentialMembers();
         }
     }, [innerCircleDetails]);
@@ -91,6 +93,17 @@ const DisplayInnerCircle = () => {
         setIsHovered(false);
     };
 
+    const getVariant = (status) => {
+        switch (status) {
+            case 'Accepted':
+                return 'success';
+            case '':
+                return 'warning';
+            default:
+                return '';
+        }
+    };
+
     console.log("inner", innerCircleDetails);
 
     return (
@@ -127,29 +140,32 @@ const DisplayInnerCircle = () => {
                                 <p>Loading...</p>
                             </Container>
                         ) : (
-                            (!errorMessage || errorMessage === "No members in this inner circle") && innerCircleDetails && (
+                            (!errorMessage || errorMessage === "No members in this inner circle" ) && innerCircleDetails && (
                                 <>
                                     <Col>
                                         <h5>Members:</h5>
                                         <ListGroup>
-                                        {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
-                                            innerCircleDetails.members.map(member => (
-                                                <ListGroup.Item key={member.user_id}>
-                                                    {member.displayname} ({member.email})
-                                                    <Button
-                                                        variant="danger"
-                                                        size="sm"
-                                                        className="float-right"
-                                                        onClick={() => handleRemoveMember(member.user_id)}
-                                                        style={{ margin: '1rem' }}
+                                            {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
+                                                innerCircleDetails.members.map(member => (
+                                                    <ListGroup.Item
+                                                        key={member.user_id}
+                                                        variant={getVariant(member.status)}
                                                     >
-                                                        Remove
-                                                    </Button>
-                                                </ListGroup.Item>
-                                            ))
-                                        ) : (
-                                            <ListGroup.Item>No members found</ListGroup.Item>
-                                        )}
+                                                        {member.displayname} ({member.email}) - {member.status === "Accepted" ? "Accepted" :"Not Accepted"}
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            className="float-right"
+                                                            onClick={() => handleRemoveMember(member.user_id)}
+                                                            style={{ margin: '1rem' }}
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </ListGroup.Item>
+                                                ))
+                                            ) : (
+                                                <ListGroup.Item>No members found</ListGroup.Item>
+                                            )}
                                         </ListGroup>
                                     </Col>
                                     <Col>

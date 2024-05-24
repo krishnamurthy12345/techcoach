@@ -3,20 +3,20 @@ import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import './Readd.css';
+import { Pagination, OverlayTrigger, Tooltip as BootstrapTooltip } from 'react-bootstrap';
+import { Avatar, Tooltip as MuiTooltip } from '@mui/material';
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { MdDelete,MdModeEdit } from "react-icons/md";
+import { MdDelete, MdModeEdit } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
-
-
+import './Readd.css';
 
 const Readd = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage] = useState(10);
-  const [showCompletedDecisions, setShowCompletedDecisions] = useState(false); // Change initial state to false
+  const [showCompletedDecisions, setShowCompletedDecisions] = useState(false);
+  const [comments, setComments] = useState({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,6 +30,9 @@ const Readd = () => {
         const responseData = response.data;
         if (Array.isArray(responseData.decisionData)) {
           setData(responseData.decisionData);
+          responseData.decisionData.forEach(decision => {
+            fetchComments(decision.decision_id);
+          });
         } else {
           console.error("Invalid response format:", responseData);
         }
@@ -41,7 +44,29 @@ const Readd = () => {
     loadData();
   }, []);
 
-  // Filtering logic
+  const fetchComments = async (decisionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+            decisionId: decisionId
+        }
+      });
+      console.log("Response from comments:", response);
+      setComments(prevComments => ({
+        ...prevComments,
+        [decisionId]: response.data.comments
+      }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  console.log("Comments:", comments);
+
   const filteredData = data.filter(decision => {
     if (showCompletedDecisions) {
       return !decision.decision_taken_date;
@@ -55,7 +80,6 @@ const Readd = () => {
     );
   });
 
-  // Pagination logic
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -66,18 +90,16 @@ const Readd = () => {
     pageNumbers.push(i);
   }
 
-  // Event handler for page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  // Function to delete a decision
   const deleteDecision = async (id) => {
     if (window.confirm("Are you sure that you want to delete this decision?")) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
         toast.success("Decision deleted successfully");
-        setData(prevData => prevData.filter(decision => decision.decision_id !== id)); // Update data state after deletion
+        setData(prevData => prevData.filter(decision => decision.decision_id !== id));
       } catch (error) {
         console.error("Error deleting decision:", error);
         toast.error("An error occurred while deleting the decision");
@@ -94,7 +116,7 @@ const Readd = () => {
         <div className='togglebutton'>
           <OverlayTrigger
             placement="bottom"
-            overlay={<Tooltip id="tooltip">Show pending decisions</Tooltip>}
+            overlay={<BootstrapTooltip id="tooltip">Show pending decisions</BootstrapTooltip>}
           >
             <div
               type="checkbox"
@@ -111,7 +133,7 @@ const Readd = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <table >
+      <table>
         <thead>
           <tr>
             <th>#</th>
@@ -121,6 +143,7 @@ const Readd = () => {
             <th>Decision Details</th>
             <th>Tags</th>
             <th>Decision Reasons</th>
+            <th>Comments</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -138,15 +161,31 @@ const Readd = () => {
                   <div key={reason}>{reason}</div>
                 ))}
               </td>
+              <td>
+                {comments[decision.decision_id] ? (
+                  comments[decision.decision_id].map((comment, commentIndex) => (
+                    <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center', margin:"0.3rem" }}>
+                      <div className="comment-avatar" style={{ marginRight: '0.5rem' }}>
+                        <MuiTooltip title={comment.displayname} arrow>
+                          <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
+                        </MuiTooltip>
+                      </div>
+                      <div className="comment-text" style={{textAlign:"left"}}>
+                        {comment.comment}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  "Loading comments..."
+                )}
+              </td>
               <td className='action'>
                 <Link to={`/decision/${decision.decision_id}`}>
-                  {/* <button className='btn btn-edit'>Edit</button> */}
-                  <MdModeEdit   className='btn-edit'/>
+                  <MdModeEdit className='btn-edit' />
                 </Link>
-                {/* <button className='btn btn-delete' onClick={() => deleteDecision(decision.decision_id)}>Delete</button> */}
                 <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
                 <Link to={`/views/${decision.decision_id}`}>
-                {/* <GrFormView className='btn-view' /> */}
+                  <GrFormView className='btn-view' />
                 </Link>
               </td>
             </tr>
