@@ -1,28 +1,65 @@
-.homepage{
-    margin-top: 2rem;
-    padding-left: 30px ;
+.homepage {
+    margin: 2rem;
     text-align: center;
 }
+
 .card {
-    border: 2px solid #ddd; 
-    border-radius: 8px; 
-    padding: 10px;
-  }
-  .card-title {
-    font-size: 25px;
-    /* color: #333; */
-  }
-  .card-text {
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .card-body1{
-    background-color: rgb(216, 248, 169);
-    border-radius: 10px;
+    border: none; 
+    border-radius: 10px; 
+    padding: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    font-size: 28px;
+    color: #555;
+}
+
+.card-text {
+    font-size: 22px;
+    color: #222;
+}
+
+.card-body1 {
+    background-color: #d8f8a9;
+    border-radius: 12px;
     font-weight: 900;
-  }
-.card-body2{
-    background-color: rgb(247, 242, 158);
-    border-radius: 10px;
+    padding: 20px;
+}
+
+.card-body2 {
+    background-color: #f7f29e;
+    border-radius: 12px;
     font-weight: 800;
+    padding: 20px;
+}
+
+.card-body1 p, .card-body2 p {
+    margin: 0;
+}
+
+.table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f9f9f9;
 }

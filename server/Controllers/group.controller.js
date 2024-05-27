@@ -288,9 +288,9 @@ const shareDecisionInInnerCircle = async (req, res) => {
         await conn.beginTransaction();
 
         await conn.query(`
-            INSERT INTO techcoach_lite.techcoach_shared_decisions (groupId, groupMember, decisionId, comment)
-            VALUES (?, ?, ?, ?)
-        `, [groupId, memberId, decisionId,'']);
+            INSERT INTO techcoach_lite.techcoach_shared_decisions (groupId, groupMember, decisionId)
+            VALUES (?, ?, ?)
+        `, [groupId, memberId, decisionId]);
 
         await conn.commit();
 
@@ -578,7 +578,7 @@ const getSharedDecisions = async (req, res) => {
             console.error('Error encrypting text:', error);
             return null;
         }
-    };
+    }; 
 
     try {
         conn = await getConnection();
@@ -642,18 +642,24 @@ const getSharedDecisions = async (req, res) => {
                 decisionDetails.reasons = [];
             }
 
-            const comments = await conn.query(`
-                SELECT * FROM techcoach_lite.techcoach_shared_decisions
-                WHERE groupId = ? AND decisionId = ? AND groupMember = ?
-            `, [groupId, decisionId, userId]);
+            const sharedInfo = await conn.query(`SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.timestamp, d.parentCommentId,
+            t.user_id, t.displayname,t.email
+            FROM techcoach_lite.techcoach_conversations d
+            LEFT JOIN techcoach_lite.techcoach_task t
+            ON d.groupMember = t.user_id
+            WHERE groupId = ? AND decisionId = ? AND groupMember = ?`,[groupId,decisionId,userId]);
+
+            console.log("shared info", sharedInfo);
+
+            const currentUser = req.user.id;
 
             results.push({
                 sharedDecision,
                 decisionDetails,
                 groupDetails: groupDetails[0],
                 userDetails,
-                comments: comments
-            });
+                comments: sharedInfo
+            });      
         }
 
         await conn.commit();
@@ -669,34 +675,36 @@ const getSharedDecisions = async (req, res) => {
 };
 
 const postCommentForDecision = async (req, res) => {
-    console.log("reqqqqqqqqqq body", req.body);
+    console.log("Request body", req.body);
 
-    const {decisionId,groupMemberID,groupId,commentText} = req.body.data;
+    const { decisionId, groupMemberID, groupId, commentText } = req.body.data;
 
     let conn;
 
     try {
-
         conn = await getConnection();
         await conn.beginTransaction();
 
-        await conn.query(`
-            UPDATE techcoach_lite.techcoach_shared_decisions 
-            SET comment = ? 
-            WHERE groupMember = ? AND decisionId = ? AND groupId = ?
-        `, [commentText, groupMemberID, decisionId, groupId ]);
+        const updateCommentResult = await conn.query(
+            `INSERT INTO techcoach_lite.techcoach_conversations (groupId, groupMember, comment, timestamp, decisionId) 
+             VALUES (?, ?, ?, NOW(), ?)`,
+            [groupId, groupMemberID, commentText, decisionId]
+        );
+
+        console.log("Inserted comment ID", updateCommentResult.insertId);
 
         await conn.commit();
 
-        res.status(200).json({ message: 'Notification status updated successfully' });
+        res.status(200).json({ message: 'Comment posted and shared decision updated successfully' });
     } catch (error) {
-        console.error('Error updating notification status:', error);
-        await conn.rollback();
+        console.error('Error processing request:', error);
+        if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
         if (conn) conn.release();
     }
 };
+
 
 const getComments = async (req, res) => {
     const decisionId = req.query.decisionId;
@@ -711,11 +719,13 @@ const getComments = async (req, res) => {
                 d.groupMember,
                 d.decisionId,
                 d.comment,
+                d.timestamp,
+                d.parentCommentId,
                 t.user_id,
                 t.displayname,
                 t.email
             FROM 
-                techcoach_lite.techcoach_shared_decisions d
+                techcoach_lite.techcoach_conversations d
             LEFT JOIN 
                 techcoach_lite.techcoach_task t
             ON 
@@ -749,11 +759,13 @@ const getSharedComments = async (req, res) => {
         d.groupMember,
         d.decisionId,
         d.comment,
+        d.timestamp,
+        d.parentCommentId,
         t.user_id,
         t.displayname,
         t.email
     FROM 
-        techcoach_lite.techcoach_shared_decisions d
+        techcoach_lite.techcoach_conversations d
     LEFT JOIN 
         techcoach_lite.techcoach_task t
     ON 
@@ -769,6 +781,36 @@ const getSharedComments = async (req, res) => {
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ error: 'An error occurred while fetching comments' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const removeCommentsAdded = async (req, res) => {
+    console.log("request from remove", req.body);
+
+    const { commentId } = req.body;
+
+    let conn;
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        console.log("request from remove", req.body);
+
+        const query = `
+            DELETE FROM techcoach_lite.techcoach_conversations
+            WHERE id=?
+        `;
+        const result = await conn.query(query, [commentId]);
+
+        console.log("result from delete query", result);
+
+        await conn.commit();
+        res.status(200).json({ message: 'Comment removed successfully' });
+    } catch (error) {
+        console.error('Error in removing comment', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
         if (conn) conn.release();
     }
@@ -790,5 +832,6 @@ module.exports = {
     getSharedDecisions,
     postCommentForDecision,
     getComments,
-    getSharedComments
+    getSharedComments,
+    removeCommentsAdded
 };

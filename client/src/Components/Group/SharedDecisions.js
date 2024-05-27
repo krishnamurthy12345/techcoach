@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Box } from '@mui/material';
-import { getSharedDecisions, postCommentForDecision } from '../../Components/Group/Network_Call';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'; // Import icons
+import { getSharedDecisions, postCommentForDecision, deleteCommentAdded } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
 
 const SharedDecision = () => {
@@ -43,6 +44,19 @@ const SharedDecision = () => {
             toast('An error occurred while posting the comment');
         }
     };
+
+    const handleDeleteComment = async (commentId) => {
+        console.log("commentId", commentId);
+        try {
+            await deleteCommentAdded(commentId);
+            fetchSharedDecisions();
+            toast('Comment deleted successfully');
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            toast('An error occurred while deleting the comment');
+        }
+    };
+    
 
     const handleCommentChange = (decisionId, newText) => {
         setCommentTexts(prevState => ({
@@ -90,17 +104,23 @@ const SharedDecision = () => {
                                 </Typography>
                             </CardContent>
                         </Card>
-                        {item.comments[0].comment != "" && item.comments.length > 0 ? (
-                            <Box ml={8} mt={2} mb={2} p={2} bgcolor="#ffffff" borderRadius={3}>
-                                <Typography variant="h6">Comments:</Typography>
-                                {item.comments.map((comment, commentIndex) => (
-                                    <Typography key={commentIndex} variant="body2" style={{ marginTop: '8px' }}>
-                                        {comment.comment}
-                                    </Typography>
-                                ))}
-                            </Box>
-                        ) : (
-                            <Box ml={8} mt={2} display="flex" alignItems="center">
+                        <Box ml={8} mt={2} mb={2} p={2} bgcolor="#ffffff" borderRadius={3}>
+                            <Typography variant="h6">Comments:</Typography>
+                            {item.comments.map((comment, commentIndex) => (
+                                <div key={commentIndex}>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
+                                        <Typography variant="body2" style={{ marginTop: '8px', marginRight:"1rem" }}>
+                                            {comment.comment}
+                                        </Typography>
+                                        <EditIcon style={{ marginRight: '8px' }} />
+                                        <DeleteIcon 
+                                            style={{color:"red"}} 
+                                            onClick={() => handleDeleteComment(comment.id)} 
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            <div style={{ marginTop: '16px' }}>
                                 <input
                                     label="Add Comment"
                                     variant="outlined"
@@ -109,10 +129,8 @@ const SharedDecision = () => {
                                     value={commentTexts[item.decisionDetails.decision_id]}
                                     onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
                                     style={{
-                                        flex: 1,
                                         height: "3rem",
                                         padding: "1rem",
-                                        marginRight: "1rem",
                                         width: "100%",
                                         maxWidth: "100%"
                                     }}
@@ -121,11 +139,13 @@ const SharedDecision = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
+                                    style={{ marginTop: '8px' }}
                                 >
                                     Add Comment
                                 </Button>
-                            </Box>
-                        )}
+                            </div>
+                        </Box>
+
                     </div>
                 ))
             )}

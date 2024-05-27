@@ -11,6 +11,7 @@ const DisplayInnerCircle = () => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchInnerCircleDetails = async () => {
@@ -104,6 +105,10 @@ const DisplayInnerCircle = () => {
         }
     };
 
+    const handleSearchInputChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
     console.log("inner", innerCircleDetails);
 
     return (
@@ -170,8 +175,15 @@ const DisplayInnerCircle = () => {
                                     </Col>
                                     <Col>
                                         <h5>Add Member:</h5>
+                                        <input
+                                            type="text"
+                                            placeholder="Search by email"
+                                            value={searchQuery}
+                                            onChange={handleSearchInputChange}
+                                            style={{ marginBottom: '1rem' }}
+                                        />
                                         <ListGroup>
-                                            {potentialMembers.map(member => (
+                                            {potentialMembers.filter(member => member.email === searchQuery).map(member => (
                                                 <ListGroup.Item key={member.user_id}>
                                                     {member.displayname} ({member.email})
                                                     <Button
@@ -201,11 +213,11 @@ const DisplayInnerCircle = () => {
                 innerCircleDetails={null}
                 decision={null}
                 id={null}
-            />
+                />
 
-            <ToastContainer />
-        </div>
-    );
-};
-
+                <ToastContainer />
+            </div>
+        );
+    };
+    
 export default DisplayInnerCircle;
