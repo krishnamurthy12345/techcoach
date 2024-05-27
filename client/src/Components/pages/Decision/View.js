@@ -177,7 +177,7 @@ const View = () => {
                                     </Box>
                                 ))}
                             </Box>
-                            <Box sx={{ display: 'flex', mt: 2 }}>
+                            {/* <Box sx={{ display: 'flex', mt: 2 }}>
                                 <input
                                     label="Write a reply..."
                                     variant="outlined"
@@ -189,7 +189,7 @@ const View = () => {
                                     }}
                                 />
                                 <Button variant="contained" onClick={() => handleReplySubmit(comment.id)}>Reply</Button>
-                            </Box>
+                            </Box> */}
                         </Box>
                     ))
                 ) : (
