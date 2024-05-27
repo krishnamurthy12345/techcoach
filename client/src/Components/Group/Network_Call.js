@@ -226,6 +226,25 @@ const getSharedComments = async (decisionId) => {
     }
 };
 
+const deleteCommentAdded = async (commentId) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.delete(`${process.env.REACT_APP_API_URL}/group/removeCommentsAdded`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data:{
+                commentId
+            }
+        });
+        console.log("response for comments", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching shared comments", error);
+        throw error;
+    }
+}
+
 
 export { 
     getUserListForInnerCircle, 
@@ -241,5 +260,6 @@ export {
     acceptOrRejectInnerCircle,
     getSharedDecisions,
     postCommentForDecision,
-    getSharedComments
+    getSharedComments,
+    deleteCommentAdded
  };

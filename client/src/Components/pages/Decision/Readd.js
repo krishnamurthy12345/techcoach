@@ -8,6 +8,7 @@ import { Avatar, Tooltip as MuiTooltip } from '@mui/material';
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
+import 'react-toastify/dist/ReactToastify.css';
 import './Readd.css';
 
 const Readd = () => {
@@ -52,10 +53,9 @@ const Readd = () => {
           Authorization: `Bearer ${token}`
         },
         params: {
-            decisionId: decisionId
+          decisionId: decisionId
         }
       });
-      console.log("Response from comments:", response);
       setComments(prevComments => ({
         ...prevComments,
         [decisionId]: response.data.comments
@@ -64,8 +64,6 @@ const Readd = () => {
       console.error("Error fetching comments:", error);
     }
   };
-
-  console.log("Comments:", comments);
 
   const filteredData = data.filter(decision => {
     if (showCompletedDecisions) {
@@ -163,18 +161,22 @@ const Readd = () => {
               </td>
               <td>
                 {comments[decision.decision_id] ? (
-                  comments[decision.decision_id].map((comment, commentIndex) => (
-                    <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center', margin:"0.3rem" }}>
-                      <div className="comment-avatar" style={{ marginRight: '0.5rem' }}>
-                        <MuiTooltip title={comment.displayname} arrow>
-                          <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
-                        </MuiTooltip>
+                  comments[decision.decision_id].length > 0 ? (
+                    comments[decision.decision_id].map((comment, commentIndex) => (
+                      <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center', margin:"0.3rem" }}>
+                        <div className="comment-avatar" style={{ marginRight: '0.5rem' }}>
+                          <MuiTooltip title={comment.displayname} arrow>
+                            <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
+                          </MuiTooltip>
+                        </div>
+                        <div className="comment-text" style={{textAlign:"left"}}>
+                          {comment.comment}
+                        </div>
                       </div>
-                      <div className="comment-text" style={{textAlign:"left"}}>
-                        {comment.comment}
-                      </div>
-                    </div>
-                  ))
+                    ))
+                  ) : (
+                    "No Comments Found"
+                  )
                 ) : (
                   "Loading comments..."
                 )}

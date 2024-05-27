@@ -177,17 +177,19 @@ const View = () => {
                                     </Box>
                                 ))}
                             </Box>
-                           {/*  <Box sx={{ display: 'flex', mt: 2 }}>
-                                <TextField
+                            <Box sx={{ display: 'flex', mt: 2 }}>
+                                <input
                                     label="Write a reply..."
                                     variant="outlined"
                                     fullWidth
                                     value={newReply}
                                     onChange={handleReplyChange}
-                                    sx={{ mr: 2 }}
+                                    style={{
+                                        marginRight:"0.5rem"
+                                    }}
                                 />
                                 <Button variant="contained" onClick={() => handleReplySubmit(comment.id)}>Reply</Button>
-                            </Box> */}
+                            </Box>
                         </Box>
                     ))
                 ) : (
