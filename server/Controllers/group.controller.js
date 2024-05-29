@@ -368,7 +368,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
     let conn;
     let userId = req.user.id;
 
-    console.log("user Id", userId);
+    console.log("User Id:", userId);
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -380,33 +380,52 @@ const getInnerCircleAcceptNotification = async (req, res) => {
         `;
         const notAcceptedMembersResult = await conn.query(notAcceptedMembersQuery, [userId]);
 
-        console.log("notification", notAcceptedMembersResult);
+        console.log("Not Accepted Members:", notAcceptedMembersResult);
 
-        const groupIds = notAcceptedMembersResult.map(member => member.group_id);
+        if (notAcceptedMembersResult.length > 0) {
+            const groupIds = notAcceptedMembersResult.map(member => member.group_id);
 
-        const acceptedMembersQuery = `
-            SELECT *
-            FROM techcoach_lite.techcoach_group_members
-            WHERE group_id IN (?) AND status = 'Accepted'
-        `;
-        const acceptedMembersResult = await conn.query(acceptedMembersQuery, [groupIds]);
-
-        console.log("Accepted members:", acceptedMembersResult);
-    
-        const groupDetailsMap = {};
-
-        for (const member of notAcceptedMembersResult) {
-            const groupId = member.group_id;
-
-            const groupQuery = `
-                SELECT created_by
-                FROM techcoach_lite.techcoach_groups
-                WHERE id = ?
+            const acceptedMembersQuery = `
+                SELECT *
+                FROM techcoach_lite.techcoach_group_members
+                WHERE group_id IN (?) AND status = 'Accepted'
             `;
-            const groupResult = await conn.query(groupQuery, [groupId]);
+            const acceptedMembersResult = await conn.query(acceptedMembersQuery, [groupIds]);
 
-            if (groupResult.length > 0) {
-                const createdBy = groupResult[0].created_by;
+            console.log("Accepted Members:", acceptedMembersResult);
+
+            const groupDetailsMap = {};
+
+            for (const member of notAcceptedMembersResult) {
+                const groupId = member.group_id;
+
+                const groupQuery = `
+                    SELECT created_by
+                    FROM techcoach_lite.techcoach_groups
+                    WHERE id = ?
+                `;
+                const groupResult = await conn.query(groupQuery, [groupId]);
+
+                if (groupResult.length > 0) {
+                    const createdBy = groupResult[0].created_by;
+
+                    const userQuery = `
+                        SELECT *
+                        FROM techcoach_lite.techcoach_task
+                        WHERE user_id = ?
+                    `;
+                    const userResult = await conn.query(userQuery, [createdBy]);
+                    groupDetailsMap[groupId] = {
+                        createdBy,
+                        userDetails: userResult.length > 0 ? userResult[0] : null
+                    };
+                }
+            }
+
+            const acceptedDetailsMap = {};
+
+            for (const member of acceptedMembersResult) {
+                const createdBy = member.member_id;
 
                 const userQuery = `
                     SELECT *
@@ -414,44 +433,35 @@ const getInnerCircleAcceptNotification = async (req, res) => {
                     WHERE user_id = ?
                 `;
                 const userResult = await conn.query(userQuery, [createdBy]);
-                groupDetailsMap[groupId] = {
-                    createdBy,
+
+                console.log("Accepted Members Details:", userResult);
+
+                acceptedDetailsMap[member.group_id] = {
                     userDetails: userResult.length > 0 ? userResult[0] : null
                 };
             }
+
+            console.log("Group Details Map:", groupDetailsMap);
+
+            await conn.commit();
+
+            res.status(200).json({
+                message: 'Not Accepted Members Fetched Successfully',
+                notAcceptedMembers: notAcceptedMembersResult,
+                acceptedMembers: acceptedMembersResult,
+                acceptedDetails: acceptedDetailsMap,
+                groupDetails: groupDetailsMap
+            });
+        } else {
+            await conn.commit();
+            res.status(200).json({
+                message: 'No Not Accepted Members Found',
+                notAcceptedMembers: [],
+                acceptedMembers: [],
+                acceptedDetails: {},
+                groupDetails: {}
+            });
         }
-
-        const AcceptedDetailsMap = {};
-
-        for (const member of acceptedMembersResult) {
-            const createdBy = member.member_id;
-
-            const userQuery = `
-                SELECT *
-                FROM techcoach_lite.techcoach_task
-                WHERE user_id = ?
-            `;
-            const userResult = await conn.query(userQuery, [createdBy]);
-
-            console.log("Accepted members:", userResult);
-
-            AcceptedDetailsMap[member.group_id] = {
-                userDetails: userResult.length > 0 ? userResult[0] : null
-            };
-        }
-
-        console.log("Result from fetched not accepted members:", notAcceptedMembersResult);
-        console.log("Group details map:", groupDetailsMap);
-
-        await conn.commit();
-
-        res.status(200).json({ 
-            message: 'Not Accepted Members Fetched Successfully', 
-            notAcceptedMembers: notAcceptedMembersResult,
-            acceptedMembers: acceptedMembersResult,
-            acceptedDetails: AcceptedDetailsMap,
-            groupDetails: groupDetailsMap
-        });
     } catch (error) {
         if (conn) await conn.rollback();
         console.error('Error fetching members:', error);
@@ -460,7 +470,6 @@ const getInnerCircleAcceptNotification = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
 
 
 const acceptOrRejectInnerCircle = async (req, res) => {
@@ -578,7 +587,7 @@ const getSharedDecisions = async (req, res) => {
             console.error('Error encrypting text:', error);
             return null;
         }
-    }; 
+    };
 
     try {
         conn = await getConnection();
@@ -590,7 +599,7 @@ const getSharedDecisions = async (req, res) => {
         `, [userId]);
 
         const results = [];
-        
+
         for (const sharedDecision of sharedDecisions) {
             const { decisionId, groupId } = sharedDecision;
 
@@ -602,7 +611,7 @@ const getSharedDecisions = async (req, res) => {
             if (decisionDetailsQuery.length === 0) {
                 continue;
             }
-            
+
             const decisionDetails = decisionDetailsQuery[0];
 
             const groupDetails = await conn.query(`
@@ -619,12 +628,9 @@ const getSharedDecisions = async (req, res) => {
                 continue;
             }
 
-        
             const userDetails = userDetailsQuery[0];
             const keyData = undefined + userDetails.displayname + userDetails.email;
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
-
-             console.log("usersssssssss", encryptedKey);
 
             decisionDetails.decision_name = decryptText(decisionDetails.decision_name, encryptedKey);
             decisionDetails.user_statement = decryptText(decisionDetails.user_statement, encryptedKey);
@@ -642,16 +648,31 @@ const getSharedDecisions = async (req, res) => {
                 decisionDetails.reasons = [];
             }
 
-            const sharedInfo = await conn.query(`SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.timestamp, d.parentCommentId,
-            t.user_id, t.displayname,t.email
-            FROM techcoach_lite.techcoach_conversations d
-            LEFT JOIN techcoach_lite.techcoach_task t
-            ON d.groupMember = t.user_id
-            WHERE groupId = ? AND decisionId = ? AND groupMember = ?`,[groupId,decisionId,userId]);
+            const sharedInfo = await conn.query(`
+                SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
+                t.user_id, t.displayname, t.email
+                FROM techcoach_lite.techcoach_conversations d
+                LEFT JOIN techcoach_lite.techcoach_task t
+                ON d.groupMember = t.user_id
+                WHERE groupId = ? AND decisionId = ? AND groupMember = ?
+            `, [groupId, decisionId, userId]);
 
-            console.log("shared info", sharedInfo);
+            const commentIds = sharedInfo.map(comment => comment.id);
 
-            const currentUser = req.user.id;
+            if (commentIds.length > 0) {
+                const replies = await conn.query(`
+                    SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
+                    t.user_id, t.displayname, t.email
+                    FROM techcoach_lite.techcoach_conversations d
+                    LEFT JOIN techcoach_lite.techcoach_task t
+                    ON d.groupMember = t.user_id
+                    WHERE parentCommentId IN (?)
+                `, [commentIds]);
+
+                sharedInfo.forEach(comment => {
+                    comment.replies = replies.filter(reply => reply.parentCommentId === comment.id);
+                });
+            }
 
             results.push({
                 sharedDecision,
@@ -659,7 +680,7 @@ const getSharedDecisions = async (req, res) => {
                 groupDetails: groupDetails[0],
                 userDetails,
                 comments: sharedInfo
-            });      
+            });
         }
 
         await conn.commit();
@@ -674,6 +695,7 @@ const getSharedDecisions = async (req, res) => {
     }
 };
 
+
 const postCommentForDecision = async (req, res) => {
     console.log("Request body", req.body);
 
@@ -686,7 +708,7 @@ const postCommentForDecision = async (req, res) => {
         await conn.beginTransaction();
 
         const updateCommentResult = await conn.query(
-            `INSERT INTO techcoach_lite.techcoach_conversations (groupId, groupMember, comment, timestamp, decisionId) 
+            `INSERT INTO techcoach_lite.techcoach_conversations (groupId, groupMember, comment, created_at, decisionId) 
              VALUES (?, ?, ?, NOW(), ?)`,
             [groupId, groupMemberID, commentText, decisionId]
         );
@@ -719,8 +741,9 @@ const getComments = async (req, res) => {
                 d.groupMember,
                 d.decisionId,
                 d.comment,
-                d.timestamp,
+                d.created_at,
                 d.parentCommentId,
+                d.updated_at,
                 t.user_id,
                 t.displayname,
                 t.email
@@ -748,34 +771,45 @@ const getComments = async (req, res) => {
 };
 
 const getSharedComments = async (req, res) => {
+    const userId = req.user.id;
+
     console.log("request from shared comments fetch", req.body);
-    const {decisionId}= req.body;
+    const { decisionId } = req.body;
     let conn;
     try {
         conn = await getConnection();
         const commentsQuery = `SELECT 
-        d.id,
-        d.groupId,
-        d.groupMember,
-        d.decisionId,
-        d.comment,
-        d.timestamp,
-        d.parentCommentId,
-        t.user_id,
-        t.displayname,
-        t.email
-    FROM 
-        techcoach_lite.techcoach_conversations d
-    LEFT JOIN 
-        techcoach_lite.techcoach_task t
-    ON 
-        d.groupMember = t.user_id
-    WHERE 
-        d.decisionId = ?`;
+            d.id,
+            d.groupId,
+            d.groupMember,
+            d.decisionId,
+            d.comment,
+            d.created_at,
+            d.parentCommentId,
+            d.updated_at,
+            t.user_id,
+            t.displayname,
+            t.email
+        FROM 
+            techcoach_lite.techcoach_conversations d
+        LEFT JOIN 
+            techcoach_lite.techcoach_task t
+        ON 
+            d.groupMember = t.user_id
+        WHERE 
+            d.decisionId = ?`;
 
         const comments = await conn.query(commentsQuery, [decisionId]);
 
         console.log("comments", comments);
+
+        comments.forEach(comment => {
+            if (comment.groupMember === userId) {
+                comment.type_of_member = 'author';
+            } else {
+                comment.type_of_member = 'member';
+            }
+        });
 
         res.status(200).json({ comments });
     } catch (error) {
@@ -785,6 +819,7 @@ const getSharedComments = async (req, res) => {
         if (conn) conn.release();
     }
 };
+
 
 const removeCommentsAdded = async (req, res) => {
     console.log("request from remove", req.body);
@@ -816,6 +851,92 @@ const removeCommentsAdded = async (req, res) => {
     }
 };
 
+const sharedDecisionCount = async (req, res) => {
+
+    const userId = req.user.id;
+
+    let conn;
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+
+        const query = `
+            SELECT * FROM techcoach_lite.techcoach_shared_decisions
+            WHERE groupMember=?
+        `;
+        const result = await conn.query(query, [userId]);
+
+        console.log("result from shared query", result);
+
+        await conn.commit();
+        res.status(200).json({ message: 'Shared Decision Fetched successfully', result });
+    } catch (error) {
+        console.error('Error in fetching shared decisions', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
+const postReplyComment = async (req, res) => {
+    console.log("request body from post reply", req.body);
+    const {commentId, reply, groupId, decisionId} = req.body;
+
+    const userId = req.user.id;
+
+    let conn;
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const query = await conn.query(
+            `INSERT INTO techcoach_lite.techcoach_conversations (groupId, groupMember, comment, created_at, parentCommentId, decisionId) 
+             VALUES (?, ?, ?, NOW(),?, ?)`,
+            [groupId, userId, reply, commentId, decisionId]
+        );
+
+        console.log("putttttttttttttt", query);
+
+        await conn.commit();
+        res.status(200).json({ message: 'Shared Decision Fetched successfully' });
+    } catch (error) {
+        console.error('Error in fetching shared decisions', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const editCommentsAdded = async (req, res) => {
+    console.log("reqqqqqqqqqq body editt", req.body);
+
+    const {commentId, editedContent} = req.body.data;
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        await conn.query(`
+            UPDATE techcoach_lite.techcoach_conversations
+            SET comment = ?, updated_at = NOW()
+            WHERE id = ?
+        `, [editedContent, commentId]);
+
+        await conn.commit();
+
+        res.status(200).json({ message: 'Comments updated successfully' });
+    } catch (error) {
+        console.error('Error updating Comments:', error);
+        await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
 
 module.exports = {
     getUserList,
@@ -833,5 +954,8 @@ module.exports = {
     postCommentForDecision,
     getComments,
     getSharedComments,
-    removeCommentsAdded
+    removeCommentsAdded,
+    sharedDecisionCount,
+    postReplyComment,
+    editCommentsAdded
 };

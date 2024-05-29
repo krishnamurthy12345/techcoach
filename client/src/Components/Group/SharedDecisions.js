@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Typography, Card, CardContent, Box } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'; // Import icons
-import { getSharedDecisions, postCommentForDecision, deleteCommentAdded } from '../../Components/Group/Network_Call';
+import { Button, Typography, Card, CardContent, Box, Avatar, IconButton, TextField, Grid, Popover } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { getSharedDecisions, postCommentForDecision, deleteCommentAdded, EditCommentAdded } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const SharedDecision = () => {
     const [sharedDecisions, setSharedDecisions] = useState([]);
     const [commentTexts, setCommentTexts] = useState({});
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editedCommentContent, setEditedCommentContent] = useState('');
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const fetchSharedDecisions = async () => {
         try {
             const response = await getSharedDecisions();
-
-            console.log("Response from shared decisions:", response);
             setSharedDecisions(response);
             const initialCommentTexts = {};
             response.forEach(item => {
@@ -46,7 +49,6 @@ const SharedDecision = () => {
     };
 
     const handleDeleteComment = async (commentId) => {
-        console.log("commentId", commentId);
         try {
             await deleteCommentAdded(commentId);
             fetchSharedDecisions();
@@ -56,7 +58,6 @@ const SharedDecision = () => {
             toast('An error occurred while deleting the comment');
         }
     };
-    
 
     const handleCommentChange = (decisionId, newText) => {
         setCommentTexts(prevState => ({
@@ -65,75 +66,142 @@ const SharedDecision = () => {
         }));
     };
 
+    const handleEdit = (commentId, initialContent) => {
+        setEditingCommentId(commentId);
+        setEditedCommentContent(initialContent);
+        setIsPopoverOpen(true);
+    };
+
+    const handleSaveEdit = async (commentId, editedContent) => {
+        console.log(`Save edited comment with id ${commentId} and content: ${editedContent}`);
+        try {
+            await EditCommentAdded(commentId, editedContent);
+            fetchSharedDecisions();
+            toast('Comment edited successfully');
+        } catch (error) {
+            console.error('Error editing comment:', error);
+            toast('An error occurred while editing the comment');
+        }
+        setEditingCommentId(null);
+        setIsPopoverOpen(false);
+    };
+
+    const handlePopoverClose = () => {
+        setEditingCommentId(null);
+        setIsPopoverOpen(false);
+    };
+
+    console.log("sharedDecisions", sharedDecisions);
+
     return (
-        <div style={{ margin: "3rem" }}>
+        <Box p={3} style={{ ...(isPopoverOpen && { filter: 'blur(2px)' })}}>
             {sharedDecisions.length === 0 ? (
-                <Typography variant="h5" style={{ textAlign: "center", marginTop: "1rem", backgroundColor: "aliceblue", padding: "1rem" }}>
+                <Typography variant="h5" align="center" mt={2} mb={2}>
                     No shared decisions
                 </Typography>
             ) : (
                 sharedDecisions.map((item, index) => (
-                    <div key={index} style={{margin:"3rem"}}>
-                        <Card variant="outlined" style={{ marginBottom: '10px' }}>
-                            <CardContent>
-                                <Typography variant="h6">
-                                    Decision: {item.decisionDetails.decision_name}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Reasons:
-                                </Typography>
-                                {item.decisionDetails.reasons && item.decisionDetails.reasons.length > 0 ? (
-                                    item.decisionDetails.reasons.map((reason, reasonIndex) => (
-                                        <Typography key={reasonIndex} variant="body2" style={{ marginLeft: '16px' }}>
-                                            - {reason}
-                                        </Typography>
-                                    ))
-                                ) : (
-                                    <Typography variant="body2" style={{ marginLeft: '16px' }}>
-                                        No reasons provided
+                    <Card key={index} variant="outlined" mt={2} mb={2} style={{ margin: "1rem" }}>
+                        <CardContent>
+                            <Typography variant="h6">
+                                Decision: {item.decisionDetails.decision_name}
+                            </Typography>
+                            <Typography variant="body2">
+                                Reasons:
+                            </Typography>
+                            {item.decisionDetails.reasons && item.decisionDetails.reasons.length > 0 ? (
+                                item.decisionDetails.reasons.map((reason, reasonIndex) => (
+                                    <Typography key={reasonIndex} variant="body2" style={{ marginLeft: '16px' }}>
+                                        - {reason}
                                     </Typography>
-                                )}
-                                <Typography variant="body2">
-                                    Due Date: {new Date(item.decisionDetails.decision_due_date).toLocaleDateString()}
+                                ))
+                            ) : (
+                                <Typography variant="body2" style={{ marginLeft: '16px' }}>
+                                    No reasons provided
                                 </Typography>
+                            )}
+                            <Typography variant="body2">
+                                Due Date: {new Date(item.decisionDetails.decision_due_date).toLocaleDateString()}
+                            </Typography>
+                            {item.decisionDetails.decision_taken_date ? (
                                 <Typography variant="body2">
                                     Taken Date: {new Date(item.decisionDetails.decision_taken_date).toLocaleDateString()}
                                 </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    User Statement: {item.decisionDetails.user_statement}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                        <Box ml={8} mt={2} mb={2} p={2} bgcolor="#ffffff" borderRadius={3}>
+                            ) : (
+                                <></>
+                            )}
+                            <Typography variant="body2" color="textSecondary">
+                                User Statement: {item.decisionDetails.user_statement}
+                            </Typography>
+                        </CardContent>
+                        <CardContent>
                             <Typography variant="h6">Comments:</Typography>
                             {item.comments.map((comment, commentIndex) => (
-                                <div key={commentIndex}>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
-                                        <Typography variant="body2" style={{ marginTop: '8px', marginRight:"1rem" }}>
-                                            {comment.comment}
-                                        </Typography>
-                                        <EditIcon style={{ marginRight: '8px' }} />
-                                        <DeleteIcon 
-                                            style={{color:"red"}} 
-                                            onClick={() => handleDeleteComment(comment.id)} 
-                                        />
-                                    </div>
-                                </div>
+                                <Box key={commentIndex} mt={2} mb={2}>
+                                    <Grid container spacing={2} alignItems="center" >
+                                        <Grid item>
+                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{comment.displayname[0]}</Avatar>
+                                        </Grid>
+                                        <Grid item xs>
+                                            <Typography variant="body1">{comment.comment}</Typography>
+                                            <Typography variant="caption" color="textSecondary">
+                                                {comment.displayname} | {comment.email} |  
+                                                {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}
+                                                {comment.updated_at !== comment.created_at ? 
+                                                    <span> | Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                    : null
+                                                }
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <IconButton onClick={() => handleEdit(comment.id, comment.comment)}>
+                                                <EditIcon sx={{ color: "black" }} />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleDeleteComment(comment.id)}>
+                                                <DeleteIcon style={{ color: "red" }} />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                    {comment.replies && comment.replies.length > 0 && (
+                                        <Box mt={1} ml={4} pl={2}>
+                                            {comment.replies.map((reply, replyIndex) => (
+                                                <Box key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{backgroundColor:"#DDE6ED"}}>
+                                                    <Grid container spacing={2} alignItems="center">
+                                                        <Grid item>
+                                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{reply.displayname[0]}</Avatar>
+                                                        </Grid>
+                                                        <Grid item xs>
+                                                            <Typography variant="body1">{reply.comment}</Typography>
+                                                            <Typography variant="caption" color="textSecondary">
+                                                                {reply.displayname} | {reply.email} | 
+                                                                {comment.created_at === comment.updated_at
+                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                    : <span> Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                    
+                                                                </Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Box>
                             ))}
-                            <div style={{ marginTop: '16px' }}>
+                            <Box mt={2}>
                                 <input
                                     label="Add Comment"
                                     variant="outlined"
                                     fullWidth
                                     placeholder="Add a comment..."
-                                    value={commentTexts[item.decisionDetails.decision_id]}
-                                    onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
                                     style={{
                                         height: "3rem",
                                         padding: "1rem",
                                         width: "100%",
-                                        maxWidth: "100%"
+                                        maxWidth: "100%",
+                                        marginRight: "0.5rem"
                                     }}
+                                    value={commentTexts[item.decisionDetails.decision_id]}
+                                    onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
                                 />
                                 <Button
                                     variant="contained"
@@ -143,14 +211,49 @@ const SharedDecision = () => {
                                 >
                                     Add Comment
                                 </Button>
-                            </div>
-                        </Box>
-
-                    </div>
+                            </Box>
+                        </CardContent>
+                    </Card>
                 ))
             )}
+
+            <Popover
+                open={isPopoverOpen}
+                anchorEl={null}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                    vertical: 'left',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'left',
+                    horizontal: 'center',
+                }}
+                PaperProps={{
+                    sx: {
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        p: 2
+                    }
+                }}
+            >
+                <Box>
+                    <Typography variant="h6" style={{ marginBottom: "1rem" }}><b>Edit Comment</b></Typography>
+                    <TextField
+                        multiline
+                        fullWidth
+                        value={editedCommentContent}
+                        onChange={(e) => setEditedCommentContent(e.target.value)}
+                    />
+                    <Button onClick={() => handleSaveEdit(editingCommentId, editedCommentContent)}>
+                        Save
+                    </Button>
+                </Box>
+            </Popover>
             <ToastContainer />
-        </div>
+        </Box>
     );
 };
 
