@@ -245,6 +245,48 @@ const deleteCommentAdded = async (commentId) =>{
     }
 }
 
+const postReplyComment = async (commentId, reply,groupId, decisionId) => {
+    console.log("comment Id", commentId, reply, groupId, decisionId);
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(
+            `${process.env.REACT_APP_API_URL}/group/postReplyComment`,
+            { commentId,reply,groupId, decisionId }, 
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        console.log("response for reply", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching reply", error);
+        throw error;
+    }
+}
+
+const EditCommentAdded = async (commentId, editedContent) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/editCommentsAdded`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data:{
+                commentId,
+                editedContent
+            }
+        });
+        console.log("response for edit comments", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching editted comments", error);
+        throw error;
+    }
+}
+
+
 
 export { 
     getUserListForInnerCircle, 
@@ -261,5 +303,7 @@ export {
     getSharedDecisions,
     postCommentForDecision,
     getSharedComments,
-    deleteCommentAdded
+    deleteCommentAdded,
+    postReplyComment,
+    EditCommentAdded
  };

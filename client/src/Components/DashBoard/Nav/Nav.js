@@ -46,11 +46,25 @@ const Nav = () => {
   }, [data, loggedInUserId]);
 
   useEffect(() => {
-    const sharedDecisions = data.filter(decision => {
-      return decision.user_id === loggedInUserId && decision.shared_decision;
-    });
-    setSharedDecisionsCount(sharedDecisions.length);
-  }, [data, loggedInUserId]);
+    const sharedDecisionCount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedDecisionCount`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const sharedDecisions = response.data.result.length;
+        setSharedDecisionsCount(sharedDecisions)
+        //console.log("response from shared Decision", response);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    sharedDecisionCount();
+  }, []);
 
   const filteredData = data.filter(decision => {
     return (
@@ -121,9 +135,6 @@ const Nav = () => {
                         <Typography variant="h6">Decision Due Date</Typography>
                       </TableCell>
                       <TableCell sx={{ backgroundColor: '#526D82', color: '#ffffff', border: '1px solid #ffffff' }}>
-                        <Typography variant="h6">Decision Taken Date</Typography>
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: '#526D82', color: '#ffffff', border: '1px solid #ffffff' }}>
                         <Typography variant="h6">Decision Details</Typography>
                       </TableCell>
                     </TableRow>
@@ -133,7 +144,6 @@ const Nav = () => {
                       <TableRow key={index}>
                         <TableCell sx={{ border: '1px solid #526D82' }}>{decision.decision_name}</TableCell>
                         <TableCell sx={{ border: '1px solid #526D82' }}>{new Date(decision.decision_due_date).toLocaleDateString()}</TableCell>
-                        <TableCell sx={{ border: '1px solid #526D82' }}>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : 'No Decision Date Taken'}</TableCell>
                         <TableCell sx={{ border: '1px solid #526D82' }}>{decision.user_statement}</TableCell>
                       </TableRow>
                     ))}

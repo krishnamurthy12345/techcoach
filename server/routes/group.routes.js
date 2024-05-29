@@ -24,5 +24,8 @@ router.put("/postCommentForDecision",groupController.postCommentForDecision);
 router.get("/comments",groupController.getComments);
 router.post("/getSharedComments",groupController.getSharedComments);
 router.delete("/removeCommentsAdded",groupController.removeCommentsAdded);
+router.get("/sharedDecisionCount",groupController.sharedDecisionCount);
+router.post("/postReplyComment",groupController.postReplyComment);
+router.put("/editCommentsAdded",groupController.editCommentsAdded);
 
 module.exports = router;

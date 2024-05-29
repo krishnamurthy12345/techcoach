@@ -162,18 +162,31 @@ const Readd = () => {
               <td>
                 {comments[decision.decision_id] ? (
                   comments[decision.decision_id].length > 0 ? (
-                    comments[decision.decision_id].map((comment, commentIndex) => (
-                      <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center', margin:"0.3rem" }}>
-                        <div className="comment-avatar" style={{ marginRight: '0.5rem' }}>
-                          <MuiTooltip title={comment.displayname} arrow>
-                            <Avatar style={{ backgroundColor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
-                          </MuiTooltip>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {comments[decision.decision_id].slice(0, 2).map((comment, commentIndex) => (
+                        <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center'}}>
+                          <div className="comment-avatar" >
+                            <MuiTooltip title={comment.displayname} arrow>
+                              <Avatar
+                              sx={{
+                                            backgroundColor: "#526D82",
+                                            width: 40,
+                                            height: 40,
+                                            position: "relative",
+                                            left: `-${commentIndex * 10}px`,
+                                            zIndex: comments.length - index,
+                                            border: "0.1rem solid white"
+                                        }}>{comment.displayname[0]}</Avatar>
+                            </MuiTooltip>
+                          </div>
                         </div>
-                        <div className="comment-text" style={{textAlign:"left"}}>
-                          {comment.comment}
+                      ))}
+                      {comments[decision.decision_id].length > 2 && (
+                        <div style={{ marginLeft: '0.1rem' }}>
+                          +{comments[decision.decision_id].length - 2}
                         </div>
-                      </div>
-                    ))
+                      )}
+                    </div>
                   ) : (
                     "No Comments Found"
                   )

@@ -5,14 +5,14 @@ import { ToastContainer, toast } from 'react-toastify';
 
 const Notification = () => {
     const [notifications, setNotifications] = useState([]);
-    const [response, setResponse] = useState(null); // State to store the response
+    const [response, setResponse] = useState(null); 
 
     const getNotification = async () => {
         try {
             const response = await getInnerCircleAcceptNotification();
             console.log("response from notification", response);
             setNotifications(response.notAcceptedMembers);
-            setResponse(response); // Set the response in state
+            setResponse(response); 
         } catch (error) {
             console.error('Error in fetching the notifications:', error);
             toast('An error occurred while fetching the notifications');
@@ -24,7 +24,7 @@ const Notification = () => {
             console.log("payload", status);
             await acceptOrRejectInnerCircle(groupId, status);
             toast('Status Updated Successfully');
-            getNotification(); // Refresh notifications after action
+            getNotification();
         } catch (error) {
             console.error(`Error ${status ? 'accepting' : 'rejecting'} notification:`, error);
             toast(`An error occurred while ${status ? 'accepting' : 'rejecting'} the notification`);
@@ -73,7 +73,7 @@ const Notification = () => {
                                         <Tooltip title={response.acceptedDetails[notification.group_id].userDetails.displayname} key={response.acceptedDetails[notification.group_id].userDetails.user_id}>
                                             <Avatar
                                                 alt={response.acceptedDetails[notification.group_id].userDetails.displayname}
-                                                src="/static/images/avatar/1.jpg" // replace with actual avatar source if available
+                                                src="/static/images/avatar/1.jpg" 
                                                 style={{ margin: '0 5px',
                                                     backgroundColor:"#526D82"
                                                  }}
