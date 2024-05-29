@@ -147,10 +147,10 @@ const SharedDecision = () => {
                                             <Typography variant="caption" color="textSecondary">
                                                 {comment.displayname} | {comment.email} |  
                                                 {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}
-                                                {comment.updated_at !== comment.created_at ? 
-                                                    <span> | Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
-                                                    : null
-                                                }
+                                                {comment.created_at === comment.updated_at
+                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                    : <span> Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                    
                                             </Typography>
                                         </Grid>
                                         <Grid item>
