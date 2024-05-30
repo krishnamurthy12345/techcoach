@@ -4,16 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box } from '@mui/material';
 import { AssignmentTurnedIn, Height, HourglassEmpty, Share } from '@mui/icons-material';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './Nav.css';
+import { useNavigate } from 'react-router-dom';
 
 const Nav = () => {
-  const navigate = useNavigate();
+  const navigate=useNavigate();
+
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
   const [sharedDecisionsCount, setSharedDecisionsCount] = useState(0);
   let loggedInUserId;
-
+  
   useEffect(() => {
     const loadData = async () => {
       try {
