@@ -146,10 +146,9 @@ const SharedDecision = () => {
                                             <Typography variant="body1">{comment.comment}</Typography>
                                             <Typography variant="caption" color="textSecondary">
                                                 {comment.displayname} | {comment.email} |  
-                                                {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}
                                                 {comment.created_at === comment.updated_at
                                                                     ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                    : <span> Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                    : <span> Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
                                                     
                                             </Typography>
                                         </Grid>
@@ -157,9 +156,9 @@ const SharedDecision = () => {
                                             <IconButton onClick={() => handleEdit(comment.id, comment.comment)}>
                                                 <EditIcon sx={{ color: "black" }} />
                                             </IconButton>
-                                            <IconButton onClick={() => handleDeleteComment(comment.id)}>
+                                            {/* <IconButton onClick={() => handleDeleteComment(comment.id)}>
                                                 <DeleteIcon style={{ color: "red" }} />
-                                            </IconButton>
+                                            </IconButton> */}
                                         </Grid>
                                     </Grid>
                                     {comment.replies && comment.replies.length > 0 && (
@@ -174,9 +173,9 @@ const SharedDecision = () => {
                                                             <Typography variant="body1">{reply.comment}</Typography>
                                                             <Typography variant="caption" color="textSecondary">
                                                                 {reply.displayname} | {reply.email} | 
-                                                                {comment.created_at === comment.updated_at
-                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                    : <span> Edited at {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                {reply.created_at === reply.updated_at
+                                                                    ? <span> {formatDistanceToNow(parseISO(reply.created_at), { addSuffix: true })}</span>
+                                                                    : <span> Edited {formatDistanceToNow(parseISO(reply.updated_at), { addSuffix: true })}</span>}
                                                     
                                                                 </Typography>
                                                         </Grid>

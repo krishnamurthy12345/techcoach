@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box } from '@mui/material';
+import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, TextField } from '@mui/material';
 import { getUserListForInnerCircle, innerCircleCreation } from './Network_Call';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -8,16 +8,14 @@ const InnerGroup = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const type_of_group = queryParams.get('type_of_group');
-    console.log("type of group from inner circle", type_of_group);
-    console.log("selected users", selectedUsers);
 
     useEffect(() => {
         const fetchNames = async () => {
             const users = await getUserListForInnerCircle();
-            console.log("User List", users);
             setUsers(users);
         };
         fetchNames();
@@ -39,25 +37,44 @@ const InnerGroup = () => {
             }))
         };
 
-        console.log("Submitted Successfully", groupData);
         const response = await innerCircleCreation(groupData);
-        console.log("response from innergroup", response);
-        if(response.status === 200)(
-            navigate('/innerCircleDisplay')
-        )
+        if(response.status === 200) {
+            navigate('/innerCircleDisplay');
+        }
+    };
+
+    const handleSearchInputChange = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     return (
         <div style={{ margin: "1rem", display: "flex", justifyContent: "center", gap: "5rem" }}>
             <div style={{ width: "30rem" }}>
                 <Typography variant="h6">List of Members</Typography>
+                <input
+                    label="Search by email"
+                    variant="outlined"
+                    fullWidth
+                    value={searchQuery}
+                    onChange={handleSearchInputChange}
+                    style={{
+                        height: "3rem",
+                        padding: "1rem",
+                        width: "100%",
+                        maxWidth: "100%",
+                        marginTop: "1rem",
+                        marginBottom:"1rem",
+                        border:"0.1rem solid #526D82",
+                        borderRadius:"0.5rem"
+                    }}
+                />
                 <List>
-                    {users.map((user) => (
+                    {users.filter(user => user.email === searchQuery).map((user) => (
                         <ListItem key={user.user_id} button>
                             <ListItemAvatar>
                                 <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>{user.displayname.charAt(0)}</Avatar>
                             </ListItemAvatar>
-                            <ListItemText primary={user.displayname} />
+                            <ListItemText primary={user.displayname} secondary={user.email} />
                             <ListItemSecondaryAction>
                                 <Checkbox
                                     edge="end"

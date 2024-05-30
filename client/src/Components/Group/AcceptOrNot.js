@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, Button } from '@mui/material';
+import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, Button, CircularProgress } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import DoneIcon from '@mui/icons-material/Done'; 
 import { useNavigate } from 'react-router-dom';
@@ -7,9 +7,9 @@ import { shareDecisionInInnerCircle, getSharedMembers } from './Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
 
 const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
-
     const [selectedMember, setSelectedMember] = useState(null);
     const [sharedMembers, setSharedMembers] = useState([]);
+    const [loading, setLoading] = useState(true); // Add loading state
     const navigate = useNavigate();
 
     const handleMemberClick = (memberId) => {
@@ -51,14 +51,22 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
         } catch (error) {
             console.error('Error in fetching the shared members:', error);
             toast('An error occurred while fetching the shared member decision');
+        } finally {
+            setLoading(false); // Set loading to false after fetching data
         }
     };
-
-    console.log("hshs", innerCircleDetails);
 
     useEffect(() => {
         getSharedMembersList();
     }, [innerCircleDetails.group.id]); 
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </div>
+        );
+    }
 
     return (
         <div>

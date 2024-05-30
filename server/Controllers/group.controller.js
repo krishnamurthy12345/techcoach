@@ -1,6 +1,7 @@
 const getConnection = require('../Models/database');
 const crypto = require('crypto');
 
+
 const getUserList = async (req, res) => {
   try {
 
@@ -71,7 +72,6 @@ const innerCircleCreation = async (req, res) => {
         }
     }
 };
-
 
 const checkInnerCircleExists = async (req, res) => {
     let conn;

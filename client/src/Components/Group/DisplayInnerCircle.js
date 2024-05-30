@@ -12,6 +12,8 @@ const DisplayInnerCircle = () => {
     const [showModal, setShowModal] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loadingAdd, setLoadingAdd] = useState(false);
+    const [loadingRemove, setLoadingRemove] = useState({});
 
     useEffect(() => {
         const fetchInnerCircleDetails = async () => {
@@ -34,7 +36,6 @@ const DisplayInnerCircle = () => {
                 if (innerCircleDetails) {
                     const existingMemberIds = innerCircleDetails.members?.map(member => member.user_id) || [];
                     const membersList = await getAddMemberNameListFetch(existingMemberIds);
-
                     
                     setPotentialMembers(membersList.result);
                 }
@@ -49,6 +50,7 @@ const DisplayInnerCircle = () => {
     }, [innerCircleDetails]);
 
     const handleRemoveMember = async (userId) => {
+        setLoadingRemove(prev => ({ ...prev, [userId]: true }));
         try {
             await removeMemberFromInner(userId, innerCircleDetails.group.id);
             toast("Removed Successfully");
@@ -58,10 +60,13 @@ const DisplayInnerCircle = () => {
             }));
         } catch (error) {
             console.error("Failed to remove member", error);
+        } finally {
+            setLoadingRemove(prev => ({ ...prev, [userId]: false }));
         }
     };
 
     const handleAddMember = async (userId) => {
+        setLoadingAdd(true);
         try {
             await addMemberToInnerCircle(userId, innerCircleDetails.group.id);
             toast("Added Successfully");
@@ -70,6 +75,8 @@ const DisplayInnerCircle = () => {
             setPotentialMembers(prev => prev.filter(member => member.user_id !== userId));
         } catch (error) {
             console.error("Failed to add member", error);
+        } finally {
+            setLoadingAdd(false);
         }
     };
 
@@ -163,8 +170,19 @@ const DisplayInnerCircle = () => {
                                                             className="float-right"
                                                             onClick={() => handleRemoveMember(member.user_id)}
                                                             style={{ margin: '1rem' }}
+                                                            disabled={loadingRemove[member.user_id]}
                                                         >
-                                                            Remove
+                                                            {loadingRemove[member.user_id] ? (
+                                                                <Spinner
+                                                                    as="span"
+                                                                    animation="border"
+                                                                    size="sm"
+                                                                    role="status"
+                                                                    aria-hidden="true"
+                                                                />
+                                                            ) : (
+                                                                'Remove'
+                                                            )}
                                                         </Button>
                                                     </ListGroup.Item>
                                                 ))
@@ -192,8 +210,19 @@ const DisplayInnerCircle = () => {
                                                         className="float-right"
                                                         onClick={() => handleAddMember(member.user_id)}
                                                         style={{ margin: '1rem' }}
+                                                        disabled={loadingAdd}
                                                     >
-                                                        Add
+                                                        {loadingAdd ? (
+                                                            <Spinner
+                                                                as="span"
+                                                                animation="border"
+                                                                size="sm"
+                                                                role="status"
+                                                                aria-hidden="true"
+                                                            />
+                                                        ) : (
+                                                            'Add'
+                                                        )}
                                                     </Button>
                                                 </ListGroup.Item>
                                             ))}
