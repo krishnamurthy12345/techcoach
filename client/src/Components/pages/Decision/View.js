@@ -253,9 +253,9 @@ const View = () => {
                                                 <IconButton onClick={(e) => { handleEdit(authorComment.id, authorComment.comment); setAnchorEl(e.currentTarget); }}>
                                                     <EditIcon sx={{ color: "black" }} />
                                                 </IconButton>
-                                                <IconButton onClick={() => handleDeleteReply(authorComment.id)}>
+                                                {/* <IconButton onClick={() => handleDeleteReply(authorComment.id)}>
                                                     <DeleteIcon sx={{ color: "red" }} />
-                                                </IconButton>
+                                                </IconButton> */}
                                             </Box>
                                         </Box>
                                     </Box>
@@ -264,7 +264,7 @@ const View = () => {
                             return null;
                         })}
                         {authorComments.some(authorComment => authorComment.parentCommentId === memberComment.id) ? null : (
-                            <Box sx={{ display: 'flex', mt: 2 }}>
+                            <Box sx={{ display: 'flex', mt: 2, mb:2 }}>
                                 <input
                                     label="Write a reply..."
                                     variant="outlined"
