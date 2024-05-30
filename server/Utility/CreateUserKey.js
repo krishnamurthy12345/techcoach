@@ -17,7 +17,10 @@ const createUserKey = async (req, res, next) => {
         }
         
         const user = userData;
-        const keyData = user.id + user.displayName + user.email;
+        console.log("dataaaa", user);
+        const keyData = undefined + user.displayName + user.email;
+
+        console.log("dataaaa", keyData);
 
         function encryptText(text, key) {
             const cipher = crypto.createCipher('aes-256-cbc', key);

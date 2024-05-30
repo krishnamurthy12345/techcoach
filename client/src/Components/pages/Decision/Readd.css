@@ -11,7 +11,7 @@ input[type="textt"]{
     margin: auto;
     font-size: 0.9em;
     font-family: 'Roboto',sans-serif;
-    max-width: 1000px;
+    max-width: 80rem;
     box-shadow: 0 0 20px rgba(0,0,0, 0.55);
     overflow-x: auto;
     /* overflow: hidden; */

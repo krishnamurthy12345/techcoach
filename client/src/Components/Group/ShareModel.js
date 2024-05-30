@@ -4,13 +4,14 @@ import Group from '../../Components/Group/GroupSelection';
 import AcceptOrNot from '../../Components/Group/AcceptOrNot';  
 
 const ShareModal = ({ showModal, handleClose, innerGroup, innerCircleDetails, decision, id }) => {
+    console.log("share modelllll",innerGroup);
     return (
         <Modal show={showModal} onHide={handleClose}>
             <Modal.Header closeButton>
                 <Modal.Title>Share Decision</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {innerGroup === null && innerCircleDetails === null && decision === null && id === null ? (
+                {(innerGroup === false || innerGroup === null) && (innerCircleDetails === null || innerCircleDetails.error === "No groups found for this user") ? (
                     <Group />
                 ) : (
                     <AcceptOrNot innerCircleDetails={innerCircleDetails} decision={decision} id={id}/>

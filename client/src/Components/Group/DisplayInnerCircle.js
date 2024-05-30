@@ -11,6 +11,9 @@ const DisplayInnerCircle = () => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loadingAdd, setLoadingAdd] = useState(false);
+    const [loadingRemove, setLoadingRemove] = useState({});
 
     useEffect(() => {
         const fetchInnerCircleDetails = async () => {
@@ -30,9 +33,10 @@ const DisplayInnerCircle = () => {
     useEffect(() => {
         const fetchPotentialMembers = async () => {
             try {
-                if (innerCircleDetails && innerCircleDetails) {
+                if (innerCircleDetails) {
                     const existingMemberIds = innerCircleDetails.members?.map(member => member.user_id) || [];
                     const membersList = await getAddMemberNameListFetch(existingMemberIds);
+                    
                     setPotentialMembers(membersList.result);
                 }
             } catch (error) {
@@ -40,12 +44,13 @@ const DisplayInnerCircle = () => {
             }
         };
 
-        if (innerCircleDetails && innerCircleDetails) {
+        if (innerCircleDetails) {
             fetchPotentialMembers();
         }
     }, [innerCircleDetails]);
 
     const handleRemoveMember = async (userId) => {
+        setLoadingRemove(prev => ({ ...prev, [userId]: true }));
         try {
             await removeMemberFromInner(userId, innerCircleDetails.group.id);
             toast("Removed Successfully");
@@ -55,10 +60,13 @@ const DisplayInnerCircle = () => {
             }));
         } catch (error) {
             console.error("Failed to remove member", error);
+        } finally {
+            setLoadingRemove(prev => ({ ...prev, [userId]: false }));
         }
     };
 
     const handleAddMember = async (userId) => {
+        setLoadingAdd(true);
         try {
             await addMemberToInnerCircle(userId, innerCircleDetails.group.id);
             toast("Added Successfully");
@@ -67,6 +75,8 @@ const DisplayInnerCircle = () => {
             setPotentialMembers(prev => prev.filter(member => member.user_id !== userId));
         } catch (error) {
             console.error("Failed to add member", error);
+        } finally {
+            setLoadingAdd(false);
         }
     };
 
@@ -89,6 +99,21 @@ const DisplayInnerCircle = () => {
 
     const handleMouseLeave = () => {
         setIsHovered(false);
+    };
+
+    const getVariant = (status) => {
+        switch (status) {
+            case 'Accepted':
+                return 'success';
+            case '':
+                return 'warning';
+            default:
+                return '';
+        }
+    };
+
+    const handleSearchInputChange = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     console.log("inner", innerCircleDetails);
@@ -127,35 +152,56 @@ const DisplayInnerCircle = () => {
                                 <p>Loading...</p>
                             </Container>
                         ) : (
-                            (!errorMessage || errorMessage === "No members in this inner circle") && innerCircleDetails && (
+                            (!errorMessage || errorMessage === "No members in this inner circle" ) && innerCircleDetails && (
                                 <>
                                     <Col>
                                         <h5>Members:</h5>
                                         <ListGroup>
-                                        {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
-                                            innerCircleDetails.members.map(member => (
-                                                <ListGroup.Item key={member.user_id}>
-                                                    {member.displayname} ({member.email})
-                                                    <Button
-                                                        variant="danger"
-                                                        size="sm"
-                                                        className="float-right"
-                                                        onClick={() => handleRemoveMember(member.user_id)}
-                                                        style={{ margin: '1rem' }}
+                                            {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
+                                                innerCircleDetails.members.map(member => (
+                                                    <ListGroup.Item
+                                                        key={member.user_id}
+                                                        variant={getVariant(member.status)}
                                                     >
-                                                        Remove
-                                                    </Button>
-                                                </ListGroup.Item>
-                                            ))
-                                        ) : (
-                                            <ListGroup.Item>No members found</ListGroup.Item>
-                                        )}
+                                                        {member.displayname} ({member.email}) - {member.status === "Accepted" ? "Accepted" :"Not Accepted"}
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            className="float-right"
+                                                            onClick={() => handleRemoveMember(member.user_id)}
+                                                            style={{ margin: '1rem' }}
+                                                            disabled={loadingRemove[member.user_id]}
+                                                        >
+                                                            {loadingRemove[member.user_id] ? (
+                                                                <Spinner
+                                                                    as="span"
+                                                                    animation="border"
+                                                                    size="sm"
+                                                                    role="status"
+                                                                    aria-hidden="true"
+                                                                />
+                                                            ) : (
+                                                                'Remove'
+                                                            )}
+                                                        </Button>
+                                                    </ListGroup.Item>
+                                                ))
+                                            ) : (
+                                                <ListGroup.Item>No members found</ListGroup.Item>
+                                            )}
                                         </ListGroup>
                                     </Col>
                                     <Col>
                                         <h5>Add Member:</h5>
+                                        <input
+                                            type="text"
+                                            placeholder="Search by email"
+                                            value={searchQuery}
+                                            onChange={handleSearchInputChange}
+                                            style={{ marginBottom: '1rem' }}
+                                        />
                                         <ListGroup>
-                                            {potentialMembers.map(member => (
+                                            {potentialMembers.filter(member => member.email === searchQuery).map(member => (
                                                 <ListGroup.Item key={member.user_id}>
                                                     {member.displayname} ({member.email})
                                                     <Button
@@ -164,8 +210,19 @@ const DisplayInnerCircle = () => {
                                                         className="float-right"
                                                         onClick={() => handleAddMember(member.user_id)}
                                                         style={{ margin: '1rem' }}
+                                                        disabled={loadingAdd}
                                                     >
-                                                        Add
+                                                        {loadingAdd ? (
+                                                            <Spinner
+                                                                as="span"
+                                                                animation="border"
+                                                                size="sm"
+                                                                role="status"
+                                                                aria-hidden="true"
+                                                            />
+                                                        ) : (
+                                                            'Add'
+                                                        )}
                                                     </Button>
                                                 </ListGroup.Item>
                                             ))}
@@ -185,11 +242,11 @@ const DisplayInnerCircle = () => {
                 innerCircleDetails={null}
                 decision={null}
                 id={null}
-            />
+                />
 
-            <ToastContainer />
-        </div>
-    );
-};
-
+                <ToastContainer />
+            </div>
+        );
+    };
+    
 export default DisplayInnerCircle;

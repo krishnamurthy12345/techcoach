@@ -17,6 +17,7 @@ import DisplayInnerCircle from './Components/Group/DisplayInnerCircle.js';
 import AcceptOrNot from './Components/Group/AcceptOrNot.js';
 import Notification from './Components/Notification/Notification.js';
 import ProfileTab from './Components/pages/Profile_Table/ProfileTab.js';
+import SharedDecision from './Components/Group/SharedDecisions.js';
 
 function App() {
   console.log("one is working")
@@ -61,6 +62,8 @@ function App() {
 
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
+
+        <Route path='/sharedDecisions' element={<SharedDecision />} />
 
       </Routes>
     </div>
