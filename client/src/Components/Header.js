@@ -43,8 +43,8 @@ const Header = () => {
         <div>
             <nav className="navbar navbar-expand-lg f-5">
                 <div className="container-fluid">
-                    <a href="/dashboard" class="image-link">
-                        <img src={tech} alt='' class='image' />
+                    <a href="/dashboard" className="image-link">
+                        <img src={tech} alt='' className='image' />
                     </a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
@@ -56,9 +56,6 @@ const Header = () => {
                                     <li className="nav-item">
                                         <Link to='/dashboard' className="nav-link">Dashboard</Link>
                                     </li>
-                                    {/* <li className="nav-item">
-                                        <Link to='/profile' className="nav-link">Profile</Link>
-                                    </li> */}
                                     <li className="nav-item">
                                         <Link to='/readd' className="nav-link">Decision</Link>
                                     </li>
@@ -66,13 +63,17 @@ const Header = () => {
                                         <a href=" https://techcoach4u.wordpress.com/make-decisions-with-confidence/" target="_blank" rel="noopener noreferrer" className="nav-link">Resources</a>
                                     </li>
 
-                                    {/* <li className="nav-item">
+                                    <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
 
                                     <li className="nav-item">
                                         <Link to='/notification' className="nav-link">Notifications</Link>
-                                    </li> */}
+                                    </li> 
+                                    
+                                    <li className="nav-item">
+                                        <Link to='/profile' className="nav-link">Profile</Link>
+                                    </li>
                                     
                                     <li className="nav-item">
                                         <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>

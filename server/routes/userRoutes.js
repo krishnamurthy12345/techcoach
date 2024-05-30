@@ -1,19 +1,18 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const getConnection = require('../Models/database');
-
 const router = express.Router();
 
-router.post('/api/users', async (req, res) => {
-    // User creation logic
-});
+const userController = require("../Controllers/usercontroller.js");
 
-router.get('/api/users/:id', async (req, res) => {
-    // User retrieval logic
-});
+const authMiddleware = require("../Utility/AuthMiddleware.js");
+const createUserKey = require("../Utility/CreateUserKey");
 
-router.put('/api/users/:id', async (req, res) => {
-    // User update logic
-});
+router.use(authMiddleware);
+router.use(createUserKey);
+
+router.get("/profile", userController.getUserList);
+
+router.post("/data",userController.postGeneralProfile);
+router.get("/data",userController.getProfile);
+router.put("/data",userController.putProfile);
 
 module.exports = router;

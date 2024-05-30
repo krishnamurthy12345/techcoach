@@ -7,20 +7,16 @@ import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/Home';
 import Header from './Components/Header';
 import Dashboard from './Components/DashBoard/Dashboard';
-// import Error from './Components/Error';
-import BasicInform from './Components/pages/Basic_Inform.js';
-import Personal from './Components/pages/Personal_Inform.js';
-import Read from './Components/pages/Profile_Table/Read';
-// import View from './Components/pages/Profile_Table/View';
 import Decision from './Components/pages/Decision/Decision.js';
 import Readd from './Components/pages/Decision/Readd.js';
 import View from './Components/pages/Decision/View.js';
-import Profile from './Components/DashBoard/Profile.js';
+import Profile from './Components/pages/Profile_Table/Profile.js';
 import InnerCircle from './Components/Group/InnerGroup.js';
 import MultipleMemberGroup from './Components/Group/MultipleMemberGroup.js';
 import DisplayInnerCircle from './Components/Group/DisplayInnerCircle.js';
 import AcceptOrNot from './Components/Group/AcceptOrNot.js';
 import Notification from './Components/Notification/Notification.js';
+import ProfileTab from './Components/pages/Profile_Table/ProfileTab.js';
 
 function App() {
   console.log("one is working")
@@ -41,15 +37,13 @@ function App() {
       <Routes>
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
-        {/* <Route path='/login' element={<Login />} /> */}
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/decision' element={<Decision />} />
 
         {/* Profile Routes */}
-        <Route path='/basic' element={<BasicInform />} />
-        <Route path='/personal' element={<Personal />} />
-        <Route path='/read' element={<Read />} />
+        <Route path='/profiletab' element={<ProfileTab />} />
+        {/* <Route path='/read' element={<ProfileTab />} /> */}
         {/* <Route path='/view' element={<View />} /> */}
 
         {/* Decision Routes */}

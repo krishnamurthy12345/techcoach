@@ -27,7 +27,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', authRoutes);
-app.use('/', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api', decisionRoutes);
 app.use('/group', groupRoutes);
 

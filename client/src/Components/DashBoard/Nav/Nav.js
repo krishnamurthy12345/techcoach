@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Nav.css';
+import { useNavigate } from 'react-router-dom';
 
 const Nav = () => {
+  const navigate=useNavigate();
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
-  const loggedInUserId =
+  let loggedInUserId ;
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,7 +90,7 @@ const Nav = () => {
               <tr>
                 <th>Decision Name</th>
                 <th>Decision Due Date</th>
-                <th>Decision Taken Date</th>
+                {/* <th>Decision Taken Date</th> */}
                 <th>Decision Details</th>
               </tr>
             </thead>
@@ -97,7 +99,7 @@ const Nav = () => {
                 <tr key={index}>
                   <td>{decision.decision_name}</td>
                   <td>{new Date(decision.decision_due_date).toLocaleDateString()}</td>
-                  <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString():'No Decision Date Taken'}</td>
+                  {/* <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString():'No Decision Date Taken'}</td> */}
                   <td>{decision.user_statement}</td>
                 </tr>
               ))}
