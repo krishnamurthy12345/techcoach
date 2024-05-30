@@ -225,9 +225,8 @@ const View = () => {
                                     <Typography variant="caption" color="textSecondary">
                                         {memberComment.displayname} | {memberComment.email} | 
                                         {memberComment.created_at === memberComment.updated_at
-                                            ? " "
-                                            : " Edited "}{' '}
-                                        {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}
+                                                        ? <span> {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}</span>
+                                                        : <span> Edited at {formatDistanceToNow(parseISO(memberComment.updated_at), { addSuffix: true })}</span>}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -246,7 +245,6 @@ const View = () => {
                                                     {authorComment.created_at === authorComment.updated_at
                                                         ? <span> {formatDistanceToNow(parseISO(authorComment.created_at), { addSuffix: true })}</span>
                                                         : <span> Edited at {formatDistanceToNow(parseISO(authorComment.updated_at), { addSuffix: true })}</span>}
-                                                    
                                                 </Typography>
                                             </Box>
                                             <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>

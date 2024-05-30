@@ -604,7 +604,16 @@ const getSharedDecisions = async (req, res) => {
             const { decisionId, groupId } = sharedDecision;
 
             const decisionDetailsQuery = await conn.query(`
-                SELECT * FROM techcoach_lite.techcoach_decision 
+                SELECT decision_id,
+                       user_id,
+                       decision_name,
+                       decision_reason,
+                       created_by,
+                       creation_date,
+                       decision_due_date,
+                       decision_taken_date,
+                       user_statement
+                FROM techcoach_lite.techcoach_decision
                 WHERE decision_id = ?
             `, [decisionId]);
 
@@ -614,29 +623,44 @@ const getSharedDecisions = async (req, res) => {
 
             const decisionDetails = decisionDetailsQuery[0];
 
+            const userQuery = await conn.query(`
+                SELECT user_id, displayname, email 
+                FROM techcoach_lite.techcoach_task 
+                WHERE user_id = ?
+            `, [decisionDetails.user_id]);
+
+            if (userQuery.length > 0) {
+                decisionDetails.userDetails = userQuery[0];
+            } else {
+                decisionDetails.userDetails = null;
+            }
+
             const groupDetails = await conn.query(`
-                SELECT created_by FROM techcoach_lite.techcoach_groups 
+                SELECT created_by 
+                FROM techcoach_lite.techcoach_groups 
                 WHERE id = ?
             `, [groupId]);
 
-            const userDetailsQuery = await conn.query(`
-                SELECT user_id, displayname, email FROM techcoach_lite.techcoach_task 
+            const groupUserDetailsQuery = await conn.query(`
+                SELECT user_id, displayname, email 
+                FROM techcoach_lite.techcoach_task 
                 WHERE user_id = ?
             `, [groupDetails[0].created_by]);
 
-            if (userDetailsQuery.length === 0) {
+            if (groupUserDetailsQuery.length === 0) {
                 continue;
             }
 
-            const userDetails = userDetailsQuery[0];
-            const keyData = undefined + userDetails.displayname + userDetails.email;
+            const groupUserDetails = groupUserDetailsQuery[0];
+            const keyData = undefined + groupUserDetails.displayname + groupUserDetails.email;
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
             decisionDetails.decision_name = decryptText(decisionDetails.decision_name, encryptedKey);
             decisionDetails.user_statement = decryptText(decisionDetails.user_statement, encryptedKey);
 
             const decisionReasonQuery = await conn.query(`
-                SELECT decision_reason_text FROM techcoach_lite.techcoach_reason 
+                SELECT decision_reason_text 
+                FROM techcoach_lite.techcoach_reason 
                 WHERE decision_id = ?
             `, [decisionId]);
 
@@ -650,7 +674,7 @@ const getSharedDecisions = async (req, res) => {
 
             const sharedInfo = await conn.query(`
                 SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
-                t.user_id, t.displayname, t.email
+                       t.user_id, t.displayname, t.email
                 FROM techcoach_lite.techcoach_conversations d
                 LEFT JOIN techcoach_lite.techcoach_task t
                 ON d.groupMember = t.user_id
@@ -662,7 +686,7 @@ const getSharedDecisions = async (req, res) => {
             if (commentIds.length > 0) {
                 const replies = await conn.query(`
                     SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
-                    t.user_id, t.displayname, t.email
+                           t.user_id, t.displayname, t.email
                     FROM techcoach_lite.techcoach_conversations d
                     LEFT JOIN techcoach_lite.techcoach_task t
                     ON d.groupMember = t.user_id
@@ -678,7 +702,7 @@ const getSharedDecisions = async (req, res) => {
                 sharedDecision,
                 decisionDetails,
                 groupDetails: groupDetails[0],
-                userDetails,
+                groupUserDetails,
                 comments: sharedInfo
             });
         }
@@ -694,6 +718,7 @@ const getSharedDecisions = async (req, res) => {
         if (conn) conn.release();
     }
 };
+
 
 
 const postCommentForDecision = async (req, res) => {

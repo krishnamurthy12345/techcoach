@@ -73,7 +73,6 @@ const SharedDecision = () => {
     };
 
     const handleSaveEdit = async (commentId, editedContent) => {
-        console.log(`Save edited comment with id ${commentId} and content: ${editedContent}`);
         try {
             await EditCommentAdded(commentId, editedContent);
             fetchSharedDecisions();
@@ -91,10 +90,10 @@ const SharedDecision = () => {
         setIsPopoverOpen(false);
     };
 
-    console.log("sharedDecisions", sharedDecisions);
+    console.log("sharedddddddd", sharedDecisions);
 
     return (
-        <Box p={3} style={{ ...(isPopoverOpen && { filter: 'blur(2px)' })}}>
+        <Box p={3}>
             {sharedDecisions.length === 0 ? (
                 <Typography variant="h5" align="center" mt={2} mb={2}>
                     No shared decisions
@@ -103,34 +102,45 @@ const SharedDecision = () => {
                 sharedDecisions.map((item, index) => (
                     <Card key={index} variant="outlined" mt={2} mb={2} style={{ margin: "1rem" }}>
                         <CardContent>
-                            <Typography variant="h6">
-                                Decision: {item.decisionDetails.decision_name}
-                            </Typography>
-                            <Typography variant="body2">
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item>
+                                    <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{item.decisionDetails.userDetails.displayname[0]}</Avatar>
+                                </Grid>
+                                <Grid item xs>
+                                    <Typography variant="h6">
+                                        Decision: {item.decisionDetails.decision_name}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {item.decisionDetails.userDetails.displayname} | {item.decisionDetails.userDetails.email}
+                                    </Typography>
+                                   
+                                </Grid>
+                            </Grid>
+                            <Typography variant="body1" mt={2}>
                                 Reasons:
                             </Typography>
                             {item.decisionDetails.reasons && item.decisionDetails.reasons.length > 0 ? (
                                 item.decisionDetails.reasons.map((reason, reasonIndex) => (
-                                    <Typography key={reasonIndex} variant="body2" style={{ marginLeft: '16px' }}>
+                                    <Typography key={reasonIndex} variant="body1" style={{ marginLeft: '16px' }}>
                                         - {reason}
                                     </Typography>
                                 ))
                             ) : (
-                                <Typography variant="body2" style={{ marginLeft: '16px' }}>
+                                <Typography variant="body1" style={{ marginLeft: '16px' }}>
                                     No reasons provided
                                 </Typography>
                             )}
-                            <Typography variant="body2">
+                            <Typography variant="body1">
                                 Due Date: {new Date(item.decisionDetails.decision_due_date).toLocaleDateString()}
                             </Typography>
                             {item.decisionDetails.decision_taken_date ? (
-                                <Typography variant="body2">
+                                <Typography variant="body1">
                                     Taken Date: {new Date(item.decisionDetails.decision_taken_date).toLocaleDateString()}
                                 </Typography>
                             ) : (
                                 <></>
                             )}
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography variant="body1" color="textSecondary">
                                 User Statement: {item.decisionDetails.user_statement}
                             </Typography>
                         </CardContent>
@@ -138,24 +148,24 @@ const SharedDecision = () => {
                             <Typography variant="h6">Comments:</Typography>
                             {item.comments.map((comment, commentIndex) => (
                                 <Box key={commentIndex} mt={2} mb={2}>
-                                    <Grid container spacing={2} alignItems="center" >
+                                    <Grid container spacing={2} alignItems="center">
                                         <Grid item>
-                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{comment.displayname[0]}</Avatar>
+                                            <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
                                         </Grid>
                                         <Grid item xs>
                                             <Typography variant="body1">{comment.comment}</Typography>
                                             <Typography variant="caption" color="textSecondary">
-                                                {comment.displayname} | {comment.email} |  
+                                                {comment.displayname} | {comment.email} |
                                                 {comment.created_at === comment.updated_at
-                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                    : <span> Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
-                                                    
+                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                    : <span> Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <IconButton onClick={() => handleEdit(comment.id, comment.comment)}>
                                                 <EditIcon sx={{ color: "black" }} />
                                             </IconButton>
+                                            {/* Uncomment below to enable delete functionality */}
                                             {/* <IconButton onClick={() => handleDeleteComment(comment.id)}>
                                                 <DeleteIcon style={{ color: "red" }} />
                                             </IconButton> */}
@@ -164,7 +174,7 @@ const SharedDecision = () => {
                                     {comment.replies && comment.replies.length > 0 && (
                                         <Box mt={1} ml={4} pl={2}>
                                             {comment.replies.map((reply, replyIndex) => (
-                                                <Box key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{backgroundColor:"#DDE6ED"}}>
+                                                <Box key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{ backgroundColor: "#DDE6ED" }}>
                                                     <Grid container spacing={2} alignItems="center">
                                                         <Grid item>
                                                             <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{reply.displayname[0]}</Avatar>
@@ -172,12 +182,11 @@ const SharedDecision = () => {
                                                         <Grid item xs>
                                                             <Typography variant="body1">{reply.comment}</Typography>
                                                             <Typography variant="caption" color="textSecondary">
-                                                                {reply.displayname} | {reply.email} | 
+                                                                {reply.displayname} | {reply.email} |
                                                                 {reply.created_at === reply.updated_at
                                                                     ? <span> {formatDistanceToNow(parseISO(reply.created_at), { addSuffix: true })}</span>
                                                                     : <span> Edited {formatDistanceToNow(parseISO(reply.updated_at), { addSuffix: true })}</span>}
-                                                    
-                                                                </Typography>
+                                                            </Typography>
                                                         </Grid>
                                                     </Grid>
                                                 </Box>
@@ -206,9 +215,9 @@ const SharedDecision = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
-                                    style={{ marginTop: '8px' }}
+                                    style={{ marginTop: "1rem" }}
                                 >
-                                    Add Comment
+                                    Post Comment
                                 </Button>
                             </Box>
                         </CardContent>
@@ -218,37 +227,42 @@ const SharedDecision = () => {
 
             <Popover
                 open={isPopoverOpen}
-                anchorEl={null}
+                anchorEl={anchorEl}
                 onClose={handlePopoverClose}
                 anchorOrigin={{
-                    vertical: 'left',
-                    horizontal: 'center',
+                    vertical: 'bottom',
+                    horizontal: 'left',
                 }}
                 transformOrigin={{
-                    vertical: 'left',
-                    horizontal: 'center',
-                }}
-                PaperProps={{
-                    sx: {
-                        position: 'fixed',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        p: 2
-                    }
+                    vertical: 'top',
+                    horizontal: 'left',
                 }}
             >
-                <Box>
-                    <Typography variant="h6" style={{ marginBottom: "1rem" }}><b>Edit Comment</b></Typography>
-                    <TextField
-                        multiline
+                <Box p={2}>
+                    <Typography variant="h6">Edit Comment</Typography>
+                    <input
                         fullWidth
+                        variant="outlined"
                         value={editedCommentContent}
                         onChange={(e) => setEditedCommentContent(e.target.value)}
+                        style={{
+                            height: "3rem",
+                            padding: "1rem",
+                            width: "100%",
+                            maxWidth: "100%",
+                            marginRight: "0.5rem"
+                        }}
                     />
-                    <Button onClick={() => handleSaveEdit(editingCommentId, editedCommentContent)}>
-                        Save
-                    </Button>
+                    <Box mt={2} display="flex" justifyContent="flex-end">
+                        <Button onClick={handlePopoverClose} style={{ marginRight: '8px' }}>Cancel</Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleSaveEdit(editingCommentId, editedCommentContent)}
+                        >
+                            Save
+                        </Button>
+                    </Box>
                 </Box>
             </Popover>
             <ToastContainer />
