@@ -755,6 +755,7 @@ const postCommentForDecision = async (req, res) => {
 
 const getComments = async (req, res) => {
     const decisionId = req.query.decisionId;
+    let userId = req.user.id;
     let conn;
 
     try {
@@ -784,9 +785,15 @@ const getComments = async (req, res) => {
 
         const comments = await conn.query(commentsQuery, [decisionId]);
 
-        console.log("comments", comments);
+        // Map through the comments and add type_of_user property
+        const updatedComments = comments.map(comment => ({
+            ...comment,
+            type_of_user: comment.groupMember === userId ? 'author' : 'member'
+        }));
 
-        res.status(200).json({ comments });
+        console.log("comments", updatedComments);
+
+        res.status(200).json({ comments: updatedComments });
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ error: 'An error occurred while fetching comments' });
@@ -794,6 +801,7 @@ const getComments = async (req, res) => {
         if (conn) conn.release();
     }
 };
+
 
 const getSharedComments = async (req, res) => {
     const userId = req.user.id;

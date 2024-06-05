@@ -15,7 +15,8 @@ const GroupSelection = () => {
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem" }}>
-            <Button onClick={navigateToInnerCircle}>Inner Circle</Button>
+            <Button style={{ margin: '1rem', color:"black", border:"0.1rem solid #27374D", backgroundColor:"#27374D", color:"White", padding:"0.5rem" }}
+                                         onClick={navigateToInnerCircle}>Inner Circle</Button>
             {/* <Button onClick={navigateToGroup}>Group</Button> */}
         </div>
     );

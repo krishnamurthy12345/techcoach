@@ -6,7 +6,6 @@ input[type="textt"]{
     margin-left: 300px;
 }
 
-
 .styled-table{
     margin: auto;
     font-size: 0.9em;
@@ -149,3 +148,41 @@ input[type="textt"]{
       margin-left: 10px;
     }
   }
+
+.custom-switch {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-switch input {
+  display: none;
+}
+
+.custom-switch .slider {
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 34px;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+.custom-switch .slider:before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: white;
+  transition: transform 0.3s;
+  transform: translateX(1px);
+}
+
+.custom-switch input:checked + .slider {
+  background-color: #526D82;
+}
+
+.custom-switch input:checked + .slider:before {
+  transform: translateX(21px);
+}

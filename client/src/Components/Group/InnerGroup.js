@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, TextField } from '@mui/material';
+import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, TextField, Grid, Button } from '@mui/material';
 import { getUserListForInnerCircle, innerCircleCreation } from './Network_Call';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -48,100 +48,94 @@ const InnerGroup = () => {
     };
 
     return (
-        <div style={{ margin: "1rem", display: "flex", justifyContent: "center", gap: "5rem" }}>
-            <div style={{ width: "30rem" }}>
-                <Typography variant="h6">List of Members</Typography>
-                <input
-                    label="Search by email"
-                    variant="outlined"
-                    fullWidth
-                    value={searchQuery}
-                    onChange={handleSearchInputChange}
-                    style={{
-                        height: "3rem",
-                        padding: "1rem",
-                        width: "100%",
-                        maxWidth: "100%",
-                        marginTop: "1rem",
-                        marginBottom:"1rem",
-                        border:"0.1rem solid #526D82",
-                        borderRadius:"0.5rem"
-                    }}
-                />
-                <List>
-                    {users.filter(user => user.email === searchQuery).map((user) => (
-                        <ListItem key={user.user_id} button>
-                            <ListItemAvatar>
-                                <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>{user.displayname.charAt(0)}</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary={user.displayname} secondary={user.email} />
-                            <ListItemSecondaryAction>
-                                <Checkbox
-                                    edge="end"
-                                    onChange={(event) => handleCheckboxChange(event, user)}
-                                    name={user.displayname}
-                                />
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    ))}
-                </List>
-            </div>
-            <div style={{ width: "30rem" }}>
-                <Typography variant="h6">Selected Names:</Typography>
-                <Paper elevation={3} style={{ padding: "1rem", marginTop: "1rem" }}>
-                    {selectedUsers.length > 0 ? (
-                        <>
-                            <Box display="flex" justifyContent="center" alignItems="center" flexWrap="wrap" sx={{ marginTop: "2rem" }}>
-                                {selectedUsers.slice(0, 5).map((user, index) => (
-                                    <Avatar
-                                        key={index}
+        <Box sx={{ margin: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <Grid container spacing={2} sx={{ maxWidth: '1000px' }}>
+                <Grid item xs={12} md={6}>
+                    <Typography variant="h6">List of Members</Typography>
+                    <input
+                        label="Search by email"
+                        variant="outlined"
+                        fullWidth
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                        style={{
+                            width:"100%",
+                            borderRadius:"0.5rem",
+                            padding:"1rem"
+                        }}
+                    />
+                    <List>
+                        {users.filter(user => user.email === searchQuery).map((user) => (
+                            <ListItem key={user.user_id} button>
+                                <ListItemAvatar>
+                                    <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>{user.displayname.charAt(0)}</Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary={user.displayname} secondary={user.email} />
+                                <ListItemSecondaryAction>
+                                    <Checkbox
+                                        edge="end"
+                                        onChange={(event) => handleCheckboxChange(event, user)}
+                                        name={user.displayname}
+                                    />
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Typography variant="h6">Selected Names:</Typography>
+                    <Paper elevation={3} sx={{ padding: 2, mt: 2 }}>
+                        {selectedUsers.length > 0 ? (
+                            <>
+                                <Box display="flex" justifyContent="center" alignItems="center" flexWrap="wrap" sx={{ marginTop: "2rem" }}>
+                                    {selectedUsers.slice(0, 5).map((user, index) => (
+                                        <Avatar
+                                            key={index}
+                                            sx={{
+                                                backgroundColor: "#526D82",
+                                                width: 40,
+                                                height: 40,
+                                                position: "relative",
+                                                left: `-${index * 10}px`,
+                                                zIndex: selectedUsers.length - index,
+                                                border: "0.2rem solid white"
+                                            }}
+                                        >
+                                            {user.displayname.charAt(0)}
+                                        </Avatar>
+                                    ))}
+                                    {selectedUsers.length > 5 && (
+                                        <>
+                                            +{selectedUsers.length - 5}
+                                        </>
+                                    )}
+                                </Box>
+                                <Box mt={2}>
+                                    {selectedUsers.map((user, index) => (
+                                        <Typography key={index}>{user.displayname}</Typography>
+                                    ))}
+                                </Box>
+                                <Box mt={2} display="flex" justifyContent="flex-end">
+                                    <Button 
+                                        variant="contained" 
                                         sx={{
-                                            backgroundColor: "#526D82",
-                                            width: 40,
-                                            height: 40,
-                                            position: "relative",
-                                            left: `-${index * 10}px`,
-                                            zIndex: selectedUsers.length - index,
-                                            border: "0.2rem solid white"
-                                        }}
+                                            backgroundColor: "#526D82", 
+                                            borderRadius: "0.5rem", 
+                                            color: "white"
+                                        }} 
+                                        onClick={handleSubmit}
                                     >
-                                        {user.displayname.charAt(0)}
-                                    </Avatar>
-                                ))}
-                                {selectedUsers.length > 5 && (
-                                    <>
-                                        +{selectedUsers.length - 5}
-                                    </>
-                                )}
-                            </Box>
-                            <Box mt={2}>
-                                {selectedUsers.map((user, index) => (
-                                    <Typography key={index}>{user.displayname}</Typography>
-                                ))}
-                            </Box>
-                            <Box mt={2}>
-                                <button 
-                                    style={{
-                                        backgroundColor: "#526D82", 
-                                        borderRadius: "0.5rem", 
-                                        width: "5rem", 
-                                        height: "3rem", 
-                                        border: "None", 
-                                        color: "white", 
-                                        marginLeft: "23rem"
-                                    }} 
-                                    onClick={handleSubmit}
-                                >
-                                    Submit
-                                </button>
-                            </Box>
-                        </>
-                    ) : (
-                        <Typography>No names selected</Typography>
-                    )}
-                </Paper>
-            </div>
-        </div>
+                                        Submit
+                                    </Button>
+                                </Box>
+                            </>
+                        ) : (
+                            <Typography>No names selected</Typography>
+                        )}
+                    </Paper>
+                </Grid>
+            </Grid>
+        </Box>
     );
 };
 
