@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Pagination, OverlayTrigger, Tooltip as BootstrapTooltip } from 'react-bootstrap';
-import { Avatar, Tooltip as MuiTooltip } from '@mui/material';
-import { FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { Pagination, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress } from '@mui/material';
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
 import 'react-toastify/dist/ReactToastify.css';
@@ -73,7 +70,7 @@ const Readd = () => {
     }
   }).filter(decision => {
     return (
-      decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
     );
   });
@@ -83,10 +80,6 @@ const Readd = () => {
   const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
 
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -105,120 +98,134 @@ const Readd = () => {
     }
   };
 
-  return (
-    <div className='styled-table'>
-      <div className='heAd'>
-        <Link to='/decision'>
-          <button className='decision'>Add Decision</button>
-        </Link>
-        <div className='togglebutton'>
-          <OverlayTrigger
-            placement="bottom"
-            overlay={<BootstrapTooltip id="tooltip">Show pending decisions</BootstrapTooltip>}
-          >
-            <div
-              type="checkbox"
-              onClick={() => setShowCompletedDecisions(!showCompletedDecisions)}
-            >
-              {showCompletedDecisions ? <FaToggleOn /> : <FaToggleOff />}
-            </div>
-          </OverlayTrigger>
-        </div>
-        <input
-          className='texttt'
-          placeholder="Search by decision name or tag name"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Decision Name</th>
-            <th>Decision Due Date</th>
-            <th>Decision Taken Date</th>
-            <th>Decision Details</th>
-            <th>Tags</th>
-            <th>Decision Reasons</th>
-            <th>Comments</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentRecords.map((decision, index) => (
-            <tr key={decision.decision_id}>
-              <th scope='row'>{indexOfFirstRecord + index + 1}</th>
-              <td>{decision.decision_name}</td>
-              <td>{new Date(decision.decision_due_date).toLocaleDateString()}</td>
-              <td>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : "--"}</td>
-              <td>{decision.user_statement}</td>
-              <td>{decision.tagsArray && decision.tagsArray.join(', ')}</td>
-              <td>
-                {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
-                  <div key={reason}>{reason}</div>
-                ))}
-              </td>
-              <td>
-                {comments[decision.decision_id] ? (
-                  comments[decision.decision_id].length > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      {comments[decision.decision_id].slice(0, 2).map((comment, commentIndex) => (
-                        <div key={commentIndex} className="comment-box" style={{ display: 'flex', alignItems: 'center'}}>
-                          <div className="comment-avatar" >
-                            <MuiTooltip title={comment.displayname} arrow>
-                              <Avatar
-                              sx={{
-                                            backgroundColor: "#526D82",
-                                            width: 40,
-                                            height: 40,
-                                            position: "relative",
-                                            left: `-${commentIndex * 10}px`,
-                                            zIndex: comments.length - index,
-                                            border: "0.1rem solid white"
-                                        }}>{comment.displayname[0]}</Avatar>
-                            </MuiTooltip>
-                          </div>
-                        </div>
-                      ))}
-                      {comments[decision.decision_id].length > 2 && (
-                        <div style={{ marginLeft: '0.1rem' }}>
-                          +{comments[decision.decision_id].length - 2}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    "No Comments Found"
-                  )
-                ) : (
-                  "Loading comments..."
-                )}
-              </td>
-              <td className='action'>
-                <Link to={`/decision/${decision.decision_id}`}>
-                  <MdModeEdit className='btn-edit' />
-                </Link>
-                <MdDelete onClick={() => deleteDecision(decision.decision_id)} className='btn-delete' />
-                <Link to={`/views/${decision.decision_id}`}>
-                  <GrFormView className='btn-view' />
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <Pagination>
-        <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-        {pageNumbers.map(number => (
-          <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-            {number}
-          </Pagination.Item>
-        ))}
-        <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pageNumbers.length} />
-      </Pagination>
+  const getMemberCommentCount = (decisionId) => {
+    if (comments[decisionId]) {
+      return comments[decisionId].filter(comment => comment.type_of_user === 'member').length;
+    }
+    return 0;
+  };
 
+  return (
+    <Box sx={{ padding: 5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+        <Link to='/decision'>
+          <Button variant="contained"  
+          sx={{
+                backgroundColor:"#526D82",
+                '&:hover': {
+                  backgroundColor: "#405060", 
+                },
+              }}
+              >Add Decision</Button>
+        </Link>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ marginRight: '0.5rem',marginLeft:"1rem", color:"#5c5c5b" }}>Show pending decisions</label>
+          <label className="custom-switch">
+            <input 
+              type="checkbox" 
+              checked={showCompletedDecisions}
+              onChange={() => setShowCompletedDecisions(!showCompletedDecisions)} 
+            />
+            <span className="slider"></span>
+          </label>
+          <Box
+            component="input"
+            placeholder="Search by decision name or tag name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              marginLeft: 2,
+              borderRadius: "0.5rem",
+              border: "0.1rem solid #526D82",
+              padding: "0.4rem",
+              width: '100%', 
+              maxWidth: "10rem", 
+              '@media (max-width: 600px)': { 
+                maxWidth: "5rem",
+              },
+              '&:focus': {
+                outline: "none"
+              },
+            }}
+          />
+        </Box>
+      </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead sx={{
+            backgroundColor:"#526D82"
+          }}
+          >
+            <TableRow>
+              <TableCell sx={{color:"white"}}>#</TableCell>
+              <TableCell sx={{color:"white"}}>Decision Name</TableCell>
+              <TableCell sx={{color:"white"}}>Decision Due Date</TableCell>
+              <TableCell sx={{color:"white"}}>Decision Taken Date</TableCell>
+              <TableCell sx={{color:"white"}}>Decision Details</TableCell>
+              <TableCell sx={{color:"white"}}>Tags</TableCell>
+              <TableCell sx={{color:"white"}}>Decision Reasons</TableCell>
+              <TableCell sx={{color:"white"}}>Comments</TableCell>
+              <TableCell sx={{color:"white"}}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentRecords.map((decision, index) => (
+              <TableRow key={decision.decision_id}>
+                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                <TableCell>{decision.decision_name}</TableCell>
+                <TableCell>{new Date(decision.decision_due_date).toLocaleDateString()}</TableCell>
+                <TableCell>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : "--"}</TableCell>
+                <TableCell>{decision.user_statement}</TableCell>
+                <TableCell>{decision.tagsArray && decision.tagsArray.join(', ')}</TableCell>
+                <TableCell>
+                  {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
+                    <Typography variant="body2" key={reason}>{reason}</Typography>
+                  ))}
+                </TableCell>
+                <TableCell>
+                  {comments[decision.decision_id] ? (
+                    comments[decision.decision_id].length > 0 ? (
+                      <Box sx={{ display: 'flex' }}>
+                        <Typography variant="body2">{getMemberCommentCount(decision.decision_id)} comments</Typography>
+                      </Box>
+                    ) : (
+                      "No Comments Found"
+                    )
+                  ) : (
+                    <CircularProgress size={24} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <IconButton component={Link} to={`/decision/${decision.decision_id}`} style={{ color: '#526D82' }}>
+                    <MdModeEdit />
+                  </IconButton>
+                  <IconButton onClick={() => deleteDecision(decision.decision_id)} style={{ color: '#526D82' }}>
+                    <MdDelete />
+                  </IconButton>
+                  <IconButton component={Link} to={`/views/${decision.decision_id}`} style={{ color: '#526D82' }}>
+                    <GrFormView />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+      <Pagination
+        count={totalPages}
+        page={currentPage}
+        onChange={(e, page) => handlePageChange(page)}
+        sx={{
+          '& .MuiPaginationItem-page.Mui-selected': {
+            backgroundColor: '#526D82',
+            color: '#fff',
+          },
+        }}
+      />
+    </Box>
       <ToastContainer />
-    </div>
+    </Box>
   );
 };
 

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box } from '@mui/material';
-import { AssignmentTurnedIn, Height, HourglassEmpty, Share } from '@mui/icons-material';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
 import './Nav.css';
-import { useNavigate } from 'react-router-dom';
 
 const Nav = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +14,7 @@ const Nav = () => {
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
   const [sharedDecisionsCount, setSharedDecisionsCount] = useState(0);
   let loggedInUserId;
-  
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -59,6 +57,8 @@ const Nav = () => {
         });
 
         const sharedDecisions = response.data.result.length;
+        console.log("countttt", sharedDecisions);
+
         setSharedDecisionsCount(sharedDecisions)
         //console.log("response from shared Decision", response);
       } catch (error) {
@@ -95,9 +95,9 @@ const Nav = () => {
   };
 
   return (
-    <div style={{ maxWidth: "95%" }}>
-      <Grid container spacing={4} style={{ margin: "1rem" }}>
-        <Grid item xs={12} sm={4}>
+    <div style={{ maxWidth: "95%", display:"flex", flexDirection:"column", gap:"1rem", margin:"3rem"}}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<AssignmentTurnedIn />}
             title="Total Decisions"
@@ -105,7 +105,7 @@ const Nav = () => {
             onClick={navigateToTotalDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<HourglassEmpty />}
             title="Pending Decisions"
@@ -113,7 +113,7 @@ const Nav = () => {
             onClick={togglePendingDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<Share />}
             title="Shared Decisions"
@@ -122,8 +122,8 @@ const Nav = () => {
           />
         </Grid>
       </Grid>
-      <Grid container spacing={4} style={{ margin: "1rem" }}>
-        <Grid item xs={12} sm={12}>
+      <Grid container spacing={4}>
+        <Grid item xs={12}>
           {showPendingDecisions && (
             <div>
               <Typography variant="h6" style={{ marginBottom: "1rem" }}>Pending Decisions</Typography>
@@ -177,8 +177,8 @@ const CustomCard = ({ icon, title, count, onClick }) => {
     border: '1px solid #526D82',
     borderRadius: '8px',
     backgroundColor: hovered ? '#d7ebfc' : '#ffffff',
-    width: hovered ? "100%" : "95%",
-    height: hovered ? "100%" : "95%",
+    width: '100%',
+    height: '100%',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -196,12 +196,13 @@ const CustomCard = ({ icon, title, count, onClick }) => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         {icon}
-        <Typography variant="h5" sx={{ marginLeft: '8px' }}>{title}</Typography>
+        <Typography variant="h5">{title}</Typography>
       </Box>
       <Box>
         <Typography variant="h4">{count}</Typography>
       </Box>
-</Card>
-);
+    </Card>
+  );
 };
+
 export default Nav;

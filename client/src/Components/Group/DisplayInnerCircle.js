@@ -119,133 +119,121 @@ const DisplayInnerCircle = () => {
     console.log("inner", innerCircleDetails);
 
     return (
-        <div style={{ minWidth: "50rem", margin: "5rem" }}>
-            <Card>
-                <Card.Body>
-                    <Card.Title>Inner Circle Details</Card.Title>
-                    <br />
-                    {errorMessage && errorMessage !== "No members in this inner circle" && (
-                        <Alert variant="danger" className="d-flex justify-content-between align-items-center">
-                            <span>{errorMessage}</span>
-                            <button
-                                onClick={handleShow}
-                                style={{
-                                    marginLeft: 'auto',
-                                    backgroundColor: isHovered ? '#ffffff' : '#526D82',
-                                    color: isHovered ? '#000000' : '#ffffff',
-                                    padding: "0.5rem",
-                                    borderRadius: "0.5rem",
-                                    border: "none"
-                                }}
-                                variant="light"
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                Create Inner Circle
-                            </button>
-                        </Alert>
-                    )}
-                    <Row>
-                        {loading ? (
-                            <Container className="text-center">
-                                <Spinner animation="border" />
-                                <p>Loading...</p>
-                            </Container>
-                        ) : (
-                            (!errorMessage || errorMessage === "No members in this inner circle" ) && innerCircleDetails && (
-                                <>
-                                    <Col>
-                                        <h5>Members:</h5>
-                                        <ListGroup>
-                                            {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
-                                                innerCircleDetails.members.map(member => (
-                                                    <ListGroup.Item
-                                                        key={member.user_id}
-                                                        variant={getVariant(member.status)}
-                                                    >
-                                                        {member.displayname} ({member.email}) - {member.status === "Accepted" ? "Accepted" :"Not Accepted"}
-                                                        <Button
-                                                            variant="danger"
-                                                            size="sm"
-                                                            className="float-right"
-                                                            onClick={() => handleRemoveMember(member.user_id)}
-                                                            style={{ margin: '1rem' }}
-                                                            disabled={loadingRemove[member.user_id]}
-                                                        >
-                                                            {loadingRemove[member.user_id] ? (
-                                                                <Spinner
-                                                                    as="span"
-                                                                    animation="border"
-                                                                    size="sm"
-                                                                    role="status"
-                                                                    aria-hidden="true"
-                                                                />
-                                                            ) : (
-                                                                'Remove'
-                                                            )}
-                                                        </Button>
-                                                    </ListGroup.Item>
-                                                ))
-                                            ) : (
-                                                <ListGroup.Item>No members found</ListGroup.Item>
-                                            )}
-                                        </ListGroup>
-                                    </Col>
-                                    <Col>
-                                        <h5>Add Member:</h5>
-                                        <input
-                                            type="text"
-                                            placeholder="Search by email"
-                                            value={searchQuery}
-                                            onChange={handleSearchInputChange}
-                                            style={{ marginBottom: '1rem' }}
-                                        />
-                                        <ListGroup>
-                                            {potentialMembers.filter(member => member.email === searchQuery).map(member => (
-                                                <ListGroup.Item key={member.user_id}>
-                                                    {member.displayname} ({member.email})
-                                                    <Button
-                                                        variant="primary"
+        <div style={{ margin: "1rem" }}>
+        <Card style={{
+        maxWidth: "85rem",
+        margin: "2rem auto",
+        transform: isHovered ? 'scale(1)' : 'none'
+    }}>
+            <Card.Body>
+                <Card.Title>Inner Circle Details</Card.Title>
+                <br />
+                {errorMessage && errorMessage !== "No members in this inner circle" && (
+                    <Alert variant="danger">
+                        {errorMessage}
+                        <button
+                            onClick={handleShow}
+                            style={{ backgroundColor: '#526D82', color: '#ffffff', padding: "0.5rem", borderRadius: "0.5rem", border: "none", width: "100%", marginTop: "1rem" }}
+                        >
+                            Create Inner Circle
+                        </button>
+                    </Alert>
+                )}
+                {loading ? (
+                    <Container className="text-center">
+                        <Spinner animation="border" />
+                        <p>Loading...</p>
+                    </Container>
+                ) : (
+                    (!errorMessage || errorMessage === "No members in this inner circle" ) && innerCircleDetails && (
+                        <div>
+                            <h5>Members:</h5>
+                            <ListGroup>
+                                {innerCircleDetails.members && innerCircleDetails.members.length > 0 ? (
+                                    innerCircleDetails.members.map(member => (
+                                        <ListGroup.Item
+                                            key={member.user_id}
+                                            variant={getVariant(member.status)}
+                                        >
+                                            {member.displayname} ({member.email}) - {member.status === "Accepted" ? "Accepted" :"Not Accepted"}
+                                            <Button
+                                                size="sm"
+                                                className="float-right"
+                                                onClick={() => handleRemoveMember(member.user_id)}
+                                                disabled={loadingRemove[member.user_id]}
+                                                style={{ margin: '1rem', color:"black", border:"0.1rem solid #DC3545", backgroundColor:"#DC3545", color:"White", padding:"0.5rem" }}
+                                            >
+                                                {loadingRemove[member.user_id] ? (
+                                                    <Spinner
+                                                        as="span"
+                                                        animation="border"
                                                         size="sm"
-                                                        className="float-right"
-                                                        onClick={() => handleAddMember(member.user_id)}
-                                                        style={{ margin: '1rem' }}
-                                                        disabled={loadingAdd}
-                                                    >
-                                                        {loadingAdd ? (
-                                                            <Spinner
-                                                                as="span"
-                                                                animation="border"
-                                                                size="sm"
-                                                                role="status"
-                                                                aria-hidden="true"
-                                                            />
-                                                        ) : (
-                                                            'Add'
-                                                        )}
-                                                    </Button>
-                                                </ListGroup.Item>
-                                            ))}
-                                        </ListGroup>
-                                    </Col>
-                                </>
-                            )
-                        )}
-                    </Row>
-                </Card.Body>
-            </Card>
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    'Remove'
+                                                )}
+                                            </Button>
+                                        </ListGroup.Item>
+                                    ))
+                                ) : (
+                                    <ListGroup.Item>No members found</ListGroup.Item>
+                                )}
+                            </ListGroup>
+                            <br />
+                            <h5>Add Member:</h5>
+                            <input
+                                type="text"
+                                placeholder="Search by email"
+                                value={searchQuery}
+                                onChange={handleSearchInputChange}
+                                style={{ marginBottom: '1rem' }}
+                            />
+                            <ListGroup>
+                                {potentialMembers.filter(member => member.email === searchQuery).map(member => (
+                                    <ListGroup.Item key={member.user_id}>
+                                        {member.displayname} ({member.email})
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            className="float-right"
+                                            onClick={() => handleAddMember(member.user_id)}
+                                            disabled={loadingAdd}
+                                            style={{ margin: '1rem', color:"black", border:"0.1rem solid #DC3545", backgroundColor:"#DC3545", color:"White", padding:"0.5rem" }}
+                                        >
+                                            {loadingAdd ? (
+                                                <Spinner
+                                                    as="span"
+                                                    animation="border"
+                                                    size="sm"
+                                                    role="status"
+                                                    aria-hidden="true"
+                                                />
+                                            ) : (
+                                                'Add'
+                                            )}
+                                        </Button>
+                                    </ListGroup.Item>
+                                ))}
+                            </ListGroup>
+                        </div>
+                    )
+                )}
+            </Card.Body>
+        </Card>
 
-            <ShareModal
-                showModal={showModal}
-                handleClose={handleClose}
-                innerGroup={null}
-                innerCircleDetails={null}
-                decision={null}
-                id={null}
-                />
+        <ShareModal
+            showModal={showModal}
+            handleClose={handleClose}
+            innerGroup={null}
+            innerCircleDetails={null}
+            decision={null}
+            id={null}
+        />
 
-                <ToastContainer />
-            </div>
+        <ToastContainer />
+    </div>
         );
     };
     

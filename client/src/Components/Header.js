@@ -9,7 +9,6 @@ const Header = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        console.log('2', token);
         if (token) {
             setIsLoggedIn(true);
         } else {
@@ -21,7 +20,6 @@ const Header = () => {
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            console.log('1', token);
 
             if (token) {
                 localStorage.setItem('token', token);
@@ -60,7 +58,7 @@ const Header = () => {
                                         <Link to='/readd' className="nav-link">Decision</Link>
                                     </li>
                                     <li className="nav-item">
-                                        <a href=" https://techcoach4u.wordpress.com/make-decisions-with-confidence/" target="_blank" rel="noopener noreferrer" className="nav-link">Resources</a>
+                                        <a href="http://decisioncoach.techcoach4u.com" target="_blank" rel="noopener noreferrer" className="nav-link">Guide</a>
                                     </li>
 
                                     <li className="nav-item">
@@ -76,7 +74,7 @@ const Header = () => {
                                     </li>
                                     
                                     <li className="nav-item">
-                                        <button onClick={handleLogout} className="btn btn-link nav-link">Logout</button>
+                                        <Link to='/' onClick={handleLogout} className="nav-link">Logout</Link>
                                     </li>
                                 </>
                             ) : (

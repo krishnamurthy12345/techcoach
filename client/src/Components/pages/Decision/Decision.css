@@ -1,6 +1,6 @@
 .form{
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 800px;
+    margin: 2rem;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -27,22 +27,27 @@ select{
     border-radius: 4px;
     box-sizing: border-box;
 }
-input[type="submit"]{
-    width:70%;
-    background-color: #4caf50;
+input[type='submit'] {
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 14px 20px;
-    margin: 8px 0;
-}
-input[type="submit"]:hover{
-    background-color: #08067f;
-}
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+    margin: 20px auto;
+  }
+  
+  input[type='submit']:hover {
+    background-color: #0056b3;
+  }
+  
 .header{
     text-align: center;
-    font-size:20px ;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
+
 .btnn{
     background:rgb(82, 109, 130);
     border: none;
@@ -50,7 +55,7 @@ input[type="submit"]:hover{
     border-radius: 5px;
     height: 50px;
     max-width: 90px;
-    margin-top:-5px;
+    margin:5px;
 }
 .btnn1{
     background: rgb(82, 109, 130);
@@ -58,7 +63,17 @@ input[type="submit"]:hover{
     border-radius: 5px;
     height: 50px;
     max-width: 90px;
+    margin:5px;
 }
+
+.btnn2{
+    background: #007BFF;
+    color: white;
+    border-radius: 5px;
+    margin:5px;
+    width: 100%;
+}
+
 .tag-container {
     display: flex;
     flex-wrap: wrap;
@@ -94,6 +109,94 @@ input[type="submit"]:hover{
     color: red;
     font-size: 12px;
     margin-top: 4px;
+}
+
+/* Decision.css */
+.header {
+    text-align: center;
   }
   
+  .form {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .btnn,
+  .btnn1,
+  input[type="submit"] {
+    display: block;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .btnn1 {
+    margin-left: 1rem;
+    background-color: #dc3545;
+  }
+  
+  .tag-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .tag-item {
+    margin: 5px;
+  }
+  
+  @media (min-width: 600px) {
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .btnn,
+    .btnn1,
+    input[type="submit"] {
+      width: 50rem;
+    }
+  
+    .btnn,
+    .btnn1,
+    input[type="submit"] {
+      width: auto;
+    }
+  }
+  
+  @media (max-width: 599px) {
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .btnn,
+    .btnn1,
+    input[type="submit"] {
+      width: 100%;
+    }
+  }
   
