@@ -176,7 +176,7 @@ const Readd = () => {
                                             left: `-${commentIndex * 10}px`,
                                             zIndex: comments.length - index,
                                             border: "0.1rem solid white"
-                                        }}>{comment.displayname[0]}</Avatar>
+                                        }}>{comment.displayname}</Avatar>
                             </MuiTooltip>
                           </div>
                         </div>

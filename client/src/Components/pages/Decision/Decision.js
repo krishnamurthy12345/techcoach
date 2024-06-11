@@ -56,7 +56,7 @@ const Decision = () => {
         });
     }
   }, [id]);
-  // console.log(formData,'avavav')
+  console.log(formData,'avavav')
 
   const tags = [
     "Personal", "Career", "Work", "Family", "Money", "Health", "Spiritual",

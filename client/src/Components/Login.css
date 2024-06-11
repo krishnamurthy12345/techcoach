@@ -1,11 +1,22 @@
 /* General Styles */
 body {
   font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
 }
 
 .login-page {
   width: 360px;
-  margin: auto;
+  margin: 0 auto 20px;
 }
 
 .form {
@@ -13,7 +24,7 @@ body {
   z-index: 1;
   background: #FFFFFF;
   max-width: 360px;
-  margin: 0 auto 100px;
+  margin: 0 auto 20px;
   padding: 45px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
@@ -68,18 +79,20 @@ body {
 
 /* Testimonial Section */
 .test {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
   margin-top: 50px;
-  text-align: center;
 }
 
-.testimonial {
+.testimonial, .testimonial2 {
   height: 400px;
   width: 600px;
-  max-width: 100%;
-  height: auto;
+  border-radius: 15px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Media Queries for Responsiveness */
 @media (max-width: 768px) {
   .login-page {
     width: 90%;
@@ -95,7 +108,7 @@ body {
     font-size: 12px;
   }
 
-  .testimonial {
+  .testimonial, .testimonial2 {
     width: 100%;
     height: auto;
   }
@@ -116,7 +129,7 @@ body {
     font-size: 12px;
   }
 
-  .testimonial {
+  .testimonial, .testimonial2 {
     width: 100%;
     height: auto;
   }

@@ -12,7 +12,7 @@ const authMiddleware = (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        console.log(token);
+        // console.log(token);
 
         if (!token) {
             throw new Error('Authentication failed');

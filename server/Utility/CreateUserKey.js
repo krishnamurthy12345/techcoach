@@ -15,9 +15,9 @@ const createUserKey = async (req, res, next) => {
         if (!userData || userData.length === 0) {
             throw new Error('User not found');
         }
-        
+
         const user = userData;
-        console.log("dataaaa", user);
+        console.log("dataaa", user);
         const keyData = undefined + user.displayName + user.email;
 
         console.log("dataaaa", keyData);
@@ -33,7 +33,7 @@ const createUserKey = async (req, res, next) => {
         // console.log('Encrypted key using username, email, id:', encryptedKey);
 
         req.user.key = encryptedKey;
-        console.log('Ukkkkkkkkkkkkkkser:', req.user.key);
+        // console.log('Ukkkkkkkkkkkkkkser:', req.user.key);
         next();
     } catch (error) {
         console.error('Error creating user key:', error);
@@ -42,3 +42,5 @@ const createUserKey = async (req, res, next) => {
 };
 
 module.exports = createUserKey;
+
+
