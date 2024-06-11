@@ -358,7 +358,7 @@ export default withAuth(SharedDecision);
 import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Box, Avatar, IconButton, TextField, Grid, Popover, ToggleButton, ButtonGroup } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { getSharedDecisions, postCommentForDecision, deleteCommentAdded, EditCommentAdded } from '../../Components/Group/Network_Call';
+import { getSharedDecisions, postCommentForDecision, deleteCommentAdded, EditCommentAdded, innerCirclePostComment } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import withAuth from '../withAuth';
@@ -411,13 +411,20 @@ const SharedDecision = () => {
     const handlePostComment = async (decisionId, groupMemberID, groupId) => {
         try {
             const commentText = commentTexts[decisionId];
-            await postCommentForDecision(decisionId, groupMemberID, commentText, groupId);
+            const response = await postCommentForDecision(decisionId, groupMemberID, commentText, groupId);
             fetchSharedDecisions();
-            toast('Comment posted successfully');
-            setCommentTexts(prevState => ({
-                ...prevState,
-                [decisionId]: ""
-            }));
+
+            if (response.status === 200) {
+                toast('Comment posted successfully');
+                setCommentTexts(prevState => ({
+                    ...prevState,
+                    [decisionId]: ""
+                }));
+            }  else {
+                toast('Failed to post the comment');
+            }
+            
+            
         } catch (error) {
             console.error('Error posting comment:', error);
             toast('An error occurred while posting the comment');
@@ -624,31 +631,50 @@ const SharedDecision = () => {
                                                     )}
                                                 </Box>
                                             ))}
-                                            <Box mt={2}>
-                                                <input
-                                                    label="Add Comment"
-                                                    variant="outlined"
-                                                    fullWidth
-                                                    placeholder="Add a comment..."
-                                                    style={{
-                                                        height: "3rem",
-                                                        padding: "1rem",
-                                                        width: "100%",
-                                                        maxWidth: "100%",
-                                                        marginRight: "0.5rem"
-                                                    }}
-                                                    value={commentTexts[item.decisionDetails.decision_id]}
-                                                    onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
-                                                />
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
-                                                    style={{ marginTop: "1rem" }}
-                                                >
-                                                    Post Comment
-                                                </Button>
-                                            </Box>
+                                           <Box mt={2}>
+    <input
+        label="Add Comment"
+        variant="outlined"
+        fullWidth
+        placeholder="Add a comment..."
+        style={{
+            height: "3rem",
+            padding: "1rem",
+            width: "100%",
+            maxWidth: "100%",
+            marginRight: "0.5rem"
+        }}
+        value={commentTexts[item.decisionDetails.decision_id]}
+        onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
+    />
+    <Grid container spacing={2} justifyContent="flex-end">
+        <Grid item>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
+                style={{ marginTop: "1rem" }}
+            >
+                Post Comment
+            </Button>
+        </Grid>
+        <Grid item>
+           {/*  <Button
+                variant="contained"
+                color="primary"
+                onClick={async () => {
+                    await handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId);
+                    const responseToPostComment = await innerCirclePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, commentTexts[item.decisionDetails.decision_id]);
+                    console.log("response from the responseToPostComment", responseToPostComment);
+                }}
+                style={{ marginTop: "1rem" }}
+            >
+                Send Mail And Post Comment
+            </Button> */}
+        </Grid>
+    </Grid>
+</Box>
+
                                         </CardContent>
                                     </Card>
                                 </div>

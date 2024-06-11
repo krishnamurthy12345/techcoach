@@ -17,7 +17,7 @@ const ProfileTab = () => {
   const [isNewProfile, setIsNewProfile] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  /* useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`)
       .then((response) => {
         const { gender, attitude, strength, weakness, opportunity, threat } = response.data;
@@ -45,6 +45,43 @@ const ProfileTab = () => {
           toast.error('An error occurred. Please try again.');
         }
       });
+  }, []); */
+
+  useEffect(() => {
+    if(formData) {
+      const token = localStorage.getItem('token');
+    axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`,{
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then((response) => {
+        const { gender, attitude, strength, weakness, opportunity, threat } = response.data;
+        console.log('dededed',response.data);
+        if (gender) {
+          setFormData({
+            gender,
+            attitude: attitude ? attitude.map(item => item.value) : [],
+            strength: strength ? strength.map(item => item.value) : [],
+            weakness: weakness ? weakness.map(item => item.value) : [],
+            opportunity: opportunity ? opportunity.map(item => item.value) : [],
+            threat: threat ? threat.map(item => item.value) : []
+          });
+          setIsNewProfile(false);
+        } else {
+          throw new Error('Data format is incorrect');
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 404) {
+          toast.info('No existing profile found. Please create a new profile.');
+          setIsNewProfile(true);
+        } else {
+          console.error(err);
+          toast.error('An error occurred. Please try again.');
+        }
+      });
+    }
   }, []);
   
   

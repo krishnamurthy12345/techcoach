@@ -27,5 +27,6 @@ router.delete("/removeCommentsAdded",groupController.removeCommentsAdded);
 router.post("/postReplyComment",groupController.postReplyComment);
 router.put("/editCommentsAdded",groupController.editCommentsAdded);
 router.post("/innerCircleDecisionShare",groupController.innerCircleDecisionShare);
+router.post("/innerCirclePostComment",groupController.innerCirclePostComment);
 
 module.exports = router;

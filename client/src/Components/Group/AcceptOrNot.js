@@ -13,6 +13,8 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    console.log("innerrrr", decision);
+
     const handleMemberClick = (memberId) => {
         setSelectedMember(prevSelectedMember => prevSelectedMember === memberId ? null : memberId);
     };
@@ -33,18 +35,23 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
 
                 const selectedMemberDetails = innerCircleDetails.members.find(member => member.user_id === selectedMember);
                 const memberEmail = selectedMemberDetails?.email;
-                const memberName = selectedMemberDetails?.displayname;
 
+                if (selectedMemberDetails) {
+                    const memberName = selectedMemberDetails.displayname;
 
-                console.log("emaillll", selectedMemberDetails);
-                console.log("nameeee", memberName);
+                    const decisionSummary = {
+                        decisionName: decision.decision_name,
+                        userStatement: decision.user_statement,
+                        reasons: decision.decision_reason_text.join(', '),
+                        dueDate: decision.decision_due_date,
+                        takenDate: decision.decision_taken_date
+                    };
 
-                if (memberEmail) {
-                    const responseToMail = await mailToInnerCircleDecisionShare(memberEmail, memberName);
+                    const responseToMail = await mailToInnerCircleDecisionShare(memberEmail, memberName, decisionSummary);
                     console.log("response from the mail", responseToMail);
                 }
 
-            } else {
+            }  else {
                 toast('Failed to share decision.');
             }
         } catch (error) {
