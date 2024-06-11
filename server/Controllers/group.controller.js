@@ -1110,26 +1110,29 @@ const editCommentsAdded = async (req, res) => {
     }
 };
 
-const innerCircleInvitation = async (req, res) => {
+const innerCirclePostComment = async (req, res) => {
     console.log("reqqqqqqqqqq body invitationnnnnnnnnnnnnn", req.body);
 
-    const { memberEmail, memberName } = req.body;
+    const { decisionId, groupMemberID, commentText } = req.body;
 
-    const emailPayload = {
-        from: {
-            address: "Decision-Coach@www.careersheets.in"
-        },
-        to: [
-            {
-                email_address: {
-                    address: memberEmail
-                }
-            }
-        ],
-        subject: "You are invited to an Inner Circle",
-        htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
-            <p>Dear xxxxxxxxxxxxxxx,</p>
-            <p>You are receiving this notification as <b>yyyyyyyyyyyyyyyy</b> is inviting you to become part of their inner circle.</p>
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const decisionQuery = 'SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id = ?';
+        const decisionRows = await conn.query(decisionQuery, [decisionId]);
+        const decisionDetails = decisionRows[0];
+
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_group_members WHERE member_id = ?';
+        const groupMemberRows = await conn.query(groupMemberQuery, [groupMemberID]);
+        const groupMemberDetails = groupMemberRows[0];
+
+        // Construct email HTML
+        const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+            <p>Dear ${groupMemberDetails.displayname},</p>
+            <p>You are receiving this notification as ${groupMemberDetails.displayname} is inviting you to become part of their inner circle.</p>
             <p>Decision Coach application enables confidential collaboration between people who trust each other to support in making important decisions.</p>
             <p>Accessing Decision Coach is simple. Use this Google email account to sign up and you are all set. And it is free.</p>
             <p>If you are already a user of Decision Coach then just sign in.</p>
@@ -1141,14 +1144,25 @@ const innerCircleInvitation = async (req, res) => {
             </p>
             <p>Regards,</p>
             <p>Team @ Decision Coach</p>
-        </div>`
-    };
+            <p>Comment added by ${groupMemberDetails.displayname}:</p>
+            <p>In decision: ${decisionDetails}</p>
+            <p>Comment: ${commentText}</p>
+        </div>`;
 
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
+        const emailPayload = {
+            from: {
+                address: "Decision-Coach@www.careersheets.in"
+            },
+            to: [
+                {
+                    email_address: {
+                        address: groupMemberDetails.email
+                    }
+                }
+            ],
+            subject: "Comment Posted on Decision You shared",
+            htmlbody: htmlBody
+        };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
         const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
@@ -1163,7 +1177,7 @@ const innerCircleInvitation = async (req, res) => {
         await conn.commit();
         res.status(200).json({ message: 'Mail Sent Successfully' });
     } catch (error) {
-        console.error('Error in sending mail on invite to inner circle:', error);
+        console.error('Error in sending mail on Post comment to inner circle:', error);
         if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
@@ -1171,10 +1185,11 @@ const innerCircleInvitation = async (req, res) => {
     }
 };
 
-const innerCircleDecisionShare = async (req, res) => {
+
+/* const innerCircleDecisionShare = async (req, res) => {
     console.log("Request body invitation:", req.body);
 
-    const { memberEmail, memberName, decisionDetails } = req.body;
+    const { memberEmail, memberName, decisionSummary } = req.body;
 
     const emailPayload = {
         from: {
@@ -1225,7 +1240,72 @@ const innerCircleDecisionShare = async (req, res) => {
     } finally {
         if (conn) conn.release();
     }
+}; */
+
+const innerCircleDecisionShare = async (req, res) => {
+    console.log("Request body invitation:", req.body);
+
+    const { memberEmail, memberName, decisionSummary } = req.body;
+
+    const emailPayload = {
+        from: {
+            address: "Decision-Coach@www.careersheets.in"
+        },
+        to: [
+            {
+                email_address: {
+                    address: memberEmail
+                }
+            }
+        ],
+        subject: `Help ${memberName} decide`,
+        htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+            <p>Dear ${memberName},</p>
+            <p>This is to notify that a decision has been shared with you to provide your inputs.</p>
+            <p>Please login and add comments. You can choose to notify them by email at the time of posting comment.</p>
+            <p>Here are the details of the decision:</p>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+                <p><strong>Decision Name:</strong> ${decisionSummary.decisionName}</p>
+                <p><strong>User Statement:</strong> ${decisionSummary.userStatement}</p>
+                <p><strong>Reasons:</strong> ${decisionSummary.reasons}</p>
+                <p><strong>Due Date:</strong> ${decisionSummary.dueDate}</p>
+                <p><strong>Taken Date:</strong> ${decisionSummary.takenDate}</p>
+            </div>
+            <p style="text-align: center;">
+                <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+            </p>
+            <p>Regards,</p>
+            <p>Team @ Decision Coach</p>
+        </div>`
+    };
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
+
+        await conn.commit();
+        res.status(200).json({ message: 'Mail Sent Successfully' });
+    } catch (error) {
+        console.error('Error in sending mail on invite to inner circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
 };
+
 
 
 module.exports = {
@@ -1247,6 +1327,6 @@ module.exports = {
     removeCommentsAdded,
     postReplyComment,
     editCommentsAdded,
-    innerCircleInvitation, 
+    innerCirclePostComment, 
     innerCircleDecisionShare
 };

@@ -286,11 +286,12 @@ const EditCommentAdded = async (commentId, editedContent) =>{
     }
 }
 
-const mailToInnerCircleDecisionShare = async (memberEmail, memberName) =>{
+const mailToInnerCircleDecisionShare = async (memberEmail, memberName, decisionSummary) =>{
     const token = localStorage.getItem('token');
+    console.log("jjsjsjss",decisionSummary );
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCircleDecisionShare`,
-        {memberEmail, memberName},  
+        {memberEmail, memberName, decisionSummary},  
         {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -304,6 +305,24 @@ const mailToInnerCircleDecisionShare = async (memberEmail, memberName) =>{
     }
 }
 
+
+const innerCirclePostComment = async (decisionId, groupMemberID,commentText) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCirclePostComment`,
+        {decisionId, groupMemberID,commentText},  
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log("response for edit comments", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching editted comments", error);
+        throw error;
+    }
+}
 
 
 export { 
@@ -324,5 +343,6 @@ export {
     deleteCommentAdded,
     postReplyComment,
     EditCommentAdded,
-    mailToInnerCircleDecisionShare
+    mailToInnerCircleDecisionShare,
+    innerCirclePostComment
  };
