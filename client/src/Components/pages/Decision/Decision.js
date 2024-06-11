@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import './Decision.css';
+import withAuth from '../../withAuth';
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,8 +24,14 @@ const Decision = () => {
   const { id } = useParams();
 
   useEffect(() => {
+    console.log("iddddddd........",id);
     if (id) {
-      axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`)
+      const token = localStorage.getItem('token');
+      axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+    })
         .then((resp) => {
           const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
           console.log(resp.data.decisions[0]);
@@ -326,4 +333,4 @@ const Decision = () => {
   );
 };
 
-export default Decision;
+export default withAuth(Decision);

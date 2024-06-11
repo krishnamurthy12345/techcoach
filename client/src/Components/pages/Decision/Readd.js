@@ -7,6 +7,7 @@ import { MdDelete, MdModeEdit } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
 import 'react-toastify/dist/ReactToastify.css';
 import './Readd.css';
+import withAuth from '../../withAuth';
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -15,6 +16,7 @@ const Readd = () => {
   const [recordsPerPage] = useState(10);
   const [showCompletedDecisions, setShowCompletedDecisions] = useState(false);
   const [comments, setComments] = useState({});
+  
 
   useEffect(() => {
     const loadData = async () => {
@@ -229,4 +231,4 @@ const Readd = () => {
   );
 };
 
-export default Readd;
+export default withAuth(Readd);

@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import ShareModal from '../../Group/ShareModel';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../../withAuth';
 
 const View = () => {
     const [decision, setDecision] = useState({});
@@ -340,4 +341,4 @@ const View = () => {
     );
 };
 
-export default View;
+export default withAuth(View);

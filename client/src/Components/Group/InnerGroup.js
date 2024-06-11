@@ -3,6 +3,7 @@ import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListIte
 import { getUserListForInnerCircle, innerCircleCreation } from './Network_Call';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import withAuth from '../withAuth';
 
 const InnerGroup = () => {
     const navigate = useNavigate();
@@ -139,4 +140,4 @@ const InnerGroup = () => {
     );
 };
 
-export default InnerGroup;
+export default withAuth(InnerGroup);
