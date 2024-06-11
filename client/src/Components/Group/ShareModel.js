@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import Group from '../../Components/Group/GroupSelection';  
 import AcceptOrNot from '../../Components/Group/AcceptOrNot';  
+import withAuth from '../withAuth';
 
 const ShareModal = ({ showModal, handleClose, innerGroup, innerCircleDetails, decision, id }) => {
     console.log("share modelllll",innerGroup);
@@ -26,4 +27,4 @@ const ShareModal = ({ showModal, handleClose, innerGroup, innerCircleDetails, de
     );
 };
 
-export default ShareModal;
+export default withAuth(ShareModal);

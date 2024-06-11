@@ -18,6 +18,7 @@ import AcceptOrNot from './Components/Group/AcceptOrNot.js';
 import Notification from './Components/Notification/Notification.js';
 import ProfileTab from './Components/pages/Profile_Table/ProfileTab.js';
 import SharedDecision from './Components/Group/SharedDecisions.js';
+import DashboardRedirect from '../src/Components/DashboardRedirect.js'; 
 
 function App() {
   console.log("one is working")
@@ -38,7 +39,8 @@ function App() {
       <Routes>
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
-        <Route path='/dashboard' element={<Dashboard />} />
+        {/* <Route path='/dashboard' element={<Nav />} /> */}
+        <Route path='/dashboard' element={<DashboardRedirect />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/decision' element={<Decision />} />
 
