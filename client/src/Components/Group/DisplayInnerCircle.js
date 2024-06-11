@@ -3,6 +3,7 @@ import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch
 import { Container, Row, Col, ListGroup, Button, Spinner, Card, Alert } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import ShareModal from '../Group/ShareModel';
+import withAuth from '../withAuth';
 
 const DisplayInnerCircle = () => {
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
@@ -237,4 +238,4 @@ const DisplayInnerCircle = () => {
         );
     };
     
-export default DisplayInnerCircle;
+export default withAuth(DisplayInnerCircle);

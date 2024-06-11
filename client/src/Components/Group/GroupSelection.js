@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
+import withAuth from '../withAuth';
 
 const GroupSelection = () => {
     const navigate = useNavigate();
@@ -22,4 +23,4 @@ const GroupSelection = () => {
     );
 };
 
-export default GroupSelection;
+export default withAuth(GroupSelection);

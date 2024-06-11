@@ -1,6 +1,6 @@
 const getConnection = require('../Models/database');
 const crypto = require('crypto');
-
+const axios = require('axios');
 
 const getUserList = async (req, res) => {
   try {
@@ -280,7 +280,7 @@ const addMemberInInnerCircle = async(req, res) =>{
 
 const shareDecisionInInnerCircle = async (req, res) => {
     const { decisionId, groupId, memberId } = req.body;
-    console.log("req body", req.body);
+    console.log("req body frommmm share decisionnnnnnn", req.body);
     let conn;
 
     try {
@@ -290,7 +290,7 @@ const shareDecisionInInnerCircle = async (req, res) => {
         await conn.query(`
             INSERT INTO techcoach_lite.techcoach_shared_decisions (groupId, groupMember, decisionId)
             VALUES (?, ?, ?)
-        `, [groupId, memberId, decisionId]);
+        `, [groupId, memberId, decisionId]);    
 
         await conn.commit();
 
@@ -561,7 +561,7 @@ const acceptOrRejectInnerCircle = async (req, res) => {
     }
 }; */
 
-const getSharedDecisions = async (req, res) => {
+/* const getSharedDecisions = async (req, res) => {
     const userId = req.user.id;
     let conn;
 
@@ -717,8 +717,176 @@ const getSharedDecisions = async (req, res) => {
     } finally {
         if (conn) conn.release();
     }
-};
+}; */
 
+const getSharedDecisions = async (req, res) => {
+    const userId = req.user.id;
+    let conn;
+
+    const decryptText = (text, key) => {
+        try {
+            const decipher = crypto.createDecipher('aes-256-cbc', key);
+            let decryptedText = decipher.update(text, 'hex', 'utf8');
+            decryptedText += decipher.final('utf8');
+            return decryptedText;
+        } catch (error) {
+            console.error('Error decrypting text:', error);
+            return null;
+        }
+    };
+
+    const encryptText = (text, key) => {
+        try {
+            const cipher = crypto.createCipher('aes-256-cbc', key);
+            let encryptedText = cipher.update(text, 'utf8', 'hex');
+            encryptedText += cipher.final('hex');
+            return encryptedText;
+        } catch (error) {
+            console.error('Error encrypting text:', error);
+            return null;
+        }
+    };
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const sharedDecisions = await conn.query(`
+            SELECT * FROM techcoach_lite.techcoach_shared_decisions 
+            WHERE groupMember = ?
+        `, [userId]);
+
+        const results = [];
+        let decisionCount = 0;
+
+        for (const sharedDecision of sharedDecisions) {
+            const { decisionId, groupId } = sharedDecision;
+
+            const decisionDetailsQuery = await conn.query(`
+                SELECT decision_id,
+                       user_id,
+                       decision_name,
+                       decision_reason,
+                       created_by,
+                       creation_date,
+                       decision_due_date,
+                       decision_taken_date,
+                       user_statement
+                FROM techcoach_lite.techcoach_decision
+                WHERE decision_id = ?
+            `, [decisionId]);
+
+            if (decisionDetailsQuery.length === 0) {
+                continue;
+            }
+
+            const decisionDetails = decisionDetailsQuery[0];
+
+            const userQuery = await conn.query(`
+                SELECT user_id, displayname, email 
+                FROM techcoach_lite.techcoach_task 
+                WHERE user_id = ?
+            `, [decisionDetails.user_id]);
+
+            if (userQuery.length > 0) {
+                decisionDetails.userDetails = userQuery[0];
+            } else {
+                decisionDetails.userDetails = null;
+            }
+
+            const groupDetails = await conn.query(`
+                SELECT created_by 
+                FROM techcoach_lite.techcoach_groups 
+                WHERE id = ?
+            `, [groupId]);
+
+            if (groupDetails.length === 0) {
+                continue;
+            }
+
+            const groupUserDetailsQuery = await conn.query(`
+                SELECT user_id, displayname, email 
+                FROM techcoach_lite.techcoach_task 
+                WHERE user_id = ?
+            `, [groupDetails[0].created_by]);
+
+            if (groupUserDetailsQuery.length === 0) {
+                continue;
+            }
+
+            const groupUserDetails = groupUserDetailsQuery[0];
+            const keyData = undefined + groupUserDetails.displayname + groupUserDetails.email;
+            const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
+
+            decisionDetails.decision_name = decryptText(decisionDetails.decision_name, encryptedKey);
+            decisionDetails.user_statement = decryptText(decisionDetails.user_statement, encryptedKey);
+
+            const decisionReasonQuery = await conn.query(`
+                SELECT decision_reason_text 
+                FROM techcoach_lite.techcoach_reason 
+                WHERE decision_id = ?
+            `, [decisionId]);
+
+            if (decisionReasonQuery.length > 0) {
+                decisionDetails.reasons = decisionReasonQuery.map(reasonEntry => 
+                    decryptText(reasonEntry.decision_reason_text, encryptedKey)
+                );
+            } else {
+                decisionDetails.reasons = [];
+            }
+
+            const sharedInfo = await conn.query(`
+                SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
+                       t.user_id, t.displayname, t.email
+                FROM techcoach_lite.techcoach_conversations d
+                LEFT JOIN techcoach_lite.techcoach_task t
+                ON d.groupMember = t.user_id
+                WHERE groupId = ? AND decisionId = ? AND groupMember = ?
+            `, [groupId, decisionId, userId]);
+
+            const commentIds = sharedInfo.map(comment => comment.id);
+
+            if (commentIds.length > 0) {
+                const replies = await conn.query(`
+                    SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
+                           t.user_id, t.displayname, t.email
+                    FROM techcoach_lite.techcoach_conversations d
+                    LEFT JOIN techcoach_lite.techcoach_task t
+                    ON d.groupMember = t.user_id
+                    WHERE parentCommentId IN (?)
+                `, [commentIds]);
+
+                sharedInfo.forEach(comment => {
+                    comment.replies = replies.filter(reply => reply.parentCommentId === comment.id);
+                });
+            }
+
+            results.push({
+                sharedDecision,
+                decisionDetails,
+                groupDetails: groupDetails[0],
+                groupUserDetails,
+                comments: sharedInfo
+            });
+
+            decisionCount++;
+        }
+
+        await conn.commit();
+
+        if (decisionCount === 0) {
+            res.status(200).json({ message: 'No decisions fetched', results: [], decisionCount });
+        } else {
+            res.status(200).json({ message: 'Shared Notification Fetched Successfully', results, decisionCount });
+        }
+    } catch (error) {
+        console.error('Error fetching Shared Notification:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
 
 
 const postCommentForDecision = async (req, res) => {
@@ -884,35 +1052,6 @@ const removeCommentsAdded = async (req, res) => {
     }
 };
 
-const sharedDecisionCount = async (req, res) => {
-
-    const userId = req.user.id;
-
-    let conn;
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-
-        const query = `
-            SELECT * FROM techcoach_lite.techcoach_shared_decisions
-            WHERE groupMember=?
-        `;
-        const result = await conn.query(query, [userId]);
-
-        console.log("result from shared query", result);
-
-        await conn.commit();
-        res.status(200).json({ message: 'Shared Decision Fetched successfully', result });
-    } catch (error) {
-        console.error('Error in fetching shared decisions', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-
 const postReplyComment = async (req, res) => {
     console.log("request body from post reply", req.body);
     const {commentId, reply, groupId, decisionId} = req.body;
@@ -971,6 +1110,124 @@ const editCommentsAdded = async (req, res) => {
     }
 };
 
+const innerCircleInvitation = async (req, res) => {
+    console.log("reqqqqqqqqqq body invitationnnnnnnnnnnnnn", req.body);
+
+    const { memberEmail, memberName } = req.body;
+
+    const emailPayload = {
+        from: {
+            address: "Decision-Coach@www.careersheets.in"
+        },
+        to: [
+            {
+                email_address: {
+                    address: memberEmail
+                }
+            }
+        ],
+        subject: "You are invited to an Inner Circle",
+        htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+            <p>Dear xxxxxxxxxxxxxxx,</p>
+            <p>You are receiving this notification as <b>yyyyyyyyyyyyyyyy</b> is inviting you to become part of their inner circle.</p>
+            <p>Decision Coach application enables confidential collaboration between people who trust each other to support in making important decisions.</p>
+            <p>Accessing Decision Coach is simple. Use this Google email account to sign up and you are all set. And it is free.</p>
+            <p>If you are already a user of Decision Coach then just sign in.</p>
+            <p style="text-align: center;">
+                <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+            </p>
+            <p style="text-align: center;">
+                <a href="http://www.decisioncoach.com/innercircle" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #28A745; text-decoration: none; border-radius: 5px;">Click Inner Circle to accept the invite</a>
+            </p>
+            <p>Regards,</p>
+            <p>Team @ Decision Coach</p>
+        </div>`
+    };
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
+
+        await conn.commit();
+        res.status(200).json({ message: 'Mail Sent Successfully' });
+    } catch (error) {
+        console.error('Error in sending mail on invite to inner circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const innerCircleDecisionShare = async (req, res) => {
+    console.log("Request body invitation:", req.body);
+
+    const { memberEmail, memberName, decisionDetails } = req.body;
+
+    const emailPayload = {
+        from: {
+            address: "Decision-Coach@www.careersheets.in"
+        },
+        to: [
+            {
+                email_address: {
+                    address: memberEmail
+                }
+            }
+        ],
+        subject: `Help Swetha decide`,
+        htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+            <p>Dear ${memberName},</p>
+            <p>This is to notify that a decision has been shared with you to provide your inputs.</p>
+            <p>Please login and add comments. You can choose to notify them by email at the time of posting comment.</p>
+            <p style="text-align: center;">
+                <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+            </p>
+            <p>Regards,</p>
+            <p>Team @ Decision Coach</p>
+        </div>`
+    };
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
+
+        await conn.commit();
+        res.status(200).json({ message: 'Mail Sent Successfully' });
+    } catch (error) {
+        console.error('Error in sending mail on invite to inner circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
 module.exports = {
     getUserList,
     innerCircleCreation,
@@ -988,7 +1245,8 @@ module.exports = {
     getComments,
     getSharedComments,
     removeCommentsAdded,
-    sharedDecisionCount,
     postReplyComment,
-    editCommentsAdded
+    editCommentsAdded,
+    innerCircleInvitation, 
+    innerCircleDecisionShare
 };

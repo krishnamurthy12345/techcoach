@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box } from '@mui/material';
 import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
 import './Nav.css';
+import withAuth from '../../withAuth';
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -50,13 +51,12 @@ const Nav = () => {
     const sharedDecisionCount = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedDecisionCount`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisions`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-
-        const sharedDecisions = response.data.result.length;
+        const sharedDecisions = response.data.decisionCount;
         console.log("countttt", sharedDecisions);
 
         setSharedDecisionsCount(sharedDecisions)
@@ -205,4 +205,4 @@ const CustomCard = ({ icon, title, count, onClick }) => {
   );
 };
 
-export default Nav;
+export default withAuth(Nav);

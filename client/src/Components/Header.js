@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
+import withAuth from '../../src/Components/withAuth';
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,12 +19,10 @@ const Header = () => {
 
     useEffect(() => {
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-
+            let token;
             if (token) {
-                localStorage.setItem('token', token);
-                setIsLoggedIn(true); // Set isLoggedIn to true after saving token
+                localStorage.getItem('token', token);
+                setIsLoggedIn(true); 
             }
         } catch (error) {
             console.error('Error setting auth token:', error);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Avatar, Tooltip, Box } from '@mui/material';
 import { acceptOrRejectInnerCircle, getInnerCircleAcceptNotification } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../withAuth';
 
 const Notification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -99,4 +100,4 @@ const Notification = () => {
     );
 };
 
-export default Notification;
+export default withAuth(Notification);
