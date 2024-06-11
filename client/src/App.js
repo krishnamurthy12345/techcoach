@@ -46,15 +46,17 @@ function App() {
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
-        {/* <Route path='/read' element={<ProfileTab />} /> */}
-        {/* <Route path='/view' element={<View />} /> */}
+        <Route path='/profiletab/:id' element={<ProfileTab />} />
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
         <Route path='/readd' element={<Readd />} />
         <Route path='/views/:id' element={<View />} />
-        {/* <Route path='*' element={<Error/>}/> */}
+
+        {/* Share Decision */}
+        <Route path='/sharedDecisions' element={<SharedDecision />} />
+
 
         {/* Create Group Routes */}
         <Route path='/innerCircle' element={<InnerCircle />} />
@@ -65,7 +67,6 @@ function App() {
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
 
-        <Route path='/sharedDecisions' element={<SharedDecision />} />
 
       </Routes>
     </div>

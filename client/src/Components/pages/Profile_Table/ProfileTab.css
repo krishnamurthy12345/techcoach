@@ -14,15 +14,21 @@
     text-align: center;
     margin-bottom: 20px;
   }
+  .profile-title1 {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
   
-  input[type="text"],
+  /* input[type="text"],
   input[type="date"],
   input[type="radio"] {
-    width: 50%;
+    width: 70%;
     padding: 8px;
     margin: 4px 0;
     box-sizing: border-box;
-  }
+  } */
   .submit-button {
     padding: 10px;
     border: none;
@@ -41,6 +47,7 @@
     cursor: pointer;
     font-weight: bold;
     margin-top: 5px;
+    position:;
   }
   .remove-button {
     padding: 10px;
