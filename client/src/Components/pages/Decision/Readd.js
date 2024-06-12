@@ -120,7 +120,7 @@ const Readd = () => {
               }}
               >Add Decision</Button>
         </Link>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', width:"31rem"}}>
           <label style={{ marginRight: '0.5rem',marginLeft:"1rem", color:"#5c5c5b" }}>Show pending decisions</label>
           <label className="custom-switch">
             <input 
@@ -141,7 +141,8 @@ const Readd = () => {
               border: "0.1rem solid #526D82",
               padding: "0.4rem",
               width: '100%', 
-              maxWidth: "10rem", 
+              maxWidth: "15rem", 
+              fontSize:"0.8rem",
               '@media (max-width: 600px)': { 
                 maxWidth: "5rem",
               },
