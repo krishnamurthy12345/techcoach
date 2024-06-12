@@ -306,11 +306,11 @@ const mailToInnerCircleDecisionShare = async (memberEmail, memberName, decisionS
 }
 
 
-const innerCirclePostComment = async (decisionId, groupMemberID,commentText) =>{
+const innerCirclePostComment = async (decision, groupMemberID,commentText, email) =>{
     const token = localStorage.getItem('token');
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCirclePostComment`,
-        {decisionId, groupMemberID,commentText},  
+        {decision, groupMemberID,commentText, email},  
         {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -324,6 +324,23 @@ const innerCirclePostComment = async (decisionId, groupMemberID,commentText) =>{
     }
 }
 
+const innerCircleInvitation = async (email) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCircleInvitation`,
+        {email},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log("response for Inner Circle Invitation", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error Inviting the person to the Decision App", error);
+        throw error;
+    }
+}
 
 export { 
     getUserListForInnerCircle, 
@@ -344,5 +361,6 @@ export {
     postReplyComment,
     EditCommentAdded,
     mailToInnerCircleDecisionShare,
-    innerCirclePostComment
+    innerCirclePostComment,
+    innerCircleInvitation
  };
