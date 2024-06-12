@@ -377,7 +377,4 @@ const deleteProfile = async (req, res) => {
 
 
 
-
-
-
 module.exports = { getUserList, postGeneralProfile, getProfile, putProfile,deleteProfile };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Nav from '../Components/DashBoard/Nav/Nav';
 
 const DashboardRedirect = () => {
