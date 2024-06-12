@@ -6,7 +6,6 @@ import 'bootstrap/dist/js/bootstrap.js';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/Home';
 import Header from './Components/Header';
-import Dashboard from './Components/DashBoard/Dashboard';
 import Decision from './Components/pages/Decision/Decision.js';
 import Readd from './Components/pages/Decision/Readd.js';
 import View from './Components/pages/Decision/View.js';
@@ -46,7 +45,6 @@ function App() {
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
-        <Route path='/profiletab/:id' element={<ProfileTab />} />
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />

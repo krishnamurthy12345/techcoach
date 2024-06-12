@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, Avatar, IconButton, Popover, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded } from '../../Group/Network_Call';
 import { useNavigate } from 'react-router-dom';
 import ShareModal from '../../Group/ShareModel';

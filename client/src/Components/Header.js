@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
-import withAuth from '../../src/Components/withAuth';
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);

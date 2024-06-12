@@ -99,7 +99,7 @@ h3 {
 }
 .data-around{
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   margin-top: 15px;
 }
@@ -111,6 +111,7 @@ h3 {
   padding: 10px;
   height: 50px;
   width: 150px;
+  cursor: pointer;
 }
 .download-data{
   background-color: #333;
@@ -120,6 +121,7 @@ h3 {
   width: 200px;
   text-align: center;
   padding: 10px;
+  cursor: pointer;
 }
 
 @media (max-width: 600px) {

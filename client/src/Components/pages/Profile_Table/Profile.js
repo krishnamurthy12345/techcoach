@@ -1,33 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { FaUserEdit } from "react-icons/fa";
 import './Profile.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 const Profile = () => {
   const [formData, setFormData] = useState({});
   const [userData, setUserData] = useState({});
+  const [decisions, setDecisions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const resp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
+        const userResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const user = resp.data.tasks && resp.data.tasks.length ? resp.data.tasks[0] : {};
+        const user = userResp.data.tasks && userResp.data.tasks.length ? userResp.data.tasks[0] : {};
         setUserData(user);
 
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
+        const formResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        setFormData(response.data);
-        console.log('Fetched profile data:', response.data);
+        setFormData(formResp.data);
+        console.log('Fetched profile data:', formResp.data);
+
+        const decisionsResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (Array.isArray(decisionsResp.data.decisionData)) {
+          setDecisions(decisionsResp.data.decisionData);
+        } else {
+          console.error("Invalid response format:", decisionsResp.data);
+        }
       } catch (error) {
         console.error('Error fetching data:', error.message);
       }
@@ -65,6 +80,29 @@ const Profile = () => {
     }
   };
 
+  const handleDownloadData = () => {
+    const decisionData = decisions.map(decision => ({
+      'Decision Name': decision.decision_name,
+      'Decision Due Date': new Date(decision.decision_due_date).toLocaleDateString(),
+      'Decision Taken Date': decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--',
+      'Decision Details': decision.user_statement,
+      'Tags': decision.tagsArray ? decision.tagsArray.join(',') : '',
+      'Decision Reasons': decision.decision_reason_text ? decision.decision_reason_text.join(',') : ''
+    }));
+
+    const worksheetDecisions = XLSX.utils.json_to_sheet(decisionData);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheetDecisions, 'Decisions Data');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(data, 'decisions_data.xlsx');
+    if(data){
+      toast('downloaded successfully')      
+    }
+  };
+
   return (
     <div className="card1">
       <div >
@@ -98,10 +136,10 @@ const Profile = () => {
         </div>
         {Object.keys(formData).length ? (
           <div className="profile-details">
-            <div className="profile-field">
+            {/* <div className="profile-field">
               <strong>Gender: </strong>
               <span>{formData.gender}</span>
-            </div>
+            </div> */}
             {formData.attitude && (
               <div className="sub-card">
                 <strong>Attitude: </strong>
@@ -139,11 +177,12 @@ const Profile = () => {
       </div>
       <div className='data-around'>
         <div className='download-data'>
-          <p>Download my data</p>
+          <p onClick={handleDownloadData}>Download my data</p>
         </div>
         <div className='delete-account'>
           <p onClick={handleDeleteAccount}>Delete Account</p>
         </div>
+        <ToastContainer/>
       </div>
     </div>
   );
