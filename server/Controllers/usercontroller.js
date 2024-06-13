@@ -331,6 +331,51 @@ const putProfile = async (req, res) => {
   }
 };
 
+// const deleteProfile = async (req, res) => {
+//   const userId = req.user.id;
+//   let conn;
+
+//   try {
+//     conn = await getConnection();
+//     await conn.beginTransaction();
+
+//     // Delete from techcoach_reason (depending on techcoach_decision)
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+
+//     // Delete from techcoach_decision_tag
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+
+//     // Delete from techcoach_decision
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_decision WHERE user_id = ?", [userId]);
+
+//     // Delete from techcoach_header_value
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_header_value WHERE user_id = ?", [userId]);
+
+//     // Delete from techcoach_personal_info
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?", [userId]);
+
+//     // Delete from techcoach_login_history
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_login_history WHERE user_id = ?", [userId]);
+
+//     // Finally, delete the user profile
+//     await conn.query("DELETE FROM techcoach_lite.techcoach_task WHERE user_id = ?", [userId]);
+
+//     await conn.commit();
+//     res.status(200).json({ message: 'Profile and associated data deleted successfully' });
+//   } catch (error) {
+//     console.error('Error deleting profile:', error);
+//     if (conn) {
+//       await conn.rollback();
+//     }
+//     res.status(500).json({ error: 'An error occurred while deleting the profile' });
+//   } finally {
+//     if (conn) {
+//       conn.release();
+//     }
+//   }
+// };
+
+
 const deleteProfile = async (req, res) => {
   const userId = req.user.id;
   let conn;
@@ -345,6 +390,12 @@ const deleteProfile = async (req, res) => {
     // Delete from techcoach_decision_tag
     await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
+    // Delete from techcoach_shared_decisions (depending on techcoach_decision)
+    await conn.query("DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+
+    // Delete from techcoach_conversations (depending on techcoach_decision)
+    await conn.query("DELETE FROM techcoach_lite.techcoach_conversations WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+
     // Delete from techcoach_decision
     await conn.query("DELETE FROM techcoach_lite.techcoach_decision WHERE user_id = ?", [userId]);
 
@@ -356,6 +407,13 @@ const deleteProfile = async (req, res) => {
 
     // Delete from techcoach_login_history
     await conn.query("DELETE FROM techcoach_lite.techcoach_login_history WHERE user_id = ?", [userId]);
+
+    // Delete from techcoach_group_members
+    await conn.query("DELETE FROM techcoach_lite.techcoach_group_members WHERE group_id IN (SELECT id FROM techcoach_lite.techcoach_groups WHERE created_by = ?)", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_group_members WHERE member_id = ?", [userId]);
+
+    // Delete from techcoach_groups
+    await conn.query("DELETE FROM techcoach_lite.techcoach_groups WHERE created_by = ?", [userId]);
 
     // Finally, delete the user profile
     await conn.query("DELETE FROM techcoach_lite.techcoach_task WHERE user_id = ?", [userId]);
