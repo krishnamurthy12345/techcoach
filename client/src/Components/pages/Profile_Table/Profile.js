@@ -4,10 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { FaUserEdit } from "react-icons/fa";
-import './Profile.css';
 import { ToastContainer, toast } from 'react-toastify';
-import ClipLoader from "react-spinners/ClipLoader";
 import withAuth from '../../withAuth';
+import './Profile.css';
+
 
 const Profile = () => {
   const [formData, setFormData] = useState({});
@@ -46,6 +46,7 @@ const Profile = () => {
         } else {
           console.error("Invalid response format:", decisionsResp.data);
         }
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error.message);
         setLoading(false);
@@ -111,7 +112,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="loading-spinner">
-        <ClipLoader color={"#123abc"} loading={loading} size={100} />
+        <div className='spinner'></div>
       </div>
     );
   }
