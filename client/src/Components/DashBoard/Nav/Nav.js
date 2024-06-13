@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box } from '@mui/material';
-
+import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box, CircularProgress } from '@mui/material';
 import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
 import './Nav.css';
 import withAuth from '../../withAuth';
@@ -15,6 +14,7 @@ const Nav = () => {
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
   const [sharedDecisionsCount, setSharedDecisionsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   let loggedInUserId;
 
   useEffect(() => {
@@ -60,8 +60,8 @@ const Nav = () => {
         const sharedDecisions = response.data.decisionCount;
         console.log("countttt", sharedDecisions);
 
-        setSharedDecisionsCount(sharedDecisions)
-        //console.log("response from shared Decision", response);
+        setSharedDecisionsCount(sharedDecisions);
+        setLoading(false);  // Set loading to false after shared decisions count is fetched
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -80,7 +80,6 @@ const Nav = () => {
   });
 
   const liveDecisionsCount = filteredData.length;
-
   const pendingDecisionsCount = pendingDecisionsData.length;
 
   const togglePendingDecisions = () => {
@@ -95,8 +94,16 @@ const Nav = () => {
     navigate('/readd');
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: "95%", display:"flex", flexDirection:"column", gap:"1rem", margin:"3rem"}}>
+    <div style={{ maxWidth: "95%", display: "flex", flexDirection: "column", gap: "1rem", margin: "3rem" }}>
       <Grid container spacing={4}>
         <Grid item xs={12} sm={6} md={4}>
           <CustomCard

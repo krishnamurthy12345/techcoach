@@ -15,6 +15,7 @@ const DisplayInnerCircle = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [loadingRemove, setLoadingRemove] = useState({});
+    const [loadingInvite, setLoadingInvite] = useState(false); // New state for invite loading
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -125,7 +126,7 @@ const DisplayInnerCircle = () => {
     console.log("inner", innerCircleDetails);
 
     const filteredMembers = potentialMembers.filter(member => member.email === searchQuery);
-
+    const existingMemberEmails = innerCircleDetails?.members?.map(member => member.email) || [];
     const isValidGmail = searchQuery.endsWith('@gmail.com');
 
     const inviteButtonStyle = {
@@ -138,6 +139,7 @@ const DisplayInnerCircle = () => {
     };
 
     const handleInvite = async (searchQuery) => {
+        setLoadingInvite(true); // Set loadingInvite to true
         try {
             const response = await innerCircleInvitation(searchQuery);
 
@@ -154,6 +156,8 @@ const DisplayInnerCircle = () => {
         } catch (error) {
             console.error('Error in Inviting:', error);
             toast('An error occurred while posting the comment');
+        } finally {
+            setLoadingInvite(false); // Set loadingInvite to false
         }
     };
 
@@ -256,12 +260,23 @@ const DisplayInnerCircle = () => {
                                                 </Button>
                                             </ListGroup.Item>
                                         ))}
-                                        {filteredMembers.length === 0 && (
+                                        {filteredMembers.length === 0 && !existingMemberEmails.includes(searchQuery) && (
                                             <Button
                                                 onClick={() => handleInvite(searchQuery)}
                                                 style={inviteButtonStyle}
+                                                disabled={loadingInvite} // Disable button if loadingInvite is true
                                             >
-                                                Invite the Member for Decision App
+                                                {loadingInvite ? ( // Show spinner if loadingInvite is true
+                                                    <Spinner
+                                                        as="span"
+                                                        animation="border"
+                                                        size="sm"
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    'Invite the Member for Decision App'
+                                                )}
                                             </Button>
                                         )}
                                     </ListGroup>
