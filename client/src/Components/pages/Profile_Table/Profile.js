@@ -6,12 +6,14 @@ import { saveAs } from 'file-saver';
 import { FaUserEdit } from "react-icons/fa";
 import './Profile.css';
 import { ToastContainer, toast } from 'react-toastify';
+import ClipLoader from "react-spinners/ClipLoader";
 import withAuth from '../../withAuth';
 
 const Profile = () => {
   const [formData, setFormData] = useState({});
   const [userData, setUserData] = useState({});
   const [decisions, setDecisions] = useState([]);
+  const [loading, setLoading] = useState(true);  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +48,7 @@ const Profile = () => {
         }
       } catch (error) {
         console.error('Error fetching data:', error.message);
+        setLoading(false);
       }
     };
 
@@ -104,6 +107,14 @@ const Profile = () => {
       toast('downloaded successfully')      
     }
   };
+
+  if (loading) {
+    return (
+      <div className="loading-spinner">
+        <ClipLoader color={"#123abc"} loading={loading} size={100} />
+      </div>
+    );
+  }
 
   return (
     <div className="card1">
