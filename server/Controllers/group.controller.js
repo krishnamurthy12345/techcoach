@@ -385,6 +385,8 @@ const getInnerCircleAcceptNotification = async (req, res) => {
         if (notAcceptedMembersResult.length > 0) {
             const groupIds = notAcceptedMembersResult.map(member => member.group_id);
 
+            console.log("kkkkkkkkkkkkkk", groupIds);
+
             const acceptedMembersQuery = `
                 SELECT *
                 FROM techcoach_lite.techcoach_group_members
@@ -400,6 +402,8 @@ const getInnerCircleAcceptNotification = async (req, res) => {
             for (const member of notAcceptedMembersResult) {
                 const groupId = member.group_id;
 
+                console.log("iddddddddddddd", groupId);
+
                 const groupQuery = `
                     SELECT created_by
                     FROM techcoach_lite.techcoach_groups
@@ -410,11 +414,13 @@ const getInnerCircleAcceptNotification = async (req, res) => {
                 if (groupResult.length > 0) {
                     const createdBy = groupResult[0].created_by;
 
+                    console.log("ssssssssss", createdBy);
+
                     const userQuery = `
                         SELECT *
                         FROM techcoach_lite.techcoach_task
-                        WHERE user_id = ?
-                    `;
+                        WHERE user_id = ?`;
+                    
                     const userResult = await conn.query(userQuery, [createdBy]);
                     groupDetailsMap[groupId] = {
                         createdBy,
@@ -501,7 +507,6 @@ const acceptOrRejectInnerCircle = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
 
 const getSharedDecisions = async (req, res) => {
     const userId = req.user.id;
@@ -1031,7 +1036,6 @@ const innerCircleDecisionShare = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
 
 const innerCircleInvitation = async (req, res) => {
     console.log("Request body invitation:", req.user);
