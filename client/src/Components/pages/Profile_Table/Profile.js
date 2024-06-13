@@ -6,6 +6,7 @@ import { saveAs } from 'file-saver';
 import { FaUserEdit } from "react-icons/fa";
 import './Profile.css';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../../withAuth';
 
 const Profile = () => {
   const [formData, setFormData] = useState({});
@@ -73,7 +74,8 @@ const Profile = () => {
           }
         });
         localStorage.removeItem('token');
-        navigate('/');
+        window.location.reload(); 
+        navigate("/");
       } catch (error) {
         console.error('Error deleting account:', error.message);
       }
@@ -188,4 +190,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default withAuth(Profile);
