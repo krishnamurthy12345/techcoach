@@ -47,7 +47,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                         takenDate: decision.decision_taken_date
                     };
 
-                    const responseToMail = await mailToInnerCircleDecisionShare(memberEmail, memberName, decisionSummary);
+                    const responseToMail = await mailToInnerCircleDecisionShare(memberEmail, decisionSummary);
                     console.log("response from the mail", responseToMail);
                 }
 

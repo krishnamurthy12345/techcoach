@@ -18,6 +18,7 @@ import Notification from './Components/Notification/Notification.js';
 import ProfileTab from './Components/pages/Profile_Table/ProfileTab.js';
 import SharedDecision from './Components/Group/SharedDecisions.js';
 import DashboardRedirect from '../src/Components/DashboardRedirect.js'; 
+import ReceivedDecisionsTab from '../src/Components/DashBoard/ReceivedDecisionsTab.js'; 
 
 function App() {
   console.log("one is working")
@@ -45,6 +46,8 @@ function App() {
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
+
+        <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />

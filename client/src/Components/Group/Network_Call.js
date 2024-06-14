@@ -286,12 +286,12 @@ const EditCommentAdded = async (commentId, editedContent) =>{
     }
 }
 
-const mailToInnerCircleDecisionShare = async (memberEmail, memberName, decisionSummary) =>{
+const mailToInnerCircleDecisionShare = async (memberEmail, decisionSummary) =>{
     const token = localStorage.getItem('token');
     console.log("jjsjsjss",decisionSummary );
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCircleDecisionShare`,
-        {memberEmail, memberName, decisionSummary},  
+        {memberEmail, decisionSummary},  
         {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -342,6 +342,24 @@ const innerCircleInvitation = async (email) =>{
     }
 }
 
+const getSharedDecisionDetails = async () =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisionDetails`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log("response for get shared decision details", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error in getting shared decision details", error);
+        throw error;
+    }
+}
+
+
 export { 
     getUserListForInnerCircle, 
     innerCircleCreation, 
@@ -362,5 +380,6 @@ export {
     EditCommentAdded,
     mailToInnerCircleDecisionShare,
     innerCirclePostComment,
-    innerCircleInvitation
+    innerCircleInvitation,
+    getSharedDecisionDetails
  };

@@ -29,6 +29,7 @@ router.put("/editCommentsAdded",groupController.editCommentsAdded);
 router.post("/innerCircleDecisionShare",groupController.innerCircleDecisionShare);
 router.post("/innerCirclePostComment",groupController.innerCirclePostComment);
 router.post("/innerCircleInvitation",groupController.innerCircleInvitation);
+router.get("/getSharedDecisionDetails",groupController.getSharedDecisionDetails);
 
 
 module.exports = router;

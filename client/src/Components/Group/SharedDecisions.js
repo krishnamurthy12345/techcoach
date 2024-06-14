@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Typography, Card, CardContent, Box, Avatar, IconButton, Grid, Popover, ToggleButton, ButtonGroup, } from '@mui/material';
+import { Button, Typography, Card, CardContent, Box, Avatar, IconButton, Grid, Popover, ToggleButton, ButtonGroup, CircularProgress } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
 import { getSharedDecisions, postCommentForDecision, deleteCommentAdded, EditCommentAdded, innerCirclePostComment } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
@@ -16,7 +16,8 @@ const SharedDecision = () => {
     const [showPending, setShowPending] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
     const [autocompleteValue, setAutocompleteValue] = useState('');
-
+    const [loading, setLoading] = useState(true);
+    const [buttonLoading, setButtonLoading] = useState({}); // State to track loading status for buttons
 
     const fetchSharedDecisions = async () => {
         try {
@@ -33,9 +34,11 @@ const SharedDecision = () => {
                 initialCommentTexts[item.decisionDetails.decision_id] = "";
             });
             setCommentTexts(initialCommentTexts);
+            setLoading(false);  // Set loading to false once data is fetched
         } catch (error) {
             console.error('Error fetching shared decisions:', error);
             toast('An error occurred while fetching shared decisions');
+            setLoading(false);  // Set loading to false even if there's an error
         }
     };
 
@@ -55,6 +58,7 @@ const SharedDecision = () => {
 
     const handlePostComment = async (decisionId, groupMemberID, groupId) => {
         try {
+            setButtonLoading(prevState => ({ ...prevState, [decisionId]: true })); // Set loading to true
             const commentText = commentTexts[decisionId];
             const response = await postCommentForDecision(decisionId, groupMemberID, commentText, groupId);
             fetchSharedDecisions();
@@ -65,14 +69,27 @@ const SharedDecision = () => {
                     ...prevState,
                     [decisionId]: ""
                 }));
-            }  else {
+            } else {
                 toast('Failed to post the comment');
             }
-            
-            
         } catch (error) {
             console.error('Error posting comment:', error);
             toast('An error occurred while posting the comment');
+        } finally {
+            setButtonLoading(prevState => ({ ...prevState, [decisionId]: false })); // Set loading to false
+        }
+    };
+
+    const handlePostCommentAndEmail = async (decisionId, groupMemberID, groupId, email) => {
+        try {
+            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: true })); // Set loading to true
+            await handlePostComment(decisionId, groupMemberID, groupId);
+            const responseToPostComment = await innerCirclePostComment(sharedDecisions.find(decision => decision.decisionDetails.decision_id === decisionId).decisionDetails, groupMemberID, commentTexts[decisionId], email);
+            console.log("response from the responseToPostComment", responseToPostComment);
+        } catch (error) {
+            console.error('Error posting comment and emailing:', error);
+        } finally {
+            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: false })); // Set loading to false
         }
     };
 
@@ -121,7 +138,7 @@ const SharedDecision = () => {
     const getUniqueUsers = (decisions, showPending) => {
         const users = [];
         const emails = new Set();
-    
+
         decisions.forEach(decision => {
             if ((!showPending || !decision.decisionDetails.decision_taken_date)) {
                 const user = decision.decisionDetails.userDetails;
@@ -131,251 +148,259 @@ const SharedDecision = () => {
                 }
             }
         });
-    
+
         return users;
     };
-    
 
     const handleAutocompleteChange = (event) => {
         setAutocompleteValue(event.target.value);
         const selected = getUniqueUsers(sharedDecisions).find(user => `${user.displayname} (${user.email})` === event.target.value);
         setSelectedUser(selected);
     };
-    
+
     return (
         <Box p={3}>
-            {sharedDecisions.length === 0 ? (
-                <Typography variant="h5" align="center" mt={2} mb={2}>
-                    No shared decisions
-                </Typography>
+            {loading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                    <CircularProgress />
+                </Box>
             ) : (
-                <div style={{ ...(isPopoverOpen && { filter: 'blur(2px)' }) }}>
-                    <ButtonGroup
-                        sx={{
-                            marginBottom: "1rem",
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: "0.5rem",
-                            margin:"1rem",
-                            flexDirection: { xs: 'column', sm: 'row' }
-                        }}
-                    >
-                        <ToggleButton
-                            value={true}
-                            selected={showPending}
-                            onClick={() => setShowPending(true)}
-                            sx={{
-                                color: showPending ? '#fff' : '#000',
-                                border: showPending ? "0.12rem solid #3F5362" : "0.1rem solid #3F5362",
-                                backgroundColor: showPending ? '#3F5362' : 'default',
-                                height:"3rem",
-                                '&:hover': {
-                                    color: showPending ? '#fff' : '#000',
-                                    backgroundColor: showPending ? '#465e70' : 'default'
-                                },
-                            }}
-                        >
-                            Show Pending Decisions
-                        </ToggleButton>
-                        <ToggleButton
-                            value={false}
-                            selected={!showPending}
-                            onClick={() => setShowPending(false)}
-                            sx={{
-                                color: !showPending ? '#fff' : '#000',
-                                border: !showPending ? "0.12rem solid #3F5362" : "0.1rem solid #3F5362",
-                                backgroundColor: !showPending ? '#465e70' : 'default',
-                                height:"3rem",
-                                '&:hover': {
-                                    color: !showPending ? '#fff' : '#000',
-                                    backgroundColor: !showPending ? '#465e70' : 'default'
-                                },
-                            }}
-                        >
-                            Show All Decisions
-                        </ToggleButton>
-                        
-                        <select
-                            value={autocompleteValue}
-                            onChange={handleAutocompleteChange}
-                            style={{
-                                width: '100%', 
-                                borderRadius: '0.3rem',
-                                border: '0.1rem solid #3F5362',
-                                maxWidth: '300px',
-                                marginTop:"0",
-                                padding:"0.7rem",
-                                '@media (max-width: 600px)': { 
-                                    maxWidth: '100%', 
-                                }
-                            }}
-                        >
-                        <option value="">Sort by Name</option>
-                        {getUniqueUsers(sharedDecisions, showPending).map((user, index) => (
-                            <option  key={index} value={`${user.displayname} (${user.email})`}>
-                                {user.displayname} ({user.email})
-                            </option>
-                        ))}
-                    </select>
+                <>
+                    {sharedDecisions.length === 0 ? (
+                        <Typography variant="h5" align="center" mt={2} mb={2}>
+                            No shared decisions
+                        </Typography>
+                    ) : (
+                        <div style={{ ...(isPopoverOpen && { filter: 'blur(2px)' }) }}>
+                            <ButtonGroup
+                                sx={{
+                                    marginBottom: "1rem",
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    gap: "0.5rem",
+                                    margin: "1rem",
+                                    flexDirection: { xs: 'column', sm: 'row' }
+                                }}
+                            >
+                                <ToggleButton
+                                    value={true}
+                                    selected={showPending}
+                                    onClick={() => setShowPending(true)}
+                                    sx={{
+                                        color: showPending ? '#fff' : '#000',
+                                        border: showPending ? "0.12rem solid #3F5362" : "0.1rem solid #3F5362",
+                                        backgroundColor: showPending ? '#3F5362' : 'default',
+                                        height: "3rem",
+                                        '&:hover': {
+                                            color: showPending ? '#fff' : '#000',
+                                            backgroundColor: showPending ? '#465e70' : 'default'
+                                        },
+                                    }}
+                                >
+                                    Show Pending Decisions
+                                </ToggleButton>
+                                <ToggleButton
+                                    value={false}
+                                    selected={!showPending}
+                                    onClick={() => setShowPending(false)}
+                                    sx={{
+                                        color: !showPending ? '#fff' : '#000',
+                                        border: !showPending ? "0.12rem solid #3F5362" : "0.1rem solid #3F5362",
+                                        backgroundColor: !showPending ? '#465e70' : 'default',
+                                        height: "3rem",
+                                        '&:hover': {
+                                            color: !showPending ? '#fff' : '#000',
+                                            backgroundColor: !showPending ? '#465e70' : 'default'
+                                        },
+                                    }}
+                                >
+                                    Show All Decisions
+                                </ToggleButton>
 
-                    </ButtonGroup>
-                    <div>
-                        {sharedDecisions
-                            .filter(item => 
-                                (!showPending || !item.decisionDetails.decision_taken_date) &&
-                                (selectedUser ? item.decisionDetails.userDetails.email === selectedUser.email : true)
-                            )
-                            .map((item, index) => (
-                                <div key={index}>
-                                    <Card variant="outlined" mt={2} mb={2} style={{ margin: "1rem" }}>
-                                        <CardContent>
-                                            <Grid container spacing={2} alignItems="center">
-                                                <Grid item>
-                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{item.decisionDetails.userDetails.displayname[0]}</Avatar>
-                                                </Grid>
-                                                <Grid item xs>
-                                                    <Typography variant="h6">
-                                                        Decision: {item.decisionDetails.decision_name}
-                                                    </Typography>
-                                                    <Typography variant="body2">
-                                                        {item.decisionDetails.userDetails.displayname} | {item.decisionDetails.userDetails.email}
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                            <Typography variant="body1" mt={2}>
-                                                Reasons:
-                                            </Typography>
-                                            {item.decisionDetails.reasons && item.decisionDetails.reasons.length > 0 ? (
-                                                item.decisionDetails.reasons.map((reason, reasonIndex) => (
-                                                    <Typography key={reasonIndex} variant="body1" style={{ marginLeft: '16px' }}>
-                                                        - {reason}
-                                                    </Typography>
-                                                ))
-                                            ) : (
-                                                <Typography variant="body1" style={{ marginLeft: '16px' }}>
-                                                    No reasons provided
-                                                </Typography>
-                                            )}
-                                            <Typography variant="body1">
-                                                Due Date: {new Date(item.decisionDetails.decision_due_date).toLocaleDateString()}
-                                            </Typography>
-                                            {item.decisionDetails.decision_taken_date ? (
-                                                <Typography variant="body1">
-                                                    Taken Date: {new Date(item.decisionDetails.decision_taken_date).toLocaleDateString()}
-                                                </Typography>
-                                            ) : (
-                                                <></>
-                                            )}
-                                            <Typography variant="body1" color="textSecondary">
-                                                User Statement: {item.decisionDetails.user_statement}
-                                            </Typography>
-                                        </CardContent>
-                                        <CardContent>
-                                            <Typography variant="h6">Comments:</Typography>
-                                            {item.comments.map((comment, commentIndex) => (
-                                                <Box key={commentIndex} mt={2} mb={2}>
+                                <select
+                                    value={autocompleteValue}
+                                    onChange={handleAutocompleteChange}
+                                    style={{
+                                        width: '100%',
+                                        borderRadius: '0.3rem',
+                                        border: '0.1rem solid #3F5362',
+                                        maxWidth: '300px',
+                                        marginTop: "0",
+                                        padding: "0.7rem",
+                                        '@media (max-width: 600px)': {
+                                            maxWidth: '100%',
+                                        }
+                                    }}
+                                >
+                                    <option value="">Sort by Name</option>
+                                    {getUniqueUsers(sharedDecisions, showPending).map((user, index) => (
+                                        <option key={index} value={`${user.displayname} (${user.email})`}>
+                                            {user.displayname} ({user.email})
+                                        </option>
+                                    ))}
+                                </select>
+
+                            </ButtonGroup>
+                            <div>
+                                {sharedDecisions
+                                    .filter(item =>
+                                        (!showPending || !item.decisionDetails.decision_taken_date) &&
+                                        (selectedUser ? item.decisionDetails.userDetails.email === selectedUser.email : true)
+                                    )
+                                    .map((item, index) => (
+                                        <div key={index}>
+                                            <Card variant="outlined" mt={2} mb={2} style={{ margin: "1rem" }}>
+                                                <CardContent>
                                                     <Grid container spacing={2} alignItems="center">
                                                         <Grid item>
-                                                            <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
+                                                            <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{item.decisionDetails.userDetails.displayname[0]}</Avatar>
                                                         </Grid>
                                                         <Grid item xs>
-                                                            <Typography variant="body1">{comment.comment}</Typography>
-                                                            <Typography variant="caption" color="textSecondary">
-                                                                {comment.displayname} | {comment.email} |
-                                                                {comment.created_at === comment.updated_at
-                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                    : <span> Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                            <Typography variant="h6">
+                                                                Decision: {item.decisionDetails.decision_name}
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {item.decisionDetails.userDetails.displayname} | {item.decisionDetails.userDetails.email}
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid item>
-                                                            <IconButton onClick={() => handleEdit(comment.id, comment.comment)}>
-                                                                <EditIcon sx={{ color: "black" }} />
-                                                            </IconButton>
-                                                        </Grid>
                                                     </Grid>
-                                                    {comment.replies && comment.replies.length > 0 && (
-                                                        <Box mt={1} ml={4} pl={2}>
-                                                            {comment.replies.map((reply, replyIndex) => (
-                                                                <Box key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{ backgroundColor: "#DDE6ED" }}>
-                                                                    <Grid container spacing={2} alignItems="center">
-                                                                        <Grid item>
-                                                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{reply.displayname[0]}</Avatar>
-                                                                        </Grid>
-                                                                        <Grid item xs>
-                                                                            <Typography variant="body1">{reply.comment}</Typography>
-                                                                            <Typography variant="caption" color="textSecondary">
-                                                                                {reply.displayname} | {reply.email} |
-                                                                                {reply.created_at === reply.updated_at
-                                                                                    ? <span> {formatDistanceToNow(parseISO(reply.created_at), { addSuffix: true })}</span>
-                                                                                    : <span> Edited {formatDistanceToNow(parseISO(reply.updated_at), { addSuffix: true })}</span>}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Box>
-                                                            ))}
-                                                        </Box>
+                                                    <Typography variant="body1" mt={2}>
+                                                        Reasons:
+                                                    </Typography>
+                                                    {item.decisionDetails.reasons && item.decisionDetails.reasons.length > 0 ? (
+                                                        item.decisionDetails.reasons.map((reason, reasonIndex) => (
+                                                            <Typography key={reasonIndex} variant="body1" style={{ marginLeft: '16px' }}>
+                                                                - {reason}
+                                                            </Typography>
+                                                        ))
+                                                    ) : (
+                                                        <Typography variant="body1" style={{ marginLeft: '16px' }}>
+                                                            No reasons provided
+                                                        </Typography>
                                                     )}
-                                                </Box>
-                                            ))}
-                                           <Box mt={2}>
-                                            <input
-                                                label="Add Comment"
-                                                variant="outlined"
-                                                fullWidth
-                                                placeholder="Add a comment..."
-                                                style={{
-                                                    height: "3rem",
-                                                    padding: "1rem",
-                                                    width: "100%",
-                                                    maxWidth: "100%",
-                                                    marginRight: "0.5rem"
-                                                }}
-                                                value={commentTexts[item.decisionDetails.decision_id]}
-                                                onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
-                                            />
-                                            <Grid container spacing={2} justifyContent="flex-end">
-                                                <Grid item>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
-                                                        style={{ marginTop: "1rem" }}
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </Grid>
-                                                <Grid item>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={async () => {
-                                                        await handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId);
-                                                        const email = item.decisionDetails.userDetails.email; 
-                                                        const responseToPostComment = await innerCirclePostComment(item.decisionDetails, item.sharedDecision.groupMember, commentTexts[item.decisionDetails.decision_id], email);
-                                                        console.log("response from the responseToPostComment", responseToPostComment);
-                                                    }}
-                                                    style={{ marginTop: "1rem" }}
-                                                >
-                                                    Save and Email
-                                                </Button>
-                                                </Grid>
-                                            </Grid>
-                                        </Box>
+                                                    <Typography variant="body1">
+                                                        Due Date: {new Date(item.decisionDetails.decision_due_date).toLocaleDateString()}
+                                                    </Typography>
+                                                    {item.decisionDetails.decision_taken_date ? (
+                                                        <Typography variant="body1">
+                                                            Taken Date: {new Date(item.decisionDetails.decision_taken_date).toLocaleDateString()}
+                                                        </Typography>
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                    <Typography variant="body1" color="textSecondary">
+                                                        User Statement: {item.decisionDetails.user_statement}
+                                                    </Typography>
+                                                </CardContent>
+                                                <CardContent>
+                                                    <Typography variant="h6">Comments:</Typography>
+                                                    {item.comments.map((comment, commentIndex) => (
+                                                        <Box key={commentIndex} mt={2} mb={2}>
+                                                            <Grid container spacing={2} alignItems="center">
+                                                                <Grid item>
+                                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white" }}>{comment.displayname[0]}</Avatar>
+                                                                </Grid>
+                                                                <Grid item xs>
+                                                                    <Typography variant="body1">{comment.comment}</Typography>
+                                                                    <Typography variant="caption" color="textSecondary">
+                                                                        {comment.displayname} | {comment.email} |
+                                                                        {comment.created_at === comment.updated_at
+                                                                            ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                            : <span> Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <IconButton onClick={() => handleEdit(comment.id, comment.comment)}>
+                                                                        <EditIcon sx={{ color: "black" }} />
+                                                                    </IconButton>
+                                                                </Grid>
+                                                            </Grid>
+                                                            {comment.replies && comment.replies.length > 0 && (
+                                                                <Box mt={1} ml={4} pl={2}>
+                                                                    {comment.replies.map((reply, replyIndex) => (
+                                                                        <Box key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{ backgroundColor: "#DDE6ED" }}>
+                                                                            <Grid container spacing={2} alignItems="center">
+                                                                                <Grid item>
+                                                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{reply.displayname[0]}</Avatar>
+                                                                                </Grid>
+                                                                                <Grid item xs>
+                                                                                    <Typography variant="body1">{reply.comment}</Typography>
+                                                                                    <Typography variant="caption" color="textSecondary">
+                                                                                        {reply.displayname} | {reply.email} |
+                                                                                        {reply.created_at === reply.updated_at
+                                                                                            ? <span> {formatDistanceToNow(parseISO(reply.created_at), { addSuffix: true })}</span>
+                                                                                            : <span> Edited {formatDistanceToNow(parseISO(reply.updated_at), { addSuffix: true })}</span>}
+                                                                                    </Typography>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Box>
+                                                                    ))}
+                                                                </Box>
+                                                            )}
+                                                        </Box>
+                                                    ))}
+                                                    <Box mt={2}>
+                                                        <input
+                                                            label="Add Comment"
+                                                            variant="outlined"
+                                                            fullWidth
+                                                            placeholder="Add a comment..."
+                                                            style={{
+                                                                height: "3rem",
+                                                                padding: "1rem",
+                                                                width: "100%",
+                                                                maxWidth: "100%",
+                                                                marginRight: "0.5rem"
+                                                            }}
+                                                            value={commentTexts[item.decisionDetails.decision_id]}
+                                                            onChange={(e) => handleCommentChange(item.decisionDetails.decision_id, e.target.value)}
+                                                        />
+                                                        <Grid container spacing={2} justifyContent="flex-end">
+                                                            <Grid item>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
+                                                                    style={{ marginTop: "1rem" }}
+                                                                    disabled={!commentTexts[item.decisionDetails.decision_id] || buttonLoading[item.decisionDetails.decision_id]} 
+                                                                >
+                                                                    {buttonLoading[item.decisionDetails.decision_id] ? <CircularProgress size={24} /> : 'Save'}
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    onClick={async () => {
+                                                                        const email = item.decisionDetails.userDetails.email;
+                                                                        await handlePostCommentAndEmail(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId, email);
+                                                                    }}
+                                                                    style={{ marginTop: "1rem" }}
+                                                                    disabled={!commentTexts[item.decisionDetails.decision_id] || buttonLoading[item.decisionDetails.decision_id + '_email']} 
+                                                                >
+                                                                    {buttonLoading[item.decisionDetails.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Save and Email'}
+                                                                </Button>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
 
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            ))}
-                        {showPending && !sharedDecisions.some(item => !item.decisionDetails.decision_taken_date) && (
-                            <Typography variant="h5" align="center" mt={2} mb={2} sx={{backgroundColor:"white",
-                                padding:"0.5rem",
-                                borderRadius:"0.2rem"
-                            }}>
-                                No pending decisions
-                            </Typography>
-                        )}
-                    </div>
-                </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    ))}
+                                {showPending && !sharedDecisions.some(item => !item.decisionDetails.decision_taken_date) && (
+                                    <Typography variant="h5" align="center" mt={2} mb={2} sx={{
+                                        backgroundColor: "white",
+                                        padding: "0.5rem",
+                                        borderRadius: "0.2rem"
+                                    }}>
+                                        No pending decisions
+                                    </Typography>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             <Popover
