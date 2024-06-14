@@ -15,7 +15,7 @@ const DisplayInnerCircle = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [loadingRemove, setLoadingRemove] = useState({});
-    const [loadingInvite, setLoadingInvite] = useState(false); // New state for invite loading
+    const [loadingInvite, setLoadingInvite] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -260,13 +260,13 @@ const DisplayInnerCircle = () => {
                                                 </Button>
                                             </ListGroup.Item>
                                         ))}
-                                        {filteredMembers.length === 0 && !existingMemberEmails.includes(searchQuery) && (
+                                        {filteredMembers.length === 0 && !existingMemberEmails.includes(searchQuery) ? (
                                             <Button
                                                 onClick={() => handleInvite(searchQuery)}
                                                 style={inviteButtonStyle}
-                                                disabled={loadingInvite} // Disable button if loadingInvite is true
+                                                disabled={loadingInvite} 
                                             >
-                                                {loadingInvite ? ( // Show spinner if loadingInvite is true
+                                                {loadingInvite ? ( 
                                                     <Spinner
                                                         as="span"
                                                         animation="border"
@@ -278,6 +278,10 @@ const DisplayInnerCircle = () => {
                                                     'Invite the Member for Decision App'
                                                 )}
                                             </Button>
+                                        ):(
+                                            <div className="alert alert-warning" role="alert" style={{ marginTop: '10px' }}>
+                                                Already Added Member
+                                            </div>
                                         )}
                                     </ListGroup>
                                 )}

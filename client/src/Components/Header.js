@@ -2,10 +2,29 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
+import { getInnerCircleAcceptNotification } from '../Components/Group/Network_Call';
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
+    const [response, setResponse] = useState(null);
+    const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getInnerCircleAcceptNotification();
+            console.log("response from notification", response);
+            setResponse(response);
+            if (response && response.notAcceptedMembers && response.groupDetails) {
+                const count = response.notAcceptedMembers.filter(member => 
+                    response.groupDetails[member.group_id] && response.groupDetails[member.group_id].userDetails !== null
+                ).length;
+                setNotAcceptedMembersCount(count);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -27,7 +46,6 @@ const Header = () => {
             console.error('Error setting auth token:', error);
         }
     }, []);
-
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -63,9 +81,17 @@ const Header = () => {
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
 
-                                    <li className="nav-item">
-                                        <Link to='/notification' className="nav-link">Notifications</Link>
-                                    </li> 
+                                    <li className="nav-item" style={{marginRight:"0.5rem"}}>
+                                        <Link to='/notification' className="nav-link position-relative">
+                                            Notifications
+                                            {notAcceptedMembersCount > 0 && (
+                                                <span className="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize:"0.6rem"}}>
+                                                    {notAcceptedMembersCount}
+                                                    <span className="visually-hidden">New alerts</span>
+                                                </span>
+                                            )}
+                                        </Link>
+                                    </li>
                                     
                                     <li className="nav-item">
                                         <Link to='/profile' className="nav-link">Profile</Link>

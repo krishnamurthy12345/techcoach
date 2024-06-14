@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box, CircularProgress } from '@mui/material';
 import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
+import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
 import './Nav.css';
 import withAuth from '../../withAuth';
+import { getSharedDecisionDetails } from '../../Group/Network_Call';
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -13,9 +15,28 @@ const Nav = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
-  const [sharedDecisionsCount, setSharedDecisionsCount] = useState(0);
+  const [receivedDecisionsCount, setReceivedDecisionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   let loggedInUserId;
+
+  const [sharedDecisionDetails, setSharedDecisionDetails] = useState(null);
+
+  useEffect(() => {
+    const fetchSharedDecisionsDetails = async () => {
+      try {
+        const details = await getSharedDecisionDetails();
+        setSharedDecisionDetails(details);
+        setLoading(false); // Set loading to false once data is fetched
+      } catch (error) {
+        console.error("Failed to fetch inner circle details", error);
+        setLoading(false); // Handle loading state on error as well
+      }
+    };
+    fetchSharedDecisionsDetails();
+  }, []);
+
+  // Ensure sharedDecisionDetails is not null before accessing its properties
+  const sharedDecisionCount = sharedDecisionDetails?.sharedDecisions.length || 0;
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,10 +81,11 @@ const Nav = () => {
         const sharedDecisions = response.data.decisionCount;
         console.log("countttt", sharedDecisions);
 
-        setSharedDecisionsCount(sharedDecisions);
-        setLoading(false);  // Set loading to false after shared decisions count is fetched
+        setReceivedDecisionsCount(sharedDecisions);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error.message);
+        setLoading(false); // Handle loading state on error as well
       }
     };
 
@@ -74,8 +96,8 @@ const Nav = () => {
     return (
       decision.user_id === loggedInUserId &&
       ((decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-      (!decision.decision_taken_date)) 
+        (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+        (!decision.decision_taken_date))
     );
   });
 
@@ -88,6 +110,10 @@ const Nav = () => {
 
   const navigateToSharedDecisions = () => {
     navigate('/sharedDecisions');
+  };
+
+  const navigateToReceivedDecisions = () => {
+    navigate('/receivedDecisions');
   };
 
   const navigateToTotalDecisions = () => {
@@ -105,7 +131,7 @@ const Nav = () => {
   return (
     <div style={{ maxWidth: "95%", display: "flex", flexDirection: "column", gap: "1rem", margin: "3rem" }}>
       <Grid container spacing={4}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <CustomCard
             icon={<AssignmentTurnedIn />}
             title="Total Decisions"
@@ -113,7 +139,7 @@ const Nav = () => {
             onClick={navigateToTotalDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <CustomCard
             icon={<HourglassEmpty />}
             title="Pending Decisions"
@@ -121,12 +147,21 @@ const Nav = () => {
             onClick={togglePendingDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
+          <CustomCard
+            icon={<ModelTrainingIcon />}
+            title="Received Decisions"
+            count={receivedDecisionsCount}
+            onClick={navigateToSharedDecisions}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
           <CustomCard
             icon={<Share />}
             title="Shared Decisions"
-            count={sharedDecisionsCount}
-            onClick={navigateToSharedDecisions}
+            count={sharedDecisionCount}
+            onClick={navigateToReceivedDecisions}
           />
         </Grid>
       </Grid>
@@ -190,7 +225,7 @@ const CustomCard = ({ icon, title, count, onClick }) => {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px',
+    padding: '15px',
     cursor: 'pointer',
     transition: 'all 0.3s ease-in-out'
   };
@@ -202,7 +237,7 @@ const CustomCard = ({ icon, title, count, onClick }) => {
       onClick={onClick}
       style={cardStyle}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: "0.5rem" }}>
         {icon}
         <Typography variant="h5">{title}</Typography>
       </Box>
