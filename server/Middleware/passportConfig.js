@@ -85,4 +85,3 @@ async function logLoginHistory(userId) {
     }
 }
 module.exports = passport;
-
