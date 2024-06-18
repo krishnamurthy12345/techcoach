@@ -78,12 +78,15 @@ const Readd = () => {
     );
   });
 
+  // Calculate indices for the current page
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
+
   const renderTableView = () => (
     <TableContainer component={Paper}>
       <Table>
-        <TableHead sx={{
-          backgroundColor: "#526D82"
-        }}>
+        <TableHead sx={{ backgroundColor: "#526D82" }}>
           <TableRow>
             <TableCell sx={{ color: "white" }}>#</TableCell>
             <TableCell sx={{ color: "white" }}>Decision Name</TableCell>
@@ -97,9 +100,9 @@ const Readd = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredData.map((decision, index) => (
+          {currentRecords.map((decision, index) => (
             <TableRow key={decision.decision_id}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
               <TableCell>{decision.decision_name}</TableCell>
               <TableCell>{new Date(decision.decision_due_date).toLocaleDateString()}</TableCell>
               <TableCell>{decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : "--"}</TableCell>
@@ -179,8 +182,8 @@ const Readd = () => {
                 </Box>
                 {expandedDecision === decision.decision_id && (
                   <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)', zIndex: 3 }}>
-                    <Typography variant="h6" sx                    ={{ color: '#526D82', marginBottom: '0.5rem' }}>Decision Details</Typography>
-                    <Typography variant="body2">Decision Due Date: {new Date(decision.decision_due_date).toLocaleDateString()}</Typography>
+                    <Typography variant="h6" sx={{ color: '#526D82', marginBottom: '0.5rem' }}>Decision Details</Typography>
+                    <Typography variant="body2">Decision                     Due Date: {new Date(decision.decision_due_date).toLocaleDateString()}</Typography>
                     <Typography variant="body2">Decision Taken Date: {decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : "--"}</Typography>
                     <Typography variant="body2">Decision Details: {decision.user_statement}</Typography>
                     <Typography variant="body2">Tags: {decision.tagsArray && decision.tagsArray.join(', ')}</Typography>
@@ -201,7 +204,7 @@ const Readd = () => {
     );
   };
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (event, pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
@@ -349,7 +352,7 @@ const Readd = () => {
           <Pagination
             count={Math.ceil(filteredData.length / recordsPerPage)}
             page={currentPage}
-            onChange={(e, page) => handlePageChange(page)}
+            onChange={handlePageChange}
             sx={{
               '& .MuiPaginationItem-page.Mui-selected': {
                 backgroundColor: '#526D82',
