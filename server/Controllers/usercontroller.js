@@ -30,7 +30,7 @@ const getUserList = async (req, res) => {
 
 
 const postGeneralProfile = async (req, res) => {
-  const { dob, gender, communication, skill, attitude, strength, weakness, opportunity, threat } = req.body;
+  const { dob, communication, skill, attitude, strength, weakness, opportunity, threat } = req.body;
   console.log(req.body, 'General Profile Data');
 
   let conn;
@@ -51,11 +51,9 @@ const postGeneralProfile = async (req, res) => {
       return encryptedText;
     }
 
-    const encryptedGender = encryptText(gender, req.user.key);
-
     const res1 = await conn.query(
-      "INSERT INTO techcoach_lite.techcoach_personal_info (dob, gender, user_id) VALUES (?, ?, ?)",
-      [dob, encryptedGender, userId]
+      "INSERT INTO techcoach_lite.techcoach_personal_info (dob, user_id) VALUES (?, ?)",
+      [dob, userId]
     );
 
     console.log("res1", res1);
@@ -116,24 +114,26 @@ const postGeneralProfile = async (req, res) => {
   }
 };
 
+
+const decryptText = (encryptedText, key) => {
+  if (!encryptedText) return null;
+  const decipher = crypto.createDecipher('aes-256-cbc', key);
+  let decryptedText = decipher.update(encryptedText, 'hex', 'utf8');
+  decryptedText += decipher.final('utf8');
+  return decryptedText;
+};
+
 const getProfile = async (req, res) => {
   const userId = req.user.id;
   const userKey = req.user.key;
   console.log(userId);
   let conn;
 
-  const decryptText = (encryptedText, key) => {
-    const decipher = crypto.createDecipher('aes-256-cbc', key);
-    let decryptedText = decipher.update(encryptedText, 'hex', 'utf8');
-    decryptedText += decipher.final('utf8');
-    return decryptedText;
-  };
-
   try {
     conn = await getConnection();
 
     const personalInfoResult = await conn.query(
-      "SELECT dob, gender, created_at FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?",
+      "SELECT dob, created_at FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?",
       [userId]
     );
 
@@ -142,15 +142,11 @@ const getProfile = async (req, res) => {
     }
 
     const personalInfo = personalInfoResult[0];
-    const decryptedGender = decryptText(personalInfo.gender, userKey);
-
 
     // Query to get the header names and ids
     const headerNamesResult = await conn.query(
       "SELECT header_id, header_name FROM techcoach_lite.techcoach_personal_header"
     );
-
-    // console.log(headerNamesResult,'bybyby');
 
     const headerMap = headerNamesResult.reduce((acc, { header_id, header_name }) => {
       acc[header_name.toLowerCase()] = header_id;
@@ -178,7 +174,6 @@ const getProfile = async (req, res) => {
 
     const fullProfile = {
       dob: personalInfo.dob,
-      gender: decryptedGender,
       user_id: userId,
       ...profileDetails
     };
@@ -193,7 +188,7 @@ const getProfile = async (req, res) => {
 };
 
 const putProfile = async (req, res) => {
-  const { dob, gender, communication, skill, attitude, strength, weakness, opportunity, threat } = req.body;
+  const { dob, communication, skill, attitude, strength, weakness, opportunity, threat } = req.body;
   const userKey = req.user.key;
   console.log(req.body, 'Update General Profile Data');
 
@@ -213,12 +208,10 @@ const putProfile = async (req, res) => {
       return encryptedText;
     };
 
-    const encryptedGender = gender ? encryptText(gender, userKey) : null;
-
     // Update Personal Info:
     const updatePersonalInfoResult = await conn.query(
-      "UPDATE techcoach_lite.techcoach_personal_info SET dob = ?, gender = ? WHERE user_id = ?",
-      [dob, encryptedGender, userId]
+      "UPDATE techcoach_lite.techcoach_personal_info SET dob = ? WHERE user_id = ?",
+      [dob, userId]
     );
     console.log("updatePersonalInfoResult", updatePersonalInfoResult);
 
@@ -331,6 +324,7 @@ const putProfile = async (req, res) => {
   }
 };
 
+
 // const deleteProfile = async (req, res) => {
 //   const userId = req.user.id;
 //   let conn;
@@ -432,6 +426,7 @@ const deleteProfile = async (req, res) => {
     }
   }
 };
+
 
 
 module.exports = { getUserList, postGeneralProfile, getProfile, putProfile,deleteProfile };
