@@ -11,6 +11,15 @@ const Header = () => {
     const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchData = async () => {
             const response = await getInnerCircleAcceptNotification();
             console.log("response from notification", response);
@@ -23,17 +32,10 @@ const Header = () => {
             }
         };
 
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
+        if (isLoggedIn) {
+            fetchData();
         }
-    }, []);
+    }, [isLoggedIn]);
 
     useEffect(() => {
         try {
