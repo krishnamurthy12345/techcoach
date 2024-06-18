@@ -8,6 +8,7 @@ import withAuth from '../../withAuth';
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [showAdvancedTags, setShowAdvancedTags] = useState(false);
   const [formData, setFormData] = useState({
     decision_name: '',
     decision_due_date: '',
@@ -71,7 +72,17 @@ const Decision = () => {
     "Financial Loss", "Financial Gain"
   ];
 
+  const advancedTags = [
+    "Board","Brand","Consultant","Corporate Governance","Customer", "Employee", "Expense","Hiring",
+     "Investment", "Legal Compliance","Operational","Partner","Policy","Product","Project","Prospect",
+     "Sales","Services","Statutory Compliance","Supplier"
+    ];
+
   const filteredTags = tags.filter(tag =>
+    tag.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredAdvancedTags = advancedTags.filter(tag =>
     tag.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -323,11 +334,52 @@ const Decision = () => {
                 ))}
               </div>
             </div>
+            <div className='form-group'>
+              <button
+                type="button"
+                onClick={() => setShowAdvancedTags(!showAdvancedTags)}
+                className='btnn3'
+              >
+                {showAdvancedTags ? "Hide Advanced Tags" : "Show Advanced Tags"}
+              </button>
+            </div>
+            {showAdvancedTags && (
+              <div className='form-group'>
+                <label>Advanced Tags:</label>
+                <div
+                  className='tag-container'
+                  style={{
+                    maxHeight: dropdownHeight,
+                    maxWidth: dropdownWidth,
+                    overflowY: 'auto',
+                    border: '1px solid #ccc',
+                    borderRadius: '5px',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    marginBottom: '10px',
+                    margin: 'auto',
+                  }}
+                >
+                  {filteredAdvancedTags.map((tag, index) => (
+                    <div key={index} className='tag-item'>
+                      <label className='tag-label' htmlFor={tag}>{tag}
+                        <input
+                          type="checkbox"
+                          id={tag}
+                          checked={selectedTags.includes(tag)}
+                          onChange={() => handleTagSelection(tag)}
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div style={{display:"flex", justifyContent:"center"}}>
-          <input type='submit' value={id ? "Update" : "Save"}  />
+            <input type='submit' value={id ? "Update" : "Save"}  />
           </div>
-          
         </form>
       </div>
       <ToastContainer />
