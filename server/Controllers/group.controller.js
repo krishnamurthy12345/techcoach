@@ -1052,12 +1052,19 @@ const innerCircleDecisionShare = async (req, res) => {
 
     let conn;
 
+    const truncateText = (text, maxLength) => {
+        if (text.length <= maxLength) return text;
+        const firstPart = text.substring(0, 10);
+        const lastPart = text.substring(text.length - 10);
+        return `${firstPart}...${lastPart}`;
+    };
+
     try {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?';
-        const rows = await conn.query(memberNameQuery, [memberId]);
+        const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
+        const rows = await conn.query(memberNameQuery, [memberEmail]);
 
         console.log("ssssssssssss", rows)
         
@@ -1066,6 +1073,19 @@ const innerCircleDecisionShare = async (req, res) => {
         }
         
         const memberName = rows[0].displayname;
+
+
+        const subjectNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?';
+        const subjectNameRows = await conn.query(subjectNameQuery, [memberId]);
+
+        
+        if (!subjectNameRows || subjectNameRows.length === 0) {
+            throw new Error('Member not found');
+        }
+        
+        const subjectName = subjectNameRows[0].displayname;
+
+        const truncatedDecisionText = truncateText(decisionSummary.decisionName, 20);
 
         const emailPayload = {
             from: {
@@ -1078,14 +1098,14 @@ const innerCircleDecisionShare = async (req, res) => {
                     }
                 }
             ],
-            subject: `Help ${memberName} decide`,
+            subject: `Help ${subjectName} decide`,
             htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
                 <p>Dear ${memberName},</p>
                 <p>This is to notify that a decision has been shared with you to provide your inputs.</p>
                 <p>Please login and add comments. You can choose to notify them by email at the time of posting comment.</p>
                 <p>Here are the details of the decision:</p>
                 <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
-                    <p><strong>Decision Name:</strong> ${decisionSummary.decisionName}</p>
+                    <p><strong>Decision Name:</strong> ${truncatedDecisionText}</p>
                     <p><strong>Due Date:</strong> ${decisionSummary.dueDate}</p>
                     <p><strong>Taken Date:</strong> ${decisionSummary.takenDate}</p>
                 </div>
@@ -1150,7 +1170,7 @@ const innerCircleInvitation = async (req, res) => {
             ],
             subject: `Join ${groupMemberDetails.displayname}'s Inner Circle`,
             htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
-                <p>Hi,</p>
+                <p>Hi ,</p>
                 <p>${groupMemberDetails.displayname} wants to add you as a member of their inner circle in the Decision Coach app.</p>
                 <p>Please join the Decision Coach application and provide your inputs on decisions.</p>
                 <p style="text-align: center;">

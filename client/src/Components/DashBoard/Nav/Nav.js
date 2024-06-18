@@ -25,18 +25,19 @@ const Nav = () => {
     const fetchSharedDecisionsDetails = async () => {
       try {
         const details = await getSharedDecisionDetails();
+        
         setSharedDecisionDetails(details);
-        setLoading(false); // Set loading to false once data is fetched
+        setLoading(false); 
       } catch (error) {
         console.error("Failed to fetch inner circle details", error);
-        setLoading(false); // Handle loading state on error as well
+        setLoading(false); 
       }
     };
     fetchSharedDecisionsDetails();
   }, []);
 
-  // Ensure sharedDecisionDetails is not null before accessing its properties
-  const sharedDecisionCount = sharedDecisionDetails?.sharedDecisions.length || 0;
+  const sharedDecisionCount = Array.isArray(sharedDecisionDetails?.sharedDecisions) ? sharedDecisionDetails.sharedDecisions.length : 0;
+  console.log("shhhhhhhhhhhh", sharedDecisionCount);
 
   useEffect(() => {
     const loadData = async () => {
@@ -85,7 +86,7 @@ const Nav = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error.message);
-        setLoading(false); // Handle loading state on error as well
+        setLoading(false); 
       }
     };
 

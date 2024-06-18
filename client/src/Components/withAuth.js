@@ -6,6 +6,7 @@ const withAuth = (Component) => {
         const navigate = useNavigate();
         useEffect(() => {
             const token = localStorage.getItem('token');
+            console.log("tokenjjjjjjjjjjjjjj", token)
             if (!token) {
                 navigate('/');
             }
