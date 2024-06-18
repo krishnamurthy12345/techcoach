@@ -31,33 +31,33 @@ const Decision = () => {
         headers: {
           Authorization: `Bearer ${token}`
         }
-    })
-        .then((resp) => {
-          const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
+      })
+      .then((resp) => {
+        const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
 
-          const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
-          const formattedDecisionTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().split('T')[0] : '';
+        const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
+        const formattedDecisionTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().split('T')[0] : '';
 
-          setFormData(prevState => ({
-            ...prevState,
-            decision_name: decision_name,
-            decision_due_date: formattedDecisionDueDate,
-            decision_taken_date: formattedDecisionTakenDate,
-            user_id: user_id,
-            user_statement: user_statement,
-            tags: tags,
-            decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
-          }));
-          setSelectedTags(resp.data.decisions[0].tags);
-        })
-        .catch((error) => {
-          if (error.response && error.response.status === 404) {
-            toast.error("Decision not found");
-          } else {
-            console.error(error);
-            toast.error("An error occurred while fetching decision details");
-          }
-        });
+        setFormData(prevState => ({
+          ...prevState,
+          decision_name: decision_name,
+          decision_due_date: formattedDecisionDueDate,
+          decision_taken_date: formattedDecisionTakenDate,
+          user_id: user_id,
+          user_statement: user_statement,
+          tags: tags,
+          decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
+        }));
+        setSelectedTags(resp.data.decisions[0].tags);
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          toast.error("Decision not found");
+        } else {
+          console.error(error);
+          toast.error("An error occurred while fetching decision details");
+        }
+      });
     }
   }, [id]);
 
@@ -69,10 +69,10 @@ const Decision = () => {
   ];
 
   const advancedTags = [
-    "Board","Brand","Consultant","Corporate Governance","Customer", "Employee", "Expense","Hiring",
-     "Investment", "Legal Compliance","Operational","Partner","Policy","Product","Project","Prospect",
-     "Sales","Services","Statutory Compliance","Supplier"
-    ];
+    "Board", "Brand", "Consultant", "Corporate Governance", "Customer", "Employee", "Expense", "Hiring",
+    "Investment", "Legal Compliance", "Operational", "Partner", "Policy", "Product", "Project", "Prospect",
+    "Sales", "Services", "Statutory Compliance", "Supplier"
+  ];
 
   const filteredTags = tags.filter(tag =>
     tag.toLowerCase().includes(searchTerm.toLowerCase())
@@ -85,16 +85,15 @@ const Decision = () => {
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     let formattedValue = value; 
-  
+
     if (id === 'decision_due_date' || id === 'decision_taken_date') {
       const isValidDate = /\d{4}-\d{2}-\d{2}/.test(value);
       if (!isValidDate) {
         return;
       }
-  
       formattedValue = value; 
     }
-  
+
     setFormData((prevData) => ({
       ...prevData,
       [id]: formattedValue,
@@ -262,7 +261,7 @@ const Decision = () => {
                 placeholder='Enter the statement'
                 style={{ width: "100%" }}
               />
-              {errors.user_statement && <span className="error">{errors.user_statement}</span>}
+                            {errors.user_statement && <span className="error">{errors.user_statement}</span>}
             </div>
             <div className='form-group'>
               <label>Decision Reasons <span className="required" style={{color:"red"}}>*</span></label>
@@ -273,58 +272,57 @@ const Decision = () => {
                     value={reason}
                     onChange={e => handleReasonChange(index, e.target.value)}
                     placeholder='Enter the decision reason'
-                    style={{ width:                    '100%' }}
-                    />
-                    <button
-                      className='btnn1'
-                      type='button'
-                      onClick={() => removeReason(index)}
-                    >
-                      Remove
-                    </button>
-                    {errors.decision_reason && <span className="error">{errors.decision_reason}</span>}
+                    style={{ width: '100%' }}
+                  />
+                  <button
+                    className='btnn1'
+                    type='button'
+                    onClick={() => removeReason(index)}
+                  >
+                    Remove
+                  </button>
+                  {errors.decision_reason && <span className="error">{errors.decision_reason}</span>}
+                </div>
+              ))}
+              <button className='btnn2' type='button' onClick={handleAddReason}>Add More Reason</button>
+            </div>
+            <div className='form-group'>
+              <label>Select Tags <span className="required" style={{color:"red"}}>*</span></label>
+              <input
+                type="text"
+                placeholder="Search tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ width: "100%", marginBottom: '5px' }}
+              />
+              {errors.selectedTags && <span className="error">{errors.selectedTags}</span>}
+              <div
+                className='tag-container'
+                style={{
+                  maxHeight: dropdownHeight,
+                  maxWidth: dropdownWidth,
+                  overflowY: 'auto',
+                  border: '1px solid #ccc',
+                  borderRadius: '5px',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  marginBottom: '10px',
+                  margin: 'auto',
+                }}
+              >
+                {filteredTags.map((tag, index) => (
+                  <div key={index} className='tag-item'>
+                    <label className='tag-label' htmlFor={tag}>{tag}
+                      <input
+                        type="checkbox"
+                        id={tag}
+                        checked={selectedTags.includes(tag)}
+                        onChange={() => handleTagSelection(tag)}
+                      />
+                    </label>
                   </div>
                 ))}
-                <button className='btnn2' type='button' onClick={handleAddReason}>Add More Reason</button>
-              </div>
-              <div className='form-group'>
-                <label>Select Tags <span className="required" style={{color:"red"}}>*</span></label>
-                <input
-                  type="text"
-                  placeholder="Search tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ width: "100%", marginBottom: '5px' }}
-                />
-                {errors.selectedTags && <span className="error">{errors.selectedTags}</span>}
-                <div
-                  className='tag-container'
-                  style={{
-                    maxHeight: dropdownHeight,
-                    maxWidth: dropdownWidth,
-                    overflowY: 'auto',
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    marginBottom: '10px',
-                    margin: 'auto',
-                  }}
-                >
-                  {filteredTags.map((tag, index) => (
-                    <div key={index} className='tag-item'>
-                      <label className='tag-label' htmlFor={tag}>{tag}
-                        <input
-                          type="checkbox"
-                          id={tag}
-                          checked={selectedTags.includes(tag)}
-                          onChange={() => handleTagSelection(tag)}
-                        />
-                      </label>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
             <div className='form-group'>
