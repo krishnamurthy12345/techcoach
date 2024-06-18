@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 
 const ProfileTab = () => {
   const [formData, setFormData] = useState({
-    gender: '',
     attitude: [''],
     strength: [''],
     weakness: [''],
@@ -18,24 +17,23 @@ const ProfileTab = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(formData) {
-      const token = localStorage.getItem('token');
-    axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`,{
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       .then((response) => {
-        const { gender, attitude, strength, weakness, opportunity, threat } = response.data;
-        console.log('dededed',response.data);
-        if (gender) {
+        const { attitude, strength, weakness, opportunity, threat } = response.data;
+        console.log('Server response:', response.data);
+        if (response.data) {
           setFormData({
-            gender,
-            attitude: attitude ? attitude.map(item => item.value) : [],
-            strength: strength ? strength.map(item => item.value) : [],
-            weakness: weakness ? weakness.map(item => item.value) : [],
-            opportunity: opportunity ? opportunity.map(item => item.value) : [],
-            threat: threat ? threat.map(item => item.value) : []
+            attitude: attitude ? attitude.map(item => item.value) : [''],
+            strength: strength ? strength.map(item => item.value) : [''],
+            weakness: weakness ? weakness.map(item => item.value) : [''],
+            opportunity: opportunity ? opportunity.map(item => item.value) : [''],
+            threat: threat ? threat.map(item => item.value) : ['']
           });
           setIsNewProfile(false);
         } else {
@@ -43,19 +41,24 @@ const ProfileTab = () => {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status === 404) {
-          toast.info('No existing profile found. Please create a new profile.');
-          setIsNewProfile(true);
+        if (err.response) {
+          if (err.response.status === 404) {
+            toast.info('No existing profile found. Please create a new profile.');
+            setIsNewProfile(true);
+          } else {
+            console.error('Error response:', err.response.data);
+            toast.error(`Error: ${err.response.statusText}`);
+          }
         } else {
-          console.error(err);
+          console.error('Error message:', err.message);
           toast.error('An error occurred. Please try again.');
         }
       });
+    } else {
+      toast.error('No token found. Please log in.');
     }
   }, []);
   
-
-
   const addField = (type) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -96,21 +99,29 @@ const ProfileTab = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { gender, attitude, strength, weakness, opportunity, threat } = formData;
+    const { attitude, strength, weakness, opportunity, threat } = formData;
 
-    const data = { gender, attitude, strength, weakness, opportunity, threat };
+    const data = { attitude, strength, weakness, opportunity, threat };
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found. Please log in.');
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
       if (isNewProfile) {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/user/data`, data);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/user/data`, data, config);
         toast.success('Profile Created successfully');
       } else {
-        await axios.put(`${process.env.REACT_APP_API_URL}/api/user/data`, data);
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/user/data`, data, config);
         toast.success('Profile Updated successfully');
       }
       navigate('/profile');
       setFormData({
-        gender: '',
         attitude: [''],
         strength: [''],
         weakness: [''],
@@ -129,8 +140,7 @@ const ProfileTab = () => {
     if (!formData[type]) {
       return null;
     }
-    return formData[type]
-    .map((field, index) => (
+    return formData[type].map((field, index) => (
       <div className="additional-field" key={index}>
         <input
           type="text"
@@ -148,23 +158,6 @@ const ProfileTab = () => {
       <h3 className='profile-title'>Profile Details</h3>
       <form onSubmit={handleSubmit} className='profile-header'>
         <center>
-          {/* <div>
-            <label>Gender:</label>
-            <div className="radio-group">
-              <div>
-                <label htmlFor="male">Male</label>
-                <input type="radio" id="male" name="gender" value="male" checked={formData.gender === 'male'} onChange={handleInputChange} />
-              </div>
-              <div>
-                <label htmlFor="female">Female</label>
-                <input type="radio" id="female" name="gender" value="female" checked={formData.gender === 'female'} onChange={handleInputChange} />
-              </div>
-              <div>
-                <label htmlFor="other">Other</label>
-                <input type="radio" id="other" name="gender" value="other" checked={formData.gender === 'other'} onChange={handleInputChange} />
-              </div>
-            </div>
-          </div> */}
           <div>
             <label>Attitude:</label>
             {renderAdditionalFields('attitude')}
