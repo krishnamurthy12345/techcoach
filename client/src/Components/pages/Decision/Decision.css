@@ -73,6 +73,14 @@ input[type='submit'] {
     margin:5px;
     width: 100%;
 }
+.btnn3{
+    background: #4e2206;
+    color: white;
+    border-radius: 5px;
+    margin:5px;
+    max-width: 300px;
+    /* width: 20%; */
+}
 
 .tag-container {
     display: flex;
