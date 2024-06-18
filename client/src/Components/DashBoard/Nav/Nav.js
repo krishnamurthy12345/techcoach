@@ -10,7 +10,6 @@ import { getSharedDecisionDetails } from '../../Group/Network_Call';
 
 const Nav = () => {
   const navigate = useNavigate();
-
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
