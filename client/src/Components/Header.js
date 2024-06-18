@@ -3,29 +3,13 @@ import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
 import { getInnerCircleAcceptNotification } from '../Components/Group/Network_Call';
-
+ 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
     const [response, setResponse] = useState(null);
     const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await getInnerCircleAcceptNotification();
-            console.log("response from notification", response);
-            setResponse(response);
-            if (response && response.notAcceptedMembers && response.groupDetails) {
-                const count = response.notAcceptedMembers.filter(member => 
-                    response.groupDetails[member.group_id] && response.groupDetails[member.group_id].userDetails !== null
-                ).length;
-                setNotAcceptedMembersCount(count);
-            }
-        };
-
-        fetchData();
-    }, []);
-
+ 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -34,25 +18,43 @@ const Header = () => {
             setIsLoggedIn(false);
         }
     }, []);
-
+ 
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getInnerCircleAcceptNotification();
+            console.log("response from notification", response);
+            setResponse(response);
+            if (response && response.notAcceptedMembers && response.groupDetails) {
+                const count = response.notAcceptedMembers.filter(member =>
+                    response.groupDetails[member.group_id] && response.groupDetails[member.group_id].userDetails !== null
+                ).length;
+                setNotAcceptedMembersCount(count);
+            }
+        };
+ 
+        if (isLoggedIn) {
+            fetchData();
+        }
+    }, [isLoggedIn]);
+ 
     useEffect(() => {
         try {
             let token;
             if (token) {
                 localStorage.getItem('token', token);
-                setIsLoggedIn(true); 
+                setIsLoggedIn(true);
             }
         } catch (error) {
             console.error('Error setting auth token:', error);
         }
     }, []);
-
+ 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
         navigate("/");
     };
-
+ 
     return (
         <div>
             <nav className="navbar navbar-expand-lg f-5">
@@ -76,11 +78,11 @@ const Header = () => {
                                     <li className="nav-item">
                                         <a href="http://decisioncoach.techcoach4u.com" target="_blank" rel="noopener noreferrer" className="nav-link">Guide</a>
                                     </li>
-
+ 
                                     <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
-
+ 
                                     <li className="nav-item" style={{marginRight:"0.5rem"}}>
                                         <Link to='/notification' className="nav-link position-relative">
                                             Notifications
@@ -92,11 +94,11 @@ const Header = () => {
                                             )}
                                         </Link>
                                     </li>
-                                    
+                                   
                                     <li className="nav-item">
                                         <Link to='/profile' className="nav-link">Profile</Link>
                                     </li>
-                                    
+                                   
                                     <li className="nav-item">
                                         <Link to='/' onClick={handleLogout} className="nav-link">Logout</Link>
                                     </li>
@@ -113,5 +115,5 @@ const Header = () => {
         </div>
     );
 }
-
+ 
 export default Header;
