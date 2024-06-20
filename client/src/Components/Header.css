@@ -1,22 +1,25 @@
-body {  
+body {
   background-color: #DDE6ED;
-  font-family: "Roboto", sans-serif; 
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .navbar {
   display: flex;
   justify-content: space-between;
-  background-color: #3f5362; 
-  font-size: 18px; 
+  align-items:flex-end;
+  background-color: #3f5362;
+  font-size: 18px;
   color: white;
-  padding: 10px 20px; 
+  padding: 10px 20px;
   border-bottom: 2px solid #526D82;
 }
 
 .image {
   width: 45px;
   height: 45px;
-  margin-right: 10px;
+  margin: 0;
 }
 
 .navbar-nav .nav-link.active {
@@ -31,12 +34,12 @@ body {
 .navbar-nav .nav-link {
   color: white;
   text-decoration: none;
-  padding: 10px 15px; 
+  padding: 10px 15px;
 }
 
 .navbar-nav .nav-link:hover {
-  background-color: #2b3944; 
-  border-radius: 5px; 
+  background-color: #2b3944;
+  border-radius: 5px;
 }
 
 .btn {
@@ -51,6 +54,28 @@ body {
 .btn:hover {
   background-color: white;
   color: #27374D; /* Dark blue */
+}
+
+.navbar-nav .nav-item .dropdown-menu {
+  background-color: #3f5362;
+  color: white;
+  border: none;
+  max-width: 250px; /* Ensure the dropdown does not exceed this width */
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.navbar-nav .nav-item .dropdown-menu .dropdown-item {
+  color: white;
+  text-align:start;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+.navbar-nav .nav-item .dropdown-menu .dropdown-item:hover {
+  background-color: #2b3944;
+  color: white;
 }
 
 @media (max-width: 992px) {
@@ -111,9 +136,13 @@ body {
   }
 
   .navbar-nav .nav-link:hover {
-    color: white; 
-    background-color: #1A293D; 
-    border-radius: 5px; 
-    padding: 8px 12px; 
+    color: white;
+    background-color: #1A293D;
+    border-radius: 5px;
+    padding: 8px 12px;
+  }
+
+  .navbar-nav .nav-item .dropdown-menu {
+    max-width: 100%; /* Ensure dropdown fits within the screen */
   }
 }
