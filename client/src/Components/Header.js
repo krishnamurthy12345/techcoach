@@ -3,13 +3,15 @@ import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
 import { getInnerCircleAcceptNotification } from '../Components/Group/Network_Call';
- 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
     const [response, setResponse] = useState(null);
     const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
- 
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -18,7 +20,7 @@ const Header = () => {
             setIsLoggedIn(false);
         }
     }, []);
- 
+
     useEffect(() => {
         const fetchData = async () => {
             const response = await getInnerCircleAcceptNotification();
@@ -31,34 +33,41 @@ const Header = () => {
                 setNotAcceptedMembersCount(count);
             }
         };
- 
+
         if (isLoggedIn) {
             fetchData();
         }
     }, [isLoggedIn]);
- 
-    useEffect(() => {
-        try {
-            let token;
-            if (token) {
-                localStorage.getItem('token', token);
-                setIsLoggedIn(true);
-            }
-        } catch (error) {
-            console.error('Error setting auth token:', error);
-        }
-    }, []);
- 
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
         navigate("/");
     };
- 
+
+    const handleDeleteAccount = async () => {
+        const confirmation = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+        if (confirmation) {
+          try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            localStorage.removeItem('token');
+            window.location.reload(); 
+            navigate("/");
+          } catch (error) {
+            console.error('Error deleting account:', error.message);
+          }
+        }
+      };
+
     return (
         <div>
             <nav className="navbar navbar-expand-lg f-5">
-                <div className="container-fluid">
+                <div className="container">
                     <a href="/dashboard" className="image-link">
                         <img src={tech} alt='' className='image' />
                     </a>
@@ -78,29 +87,38 @@ const Header = () => {
                                     <li className="nav-item">
                                         <a href="http://decisioncoach.techcoach4u.com" target="_blank" rel="noopener noreferrer" className="nav-link">Guide</a>
                                     </li>
- 
+
                                     <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
- 
-                                    <li className="nav-item" style={{marginRight:"0.5rem"}}>
+
+                                    <li className="nav-item" style={{ marginRight: "0.5rem" }}>
                                         <Link to='/notification' className="nav-link position-relative">
                                             Notifications
                                             {notAcceptedMembersCount > 0 && (
-                                                <span className="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize:"0.6rem"}}>
+                                                <span className="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: "0.6rem" }}>
                                                     {notAcceptedMembersCount}
                                                     <span className="visually-hidden">New alerts</span>
                                                 </span>
                                             )}
                                         </Link>
                                     </li>
-                                   
-                                    <li className="nav-item">
-                                        <Link to='/profile' className="nav-link">Profile</Link>
-                                    </li>
-                                   
-                                    <li className="nav-item">
-                                        <Link to='/' onClick={handleLogout} className="nav-link">Logout</Link>
+
+                                    <li className="nav-item dropdown">
+                                        <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Profile
+                                        </a>
+                                        <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <li>
+                                                <Link to='/profile' className="dropdown-item">Profile</Link>
+                                            </li>
+                                            <li>
+                                                <Link to='/' onClick={handleLogout} className="dropdown-item">Logout</Link>
+                                            </li>
+                                            <li>
+                                                <a href="#" onClick={handleDeleteAccount} className="dropdown-item">Delete Account</a>
+                                            </li>
+                                        </ul>
                                     </li>
                                 </>
                             ) : (
@@ -115,5 +133,5 @@ const Header = () => {
         </div>
     );
 }
- 
+
 export default Header;
