@@ -150,7 +150,7 @@ const Nav = () => {
         <Grid item xs={12} sm={6} md={3}>
           <CustomCard
             icon={<ModelTrainingIcon />}
-            title="Received Decisions"
+            title="Shared with me"
             count={receivedDecisionsCount}
             onClick={navigateToSharedDecisions}
           />
@@ -159,7 +159,7 @@ const Nav = () => {
         <Grid item xs={12} sm={6} md={3}>
           <CustomCard
             icon={<Share />}
-            title="Shared Decisions"
+            title="Shared by me"
             count={sharedDecisionCount}
             onClick={navigateToReceivedDecisions}
           />
