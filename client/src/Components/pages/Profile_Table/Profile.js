@@ -67,24 +67,24 @@ const Profile = () => {
     return <div className="profile-line">{data}</div>;
   };
 
-  // const handleDeleteAccount = async () => {
-  //   const confirmation = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
-  //   if (confirmation) {
-  //     try {
-  //       const token = localStorage.getItem('token');
-  //       await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       });
-  //       localStorage.removeItem('token');
-  //       window.location.reload(); 
-  //       navigate("/");
-  //     } catch (error) {
-  //       console.error('Error deleting account:', error.message);
-  //     }
-  //   }
-  // };
+  const handleDeleteAccount = async () => {
+    const confirmation = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+    if (confirmation) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        localStorage.removeItem('token');
+        window.location.reload(); 
+        navigate("/");
+      } catch (error) {
+        console.error('Error deleting account:', error.message);
+      }
+    }
+  };
 
   const handleDownloadData = () => {
     const decisionData = decisions.map(decision => ({
@@ -193,9 +193,9 @@ const Profile = () => {
         <div className='download-data'>
           <p onClick={handleDownloadData}>Download my data</p>
         </div>
-        {/* <div className='delete-account'>
+        <div className='delete-account'>
           <p onClick={handleDeleteAccount}>Delete Account</p>
-        </div> */}
+        </div> 
         <ToastContainer/>
       </div>
     </div>

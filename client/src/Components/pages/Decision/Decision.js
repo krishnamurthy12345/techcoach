@@ -208,6 +208,10 @@ const Decision = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate('/readd'); 
+  };
+
   return (
     <div>
       <h3 className='header'>Details</h3>
@@ -292,7 +296,7 @@ const Decision = () => {
                   {errors.decision_reason && <span className="error">{errors.decision_reason}</span>}
                 </div>
               ))}
-              <button className='btnn2' type='button' onClick={handleAddReason}>Add More Reason</button>
+              <button className='btnn2' type='button' onClick={handleAddReason}>Add Another Reason</button>
             </div>
             <div className='form-group'>
               <label>Select Tags <span className="required" style={{color:"red"}}>*</span></label>
@@ -409,9 +413,10 @@ const Decision = () => {
               </>
             )}
           </div>
-          <div style={{display:"flex", justifyContent:"center"}}>
+          <div style={{display:"flex", justifyContent:"center", gap: "10px"}}>
             <input type='submit' value={id ? "Update" : "Save"}  />
-          </div>
+            <input type='button' value="Cancel" onClick={handleCancel} className="cancel-button" />
+            </div>
         </form>
       </div>
       <ToastContainer />

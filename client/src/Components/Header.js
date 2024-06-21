@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
 import { getInnerCircleAcceptNotification } from '../Components/Group/Network_Call';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,25 +43,6 @@ const Header = () => {
         setIsLoggedIn(false);
         navigate("/");
     };
-
-    const handleDeleteAccount = async () => {
-        const confirmation = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
-        if (confirmation) {
-          try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
-            localStorage.removeItem('token');
-            window.location.reload(); 
-            navigate("/");
-          } catch (error) {
-            console.error('Error deleting account:', error.message);
-          }
-        }
-      };
 
     return (
         <div>
@@ -114,9 +94,6 @@ const Header = () => {
                                             </li>
                                             <li>
                                                 <Link to='/' onClick={handleLogout} className="dropdown-item">Logout</Link>
-                                            </li>
-                                            <li>
-                                                <a href="#" onClick={handleDeleteAccount} className="dropdown-item">Delete Account</a>
                                             </li>
                                         </ul>
                                     </li>
