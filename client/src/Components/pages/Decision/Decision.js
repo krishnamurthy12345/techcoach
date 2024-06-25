@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import './Decision.css';
 import withAuth from '../../withAuth';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -197,11 +198,15 @@ const Decision = () => {
       if (!id) {
         await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
         toast.success("Decision added successfully");
+        console.log("Decision added Successfully", formData);
       } else {
         await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
         toast.success("Decision updated successfully");
+        console.log("Decision updated Successfully", formData);
       }
-      navigate('/readd');
+      setTimeout(() => {
+        navigate('/readd');
+      }, 1000); 
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while saving the decision");
@@ -273,7 +278,7 @@ const Decision = () => {
                 placeholder='Enter the statement'
                 style={{ width: "100%" }}
               />
-                            {errors.user_statement && <span className="error">{errors.user_statement}</span>}
+            {errors.user_statement && <span className="error">{errors.user_statement}</span>}
             </div>
             <div className='form-group'>
               <label>Decision Reasons <span className="required" style={{color:"red"}}>*</span></label>
@@ -419,7 +424,7 @@ const Decision = () => {
             </div>
         </form>
       </div>
-      <ToastContainer />
+      <ToastContainer/>
     </div>
   );
 };
