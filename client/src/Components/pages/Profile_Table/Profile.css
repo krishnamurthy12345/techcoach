@@ -79,7 +79,7 @@ h3 {
 }
 
 .profiletab:hover {
-  background-color: rgb(66, 86, 101);
+  background-color: rgb(66, 101, 73);
 }
 
 .profile-details {
@@ -123,6 +123,27 @@ h3 {
   align-items: center;
   margin-top: 15px;
 }
+
+.download-data{
+  background-color: #333;
+  border-radius: 7px;
+  color: white;
+  max-width: 150px; 
+  height: auto; 
+  text-align: center;
+  padding: 7px;
+  cursor: pointer;
+}
+.download-profile{
+  background-color: #3975bf;
+  border-radius: 7px;
+  color: white;
+  max-width: 150px;
+  height: auto;
+  text-align: center;
+  padding: 7px;
+  cursor: pointer;
+}
 .delete-account{
   background-color: red;
   text-align: center;
@@ -130,18 +151,11 @@ h3 {
   color: white;
   padding: 7px;
   height: 40px;
-  width: 130px;
+  width: 300px;
   cursor: pointer;
 }
-.download-data{
-  background-color: #333;
-  border-radius: 7px;
-  color: white;
-  height: 40px;
-  width: 150px;
-  text-align: center;
-  padding: 7px;
-  cursor: pointer;
+.delete-button{
+  margin-top: 10px;
 }
 
 @media (max-width: 600px) {
@@ -187,7 +201,7 @@ h3 {
     align-items: center;
   }
 
-  .delete-account, .download-data {
+  .delete-account, .download-data, .download-profile {
     margin-top: 10px;
     width: 80%;
     text-align: center;
