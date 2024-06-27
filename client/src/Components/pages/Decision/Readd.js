@@ -105,67 +105,70 @@ const Readd = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {currentRecords.map((decision, index) => (
-            <TableRow key={decision.decision_id}>
-              <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
-              <TableCell>{decision.decision_name}</TableCell>
-              <TableCell>{new Date(decision.decision_due_date).toLocaleDateString()}</TableCell>
-              <TableCell>
-                {decision.decision_taken_date
-                  ? new Date(decision.decision_taken_date).toLocaleDateString()
-                  : '--'}
-              </TableCell>
-              <TableCell>{decision.user_statement}</TableCell>
-              <TableCell>{decision.tagsArray && decision.tagsArray.join(', ')}</TableCell>
-              <TableCell>
-                {decision.decision_reason_text &&
-                  decision.decision_reason_text.map(reason => (
-                    <Typography variant="body2" key={reason}>
-                      {reason}
-                    </Typography>
-                  ))}
-              </TableCell>
-              <TableCell>
-                {comments[decision.decision_id] ? (
-                  comments[decision.decision_id].length > 0 ? (
-                    <Box sx={{ display: 'flex' }}>
-                      <Typography variant="body2">
-                        {comments[decision.decision_id].length} comments
+          {currentRecords.map((decision, index) => {
+            const isPastDueDate = new Date(decision.decision_due_date) < new Date() && !decision.decision_taken_date;
+            return (
+              <TableRow key={decision.decision_id} sx={{ backgroundColor: isPastDueDate ? '#ffcccc' : 'inherit' }}>
+                <TableCell>{indexOfFirstRecord + index + 1}</TableCell>
+                <TableCell>{decision.decision_name}</TableCell>
+                <TableCell>{new Date(decision.decision_due_date).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {decision.decision_taken_date
+                    ? new Date(decision.decision_taken_date).toLocaleDateString()
+                    : '--'}
+                </TableCell>
+                <TableCell>{decision.user_statement}</TableCell>
+                <TableCell>{decision.tagsArray && decision.tagsArray.join(', ')}</TableCell>
+                <TableCell>
+                  {decision.decision_reason_text &&
+                    decision.decision_reason_text.map(reason => (
+                      <Typography variant="body2" key={reason}>
+                        {reason}
                       </Typography>
-                    </Box>
+                    ))}
+                </TableCell>
+                <TableCell>
+                  {comments[decision.decision_id] ? (
+                    comments[decision.decision_id].length > 0 ? (
+                      <Box sx={{ display: 'flex' }}>
+                        <Typography variant="body2">
+                          {comments[decision.decision_id].length} comments
+                        </Typography>
+                      </Box>
+                    ) : (
+                      'No Comments Found'
+                    )
                   ) : (
-                    'No Comments Found'
-                  )
-                ) : (
-                  <CircularProgress size={24} />
-                )}
-              </TableCell>
-              <TableCell>
-                <IconButton
-                  component={Link}
-                  to={`/decision/${decision.decision_id}`}
-                  style={{ color: '#526D82' }}
-                >
-                  <MdModeEdit />
-                </IconButton>
-                <IconButton onClick={() => deleteDecision(decision.decision_id)} style={{ color: '#526D82' }}>
-                  <MdDelete />
-                </IconButton>
-                <IconButton
-                  component={Link}
-                  to={`/views/${decision.decision_id}`}
-                  style={{ color: '#526D82' }}
-                >
-                  <GrFormView />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
+                    <CircularProgress size={24} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    component={Link}
+                    to={`/decision/${decision.decision_id}`}
+                    style={{ color: '#526D82' }}
+                  >
+                    <MdModeEdit />
+                  </IconButton>
+                  <IconButton onClick={() => deleteDecision(decision.decision_id)} style={{ color: '#526D82' }}>
+                    <MdDelete />
+                  </IconButton>
+                  <IconButton
+                    component={Link}
+                    to={`/views/${decision.decision_id}`}
+                    style={{ color: '#526D82' }}
+                  >
+                    <GrFormView />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
   );
-
+  
   const renderTabularView = () => {
     const tagCounts = {};
     data.forEach((decision) => {
@@ -378,7 +381,7 @@ const Readd = () => {
               }
             }}
           >
-            How Am I Doing
+            How Am I Doing?
           </Button>
         </Box>
         {(view === 'timeline' || view === 'table') && (

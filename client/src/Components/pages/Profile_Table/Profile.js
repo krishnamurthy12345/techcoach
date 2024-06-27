@@ -6,6 +6,8 @@ import { saveAs } from 'file-saver';
 import { FaUserEdit } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
 import withAuth from '../../withAuth';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './Profile.css';
 
 
@@ -13,7 +15,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const [userData, setUserData] = useState({});
   const [decisions, setDecisions] = useState([]);
-  const [loading, setLoading] = useState(true);  
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,7 +80,7 @@ const Profile = () => {
           }
         });
         localStorage.removeItem('token');
-        window.location.reload(); 
+        window.location.reload();
         navigate("/");
       } catch (error) {
         console.error('Error deleting account:', error.message);
@@ -104,11 +106,61 @@ const Profile = () => {
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(data, 'decisions_data.xlsx');
-    if(data){
-      toast('downloaded successfully')      
+    if (data) {
+      toast('downloaded successfully')
     }
   };
 
+  const handleDownloadProfile = () => {
+    const doc = new jsPDF();
+  
+    doc.setFontSize(20);
+    doc.text('Profile Data', 20, 20);
+  
+    const extractData = (data) => {
+      if (Array.isArray(data)) {
+        return data.map(item => (item.value ? item.value.trim() : '')).join(', ');
+      }
+      return data ? data.trim() : 'N/A';
+    };
+  
+    const profileData = [
+      { category: 'Strength', details: extractData(formData.strength), color: [13,97,16] }, // Light Green
+      { category: 'Weakness', details: extractData(formData.weakness), color: [41, 128, 185] }, // Primary
+      { category: 'Opportunity', details: extractData(formData.opportunity), color: [165, 42, 42] }, // Pink
+      { category: 'Threat', details: extractData(formData.threat), color: [240, 150, 180] }, // Light Pink
+    ];
+  
+    profileData.forEach((item, index) => {
+      doc.autoTable({
+        startY: index === 0 ? 30 : doc.lastAutoTable.finalY + 10,
+        head: [[item.category]],
+        body: item.details.split(', ').map(detail => [detail]),
+        theme: 'grid',
+        headStyles: {
+          fillColor: item.color, 
+          textColor: [255, 255, 255], // White text
+          fontStyle: 'bold',
+          halign: 'center', 
+        },
+        styles: {
+          cellPadding: 4, 
+          textColor:'black',
+          fontSize: 12,
+          halign: 'left',
+          valign: 'middle', 
+          lineColor: 'black', 
+          lineWidth: 0.1, 
+        },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+      });
+    });
+  
+    doc.save('profile_data.pdf');
+    toast('Profile data downloaded successfully');
+  };
+  
+  
   if (loading) {
     return (
       <div className="loading-spinner">
@@ -191,13 +243,20 @@ const Profile = () => {
       </div>
       <div className='data-around'>
         <div className='download-data'>
-          <p onClick={handleDownloadData}>Download my data</p>
+          <p onClick={handleDownloadData}>Download my Decision data</p>
         </div>
-        <div className='delete-account'>
-          <p onClick={handleDeleteAccount}>Delete Account</p>
-        </div> 
-        <ToastContainer/>
+        <div className='download-profile'>
+        <p onClick={handleDownloadProfile}>Download Profile data</p>
+        </div>
+        <ToastContainer />
       </div>
+      <center>
+        <div className='delete-button'>
+          <div className='delete-account'>
+            <p onClick={handleDeleteAccount}>Delete Account</p>
+          </div>
+        </div>
+      </center>
     </div>
   );
 };
