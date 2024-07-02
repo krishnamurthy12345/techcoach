@@ -4,12 +4,12 @@ const crypto = require('crypto');
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
 const createUserKey = async (req, res, next) => {
-    console.log('Request User Id:', req.user.email);
+    // console.log('Request User Id:', req.user.email);
 
     try {
         const conn = await getConnection();
         const [userData] = await conn.query('SELECT displayName, email FROM techcoach_lite.techcoach_task WHERE email = ?', req.user.email);
-        console.log('assss', userData);
+        // console.log('assss', userData);
         if (conn) { conn.release(); }
 
         if (!userData || userData.length === 0) {
@@ -17,10 +17,10 @@ const createUserKey = async (req, res, next) => {
         }
 
         const user = userData;
-        console.log("dataaa", user);
+        // console.log("dataaa", user);
         const keyData = undefined + user.displayName + user.email;
 
-        console.log("dataaaa", keyData);
+        // console.log("dataaaa", keyData);   
 
         function encryptText(text, key) {
             const cipher = crypto.createCipher('aes-256-cbc', key);

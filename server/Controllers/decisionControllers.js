@@ -13,7 +13,7 @@ const postInfo = async (req, res) => {
     const userName = req.user.name;
 
     const currentDate = new Date().toISOString().slice(0, 10);
-    console.log("Current Date:", currentDate);
+    // console.log("Current Date:", currentDate);
     
     // console.log("Decision Due Date:", decision_due_date);
     // console.log("Decision Taken Date:", decision_taken_date);
@@ -21,8 +21,8 @@ const postInfo = async (req, res) => {
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
 
-    console.log("Formatted Due Date:", formattedDueDate);
-    console.log("Formatted Taken Date:", formattedTakenDate);
+    // console.log("Formatted Due Date:", formattedDueDate);
+    // console.log("Formatted Taken Date:", formattedTakenDate);
 
     function encryptText(text, key) {
       const cipher = crypto.createCipher('aes-256-cbc', key);
@@ -169,8 +169,8 @@ const getInfo = async (req, res) => {
 
 const getallInfo =  async (req, res) => {
   let conn;
-  console.log('qawqaw')
-  console.log(req.user)
+  // console.log('qawqaw')
+  // console.log(req.user)
 
   try {
     conn = await getConnection();
@@ -401,8 +401,8 @@ const deleteInfo = async (req, res) => {
 
 const getall = async (req, res, next) => {
   let conn;
-  console.log('aaa');
-  console.log(req.user, "sgcjcsdjy");
+  // console.log('aaa');
+  // console.log(req.user, "sgcjcsdjy");
   // console.log('key get from:', req.user.key);
   try {
     conn = await getConnection();
@@ -467,7 +467,7 @@ const getall = async (req, res, next) => {
         : [],
     }));
 
-    console.log("hhhh", decryptedDecisionData);
+    // console.log("hhhh", decryptedDecisionData);
     await conn.commit();
     if (conn) conn.release() 
 

@@ -6,7 +6,7 @@ const getUserList = async (req, res) => {
   try {
 
     const userId = req.user.id;
-    console.log("user id from get user list", userId);
+    // console.log("user id from get user list", userId);
     conn = await getConnection();
     await conn.beginTransaction();
 
@@ -28,7 +28,7 @@ const getUserList = async (req, res) => {
 };
 
 const innerCircleCreation = async (req, res) => {
-    console.log("Request from creation of inner circle", req.body);
+    // console.log("Request from creation of inner circle", req.body);
 
     const { type_of_group, members } = req.body;
 
@@ -305,7 +305,7 @@ const shareDecisionInInnerCircle = async (req, res) => {
 
 const getSharedMembers = async (req, res) => {
     const { groupId, decisionId } = req.body;
-    console.log("reqqqqqqqqqq body", req.body);
+    // console.log("reqqqqqqqqqq body", req.body);
     let conn;
 
     try {
@@ -368,7 +368,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
     let conn;
     let userId = req.user.id;
 
-    console.log("User Id:", userId);
+    // console.log("User Id:", userId);
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -380,7 +380,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
         `;
         const notAcceptedMembersResult = await conn.query(notAcceptedMembersQuery, [userId]);
 
-        console.log("Not Accepted Members:", notAcceptedMembersResult);
+        // console.log("Not Accepted Members:", notAcceptedMembersResult);
 
         if (notAcceptedMembersResult.length > 0) {
             const groupIds = notAcceptedMembersResult.map(member => member.group_id);
@@ -842,7 +842,7 @@ const removeCommentsAdded = async (req, res) => {
 };
 
 const postReplyComment = async (req, res) => {
-    console.log("request body from post reply", req.body);
+    // console.log("request body from post reply", req.body);
     const {commentId, reply, groupId, decisionId} = req.body;
 
     const userId = req.user.id;
@@ -871,7 +871,7 @@ const postReplyComment = async (req, res) => {
 };
 
 const editCommentsAdded = async (req, res) => {
-    console.log("reqqqqqqqqqq body editt", req.body);
+    // console.log("reqqqqqqqqqq body editt", req.body);
 
     const {commentId, editedContent} = req.body.data;
 
@@ -901,7 +901,7 @@ const editCommentsAdded = async (req, res) => {
 
 
 const innerCirclePostComment = async (req, res) => {
-    console.log("Request body:", req.body.decision);
+    // console.log("Request body:", req.body.decision);
 
     const { decision, groupMemberID, commentText, email } = req.body;
 
@@ -1045,7 +1045,7 @@ const innerCirclePostComment = async (req, res) => {
 }; */
 
 const innerCircleDecisionShare = async (req, res) => {
-    console.log("Request body invitation:", req.body);
+    // console.log("Request body invitation:", req.body);
 
     const { memberEmail, decisionSummary } = req.body;
     const memberId = req.user.id;
@@ -1066,7 +1066,7 @@ const innerCircleDecisionShare = async (req, res) => {
         const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
         const rows = await conn.query(memberNameQuery, [memberEmail]);
 
-        console.log("ssssssssssss", rows)
+        // console.log("ssssssssssss", rows)
         
         if (!rows || rows.length === 0) {
             throw new Error('Member not found');
@@ -1140,8 +1140,8 @@ const innerCircleDecisionShare = async (req, res) => {
 
 
 const innerCircleInvitation = async (req, res) => {
-    console.log("Request body invitation:", req.user);
-    console.log("Request body invitation:", req.body);
+    // console.log("Request body invitation:", req.user);
+    // console.log("Request body invitation:", req.body);
 
     const { email } = req.body;
     const { email: senderEmail } = req.user;
@@ -1270,7 +1270,7 @@ const getSharedDecisionDetails = async (req, res) => {
             [id]
         ))[0];
 
-        console.log("ssssssssssssss", currentUser);
+        // console.log("ssssssssssssss", currentUser);
 
         const decisions = await conn.query(
             `SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id IN (?)`,

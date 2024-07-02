@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 
 function sendWelcomeEmail(user) {
 
-    console.log("hdhhdhhdhdhd",user);
+    // console.log("hdhhdhhdhdhd",user);
     if (Array.isArray(user) && user.length > 0) {
         user.forEach(singleUser => {
             const { email, displayname,logintime } = singleUser;
