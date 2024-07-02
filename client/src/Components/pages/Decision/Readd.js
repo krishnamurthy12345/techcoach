@@ -19,8 +19,9 @@ const Readd = () => {
   const [view, setView] = useState('table');
   const [expandedDecision, setExpandedDecision] = useState(null);
   const [selectedTag, setSelectedTag] = useState('');
-  const [sortedTags, setSortedTags] = useState([]);
   const [sortCriteria, setSortCriteria] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc');
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -34,7 +35,7 @@ const Readd = () => {
         const responseData = response.data;
         if (Array.isArray(responseData.decisionData)) {
           // Sort decisions by date (most recent first)
-          const sortedData = responseData.decisionData.sort((a, b) => new Date(b.decision_due_date) - new Date(a.decision_due_date));
+          const sortedData = responseData.decisionData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           setData(sortedData);
           sortedData.forEach(decision => {
             fetchComments(decision.decision_id);
@@ -72,6 +73,16 @@ const Readd = () => {
     }
   };
 
+  const handleSortByDueDate = () => {
+    const sortedData = [...data].sort((a, b) => {
+      const dateA = new Date(a.decision_due_date);
+      const dateB = new Date(b.decision_due_date);
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    setData(sortedData);
+    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  };
+
   const filteredData = data
     .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
     .filter(decision => {
@@ -95,7 +106,9 @@ const Readd = () => {
           <TableRow>
             <TableCell sx={{ color: 'white' }}>#</TableCell>
             <TableCell sx={{ color: 'white' }}>Decision Name</TableCell>
-            <TableCell sx={{ color: 'white' }}>Due Date</TableCell>
+            <TableCell sx={{ color: 'white', cursor: 'pointer' }} onClick={handleSortByDueDate}>
+              Due Date {sortDirection === 'asc' ? '▲' : '▼'}
+            </TableCell>
             <TableCell sx={{ color: 'white' }}>Taken Date</TableCell>
             <TableCell sx={{ color: 'white' }}>Details</TableCell>
             <TableCell sx={{ color: 'white' }}>Tags</TableCell>

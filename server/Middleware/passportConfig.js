@@ -25,7 +25,7 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
     const connection = await getConnection();
     try {
-        console.log('Google profile object:', profile); // Log the profile object
+        // console.log('Google profile object:', profile); // Log the profile object
 
         // Determine the correct path for the profile picture
         const profilePicture = profile.photos && profile.photos.length > 0 ? profile.photos[0].value : null;
@@ -48,7 +48,7 @@ passport.use(new GoogleStrategy({
         console.log(logLoginHistory, 'history')
         // console.log(existingUser,"kkkkkkkkk")
         if (connection) {
-            console.log(2);
+            // console.log(2);
             connection.release();
           }
         return done(null, { id: existingUser.user_id, email: profile.email }); // Pass user info along with token
