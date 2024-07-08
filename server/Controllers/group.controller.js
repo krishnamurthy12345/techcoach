@@ -239,7 +239,7 @@ const getAddMemberNameList = async (req, res) => {
 
         const result = await conn.query(query, queryParams);
 
-        console.log("Resulssssssssssst:", result);
+        //console.log("Resulssssssssssst:", result);
 
         await conn.commit();
         res.status(200).json({ message: 'Members fetched successfully', result });
@@ -252,7 +252,7 @@ const getAddMemberNameList = async (req, res) => {
     }
 }
 
-const addMemberInInnerCircle = async(req, res) =>{
+/* const addMemberInInnerCircle = async(req, res) =>{
 
     console.log("request body from add member list", req.body.data);
     const {userId, groupId}  = req.body.data;
@@ -276,7 +276,86 @@ const addMemberInInnerCircle = async(req, res) =>{
     } finally {
         if (conn) conn.release();
     }
-}
+} */
+
+    const addMemberInInnerCircle = async (req, res) => {
+        console.log("request body from add member list", req.body.data);
+        const { userId, groupId } = req.body.data;
+        let conn;
+    
+        try {
+            conn = await getConnection();
+            await conn.beginTransaction();
+    
+            const query = `
+                INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) 
+                VALUES (?, ?, '')
+            `;
+            await conn.query(query, [groupId, userId]);
+    
+            const getEmailQuery = `
+                SELECT email FROM techcoach_lite.techcoach_task WHERE user_id = ?
+            `;
+            const emailResult = await conn.query(getEmailQuery, [userId]);
+            const userEmail = emailResult[0].email;
+    
+            const getCreatorIdQuery = `
+                SELECT created_by FROM techcoach_lite.techcoach_groups WHERE id = ?
+            `;
+            const creatorIdResult = await conn.query(getCreatorIdQuery, [groupId]);
+            const creatorId = creatorIdResult[0].created_by;
+    
+            const getCreatorNameQuery = `
+                SELECT displayname FROM techcoach_lite.techcoach_task WHERE user_id = ?
+            `;
+            const creatorNameResult = await conn.query(getCreatorNameQuery, [creatorId]);
+            const creatorDisplayName = creatorNameResult[0].displayname;
+    
+            const emailPayload = {
+                from: {
+                    address: "Decision-Coach@www.careersheets.in"
+                },
+                to: [
+                    {
+                        email_address: {
+                            address: userEmail
+                        }
+                    }
+                ],
+                subject: `Join ${creatorDisplayName}'s Inner Circle`,
+                htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+                    <p>Hi ,</p>
+                    <p>${creatorDisplayName} wants to add you as a member of their inner circle in the Decision Coach app.</p>
+                    <p>Please join the Decision Coach application and provide your inputs on decisions.</p>
+                    <p style="text-align: center;">
+                        <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+                    </p>
+                    <p>Regards,</p>
+                    <p>Team @ Decision Coach</p>
+                </div>`
+            };
+    
+            const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+            const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+    
+            await axios.post(zeptoMailApiUrl, emailPayload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+                }
+            });
+    
+            await conn.commit();
+            res.status(200).json({ message: 'Member added and notification email sent successfully' });
+        } catch (error) {
+            console.error('Error in adding member to inner circle and sending notification email:', error);
+            if (conn) await conn.rollback();
+            res.status(500).json({ error: 'An error occurred while processing your request' });
+        } finally {
+            if (conn) conn.release();
+        }
+    };
+    
 
 const shareDecisionInInnerCircle = async (req, res) => {
     const { decisionId, groupId, memberId } = req.body;
@@ -441,7 +520,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
                 `;
                 const userResult = await conn.query(userQuery, [createdBy]);
 
-                console.log("Accepted Members Details:", userResult);
+                //console.log("Accepted Members Details:", userResult);
 
                 acceptedDetailsMap[member.group_id] = {
                     userDetails: userResult.length > 0 ? userResult[0] : null
