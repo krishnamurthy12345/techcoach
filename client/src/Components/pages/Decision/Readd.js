@@ -217,6 +217,12 @@ const Readd = () => {
         width: 375,
         headerClassName: 'super-app-theme--header',
       },
+      {
+        field: 'count',
+        headerName: 'Decisions Count',
+        width: 200, // Adjust width as needed
+        headerClassName: 'super-app-theme--header',
+      },
     ];
   
     const rows = sortedTags.map((tag, index) => ({

@@ -115,73 +115,73 @@ const Profile = () => {
   const handleDownloadProfile = () => {
     const doc = new jsPDF();
   
-    // Add more space after the Profile Data heading
     doc.setFontSize(20);
     doc.text('Profile Data:', 20, 20);
   
     const extractData = (data) => {
       if (Array.isArray(data)) {
-        return data.map(item => (item.value ? item.value.trim() : '')).join('\n\n'); // Use double line break for spacing
+        return data.map(item => (item.value ? item.value.trim() : '')).join('\n\n'); 
       }
       return data ? data.trim() : 'N/A';
     };
   
     const profileData = [
-      { category: 'Strength', details: extractData(formData.strength), color: [13, 97, 16] }, // Light Green
-      { category: 'Weakness', details: extractData(formData.weakness), color: [41, 128, 185] }, // Primary
-      { category: 'Opportunity', details: extractData(formData.opportunity), color: [153, 77, 28] }, // Brown
-      { category: 'Threat', details: extractData(formData.threat), color: [165, 42, 42] }, // Light Pink
+      { category: 'Strength', details: extractData(formData.strength), color: [13, 97, 16] },
+      { category: 'Weakness', details: extractData(formData.weakness), color: [41, 128, 185] },
+      { category: 'Opportunity', details: extractData(formData.opportunity), color: [153, 77, 28] },
+      { category: 'Threat', details: extractData(formData.threat), color: [165, 42, 42] }
     ];
   
-    const positions = [
-      { x: 20, y: 60 }, // Increased y value to give more space below the heading
-      { x: 110, y: 60 },
-      { x: 20, y: 160 },
-      { x: 110, y: 160 },
-    ];
+    let yPos = 40;
+    const cellWidth = (doc.internal.pageSize.width - 60) / 2; 
+    const cellHeight = 50; // Adjust cell height as needed
+    const rowSpacing = 80; // Adjust vertical spacing between rows
+    const colSpacing = 10; // Adjust horizontal spacing between columns
   
     profileData.forEach((item, index) => {
-      const pos = positions[index];
+      const rowIndex = Math.floor(index / 2);
+      const colIndex = index % 2;
   
-      // Center the heading
+      const xPos = 20 + (colIndex * (cellWidth + colSpacing)); 
+  
+      // Set cell properties
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(item.color[0], item.color[1], item.color[2]);
-      doc.text(item.category, pos.x + 40, pos.y - 10);
+      doc.text(item.category, xPos, yPos + (rowIndex * (cellHeight + rowSpacing)) - 10);
   
-      // Draw the table
+      // Create autoTable for each cell
       doc.autoTable({
-        startY: pos.y, // Add margin at the top of the table
-        margin: { left: pos.x },
+        startY: yPos + (rowIndex * (cellHeight + rowSpacing)),
+        margin: { left: xPos },
         head: [[item.category]],
         body: item.details.split('\n\n').map(detail => [detail]),
-        theme: 'grid', // Use 'grid' to add table outline
+        theme: 'grid',
         headStyles: {
           fillColor: item.color,
           textColor: [255, 255, 255],
-          fontStyle: 'bold',
+          fontStyle: 'bold'
         },
         styles: {
           cellPadding: 4,
           textColor: 'black',
           fontSize: 12,
           valign: 'middle',
-          lineColor: 'black', // Set line color to black for the table outline
-          lineWidth: 0.1, // Set line width for the table outline
+          lineWidth: 0.1,
+          cellWidth: cellWidth - 10 
         },
         alternateRowStyles: { fillColor: [240, 240, 240] },
         rowStyles: {
-          0: { fillColor: [240, 240, 240] }, // Odd row style
-          1: { fillColor: [245, 230, 235] }, // Even row style
-        },
+          0: { fillColor: [240, 240, 240] },
+          1: { fillColor: [245, 230, 235] }
+        }
       });
     });
   
     doc.save('profile_data.pdf');
     alert('Profile data downloaded successfully');
   };
-  
-
+   
   if (loading) {
     return (
       <div className="loading-spinner">

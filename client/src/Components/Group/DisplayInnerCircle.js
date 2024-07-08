@@ -127,8 +127,6 @@ const DisplayInnerCircle = () => {
 
     const filteredMembers = potentialMembers.filter(member => member.email === searchQuery);
     const existingMemberEmails = innerCircleDetails?.members?.map(member => member.email) || [];
-
-    console.log("existingsssssssssss", existingMemberEmails);
     const isValidGmail = searchQuery.endsWith('@gmail.com');
 
     const inviteButtonStyle = {
@@ -141,7 +139,7 @@ const DisplayInnerCircle = () => {
     };
 
     const handleInvite = async (searchQuery) => {
-        setLoadingInvite(true); 
+        setLoadingInvite(true); // Set loadingInvite to true
         try {
             const response = await innerCircleInvitation(searchQuery);
 
@@ -159,7 +157,7 @@ const DisplayInnerCircle = () => {
             console.error('Error in Inviting:', error);
             toast('An error occurred while posting the comment');
         } finally {
-            setLoadingInvite(false); 
+            setLoadingInvite(false); // Set loadingInvite to false
         }
     };
 
@@ -281,11 +279,9 @@ const DisplayInnerCircle = () => {
                                                 )}
                                             </Button>
                                         ):(
-                                            filteredMembers.length === 0 && existingMemberEmails.includes(searchQuery) && (
                                             <div className="alert alert-warning" role="alert" style={{ marginTop: '10px' }}>
                                                 Already Added Member
                                             </div>
-                                            )
                                         )}
                                     </ListGroup>
                                 )}
