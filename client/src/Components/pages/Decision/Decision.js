@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Decision.css';
 import withAuth from '../../withAuth';
-import 'react-toastify/dist/ReactToastify.css'; 
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,11 +15,11 @@ const Decision = () => {
     decision_due_date: '',
     decision_taken_date: '',
     user_statement: '',
-    user_id: '', 
-    decision_reason: [''], 
+    tags:'',
+    user_id: '',
+    decision_reason: [''],
   });
-  const [errors, setErrors] = useState({}); 
-
+  const [errors, setErrors] = useState({});
   const dropdownHeight = 200;
   const dropdownWidth = 550;
   const navigate = useNavigate();
@@ -30,35 +30,49 @@ const Decision = () => {
       const token = localStorage.getItem('token');
       axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .then((resp) => {
-        const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = resp.data.decisions[0];
+        .then((resp) => {
+          console.log(resp.data); // Log the entire response
+  
+          const { decisionData } = resp.data;
+          if (decisionData && decisionData.length > 0) {
+            const decision = decisionData[0]; // Extract the first decision object
+            const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason } = decision;
+  
+            const formatDate = (dateString) => dateString ? dateString.split('T')[0] : '';
+  
+            const formattedDecisionDueDate = formatDate(decision_due_date);
+            const formattedDecisionTakenDate = formatDate(decision_taken_date);
 
-        const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
-        const formattedDecisionTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().split('T')[0] : '';
+            const uniqueDecisionReasons = Array.from(new Set(decision_reason.map(reasonObj => reasonObj.decision_reason_text)));
 
-        setFormData(prevState => ({
-          ...prevState,
-          decision_name: decision_name,
-          decision_due_date: formattedDecisionDueDate,
-          decision_taken_date: formattedDecisionTakenDate,
-          user_id: user_id,
-          user_statement: user_statement,
-          tags: tags,
-          decision_reason: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
-        }));
-        setSelectedTags(resp.data.decisions[0].tags);
-      })
-      .catch((error) => {
-        if (error.response && error.response.status === 404) {
-          toast.error("Decision not found");
-        } else {
-          console.error(error);
-          toast.error("An error occurred while fetching decision details");
-        }
-      });
+  
+            console.log(decision);
+            setFormData(prevState => ({
+              ...prevState,
+              decision_name,
+              decision_due_date: formattedDecisionDueDate,
+              decision_taken_date: formattedDecisionTakenDate,
+              user_id,
+              user_statement,
+              tags: tags.map(tag => (typeof tag === 'object' ? tag.tag_name : tag)),
+              decision_reason: uniqueDecisionReasons,
+            }));
+            setSelectedTags(tags.map(tag => (typeof tag === 'object' ? tag.tag_name : tag)));
+          } else {
+            toast.error("Decision details not found");
+          }
+        })
+        .catch((error) => {
+          if (error.response && error.response.status === 404) {
+            toast.error("Decision not found");
+          } else {
+            console.error(error);
+            toast.error("An error occurred while fetching decision details");
+          }
+        });
     }
   }, [id]);
 
@@ -68,7 +82,7 @@ const Decision = () => {
     "Best", "Good", "Hobby", "Travel", "Hasty", "Time Sensitive",
     "Financial Loss", "Financial Gain"
   ];
-
+  
   const advancedTags = [
     "Board", "Brand", "Consultant", "Corporate Governance", "Customer", "Employee", "Expense", "Hiring",
     "Investment", "Legal Compliance", "Operational", "Partner", "Policy", "Product", "Project", "Prospect",
@@ -76,7 +90,7 @@ const Decision = () => {
   ];
 
   const decisionDriverTags = [
-    "Fully Data Driven","Not Data Driven", "Partially Data Driven", 
+    "Fully Data Driven","Not Data Driven", "Partially Data Driven",
   ];
 
   const filteredTags = tags.filter(tag =>
@@ -93,14 +107,14 @@ const Decision = () => {
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    let formattedValue = value; 
+    let formattedValue = value;
 
     if (id === 'decision_due_date' || id === 'decision_taken_date') {
       const isValidDate = /\d{4}-\d{2}-\d{2}/.test(value);
       if (!isValidDate) {
         return;
       }
-      formattedValue = value; 
+      formattedValue = value;
     }
 
     setFormData((prevData) => ({
@@ -191,7 +205,7 @@ const Decision = () => {
       user_statement,
       user_id: '',
       tags: selectedTags.join(','),
-      decision_reason_text: decision_reason.map(reason => ({ decision_reason_text: reason })),
+      decision_reason: decision_reason.map(reason => ({ decision_reason_text: reason })),
     };
 
     try {
@@ -206,7 +220,7 @@ const Decision = () => {
       }
       setTimeout(() => {
         navigate('/readd');
-      }, 1000); 
+      }, 1000);
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while saving the decision");
@@ -214,7 +228,7 @@ const Decision = () => {
   };
 
   const handleCancel = () => {
-    navigate('/readd'); 
+    navigate('/readd');
   };
 
   return (
@@ -278,7 +292,7 @@ const Decision = () => {
                 placeholder='Enter the statement'
                 style={{ width: "100%" }}
               />
-            {errors.user_statement && <span className="error">{errors.user_statement}</span>}
+              {errors.user_statement && <span className="error">{errors.user_statement}</span>}
             </div>
             <div className='form-group'>
               <label>Decision Reasons <span className="required" style={{color:"red"}}>*</span></label>
@@ -421,7 +435,7 @@ const Decision = () => {
           <div style={{display:"flex", justifyContent:"center", gap: "10px"}}>
             <input type='submit' value={id ? "Update" : "Save"}  />
             <input type='button' value="Cancel" onClick={handleCancel} className="cancel-button" />
-            </div>
+          </div>
         </form>
       </div>
       <ToastContainer/>

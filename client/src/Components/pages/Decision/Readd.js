@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { Pagination, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress, Select, MenuItem } from '@mui/material';
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { MdDelete, MdModeEdit } from 'react-icons/md';
 import { GrFormView } from 'react-icons/gr';
 import { DataGrid } from '@mui/x-data-grid';
 import 'react-toastify/dist/ReactToastify.css';
+import Chip from '@mui/material/Chip';
 import './Readd.css';
 import withAuth from '../../withAuth';
 
@@ -51,7 +53,7 @@ const Readd = () => {
     loadData();
   }, []);
 
- 
+
 
   const fetchComments = async decisionId => {
     try {
@@ -86,13 +88,15 @@ const Readd = () => {
   const filteredData = data
     .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
     .filter(decision => {
-      return (
-        (decision.decision_name &&
-          decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase())) ||
-        (decision.tagsArray &&
-          decision.tagsArray.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase())))
-      );
+      const decisionNameMatch = decision.decision_name &&
+        decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase());
+
+      const tagMatch = decision.tags &&
+        decision.tags.some(tag => tag.tag_name.toLowerCase().includes(selectedTag.toLowerCase()));
+
+      return decisionNameMatch || tagMatch;
     });
+
 
   // Calculate indices for the current page
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -131,14 +135,17 @@ const Readd = () => {
                     : '--'}
                 </TableCell>
                 <TableCell>{decision.user_statement}</TableCell>
-                <TableCell>{decision.tagsArray && decision.tagsArray.join(', ')}</TableCell>
                 <TableCell>
-                  {decision.decision_reason_text &&
-                    decision.decision_reason_text.map(reason => (
-                      <Typography variant="body2" key={reason}>
-                        {reason}
-                      </Typography>
-                    ))}
+                  {decision.tags.map(tag => (
+                    <Chip key={tag.id} label={tag.tag_name} />
+                  ))}
+                </TableCell>
+                <TableCell>
+                  {decision.decision_reason && (
+                    <Typography variant="body2">
+                      {decision.decision_reason.map(reason => reason.decision_reason_text).join(', ')}
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>
                   {comments[decision.decision_id] ? (
@@ -181,21 +188,26 @@ const Readd = () => {
       </Table>
     </TableContainer>
   );
-  
+
   const renderTabularView = () => {
     const tagCounts = {};
+    const tagTypes = {};
+
     data.forEach((decision) => {
-      if (decision.tagsArray) {
-        decision.tagsArray.forEach((tag) => {
-          if (tagCounts[tag]) {
-            tagCounts[tag]++;
+      if (decision.tags) {
+        decision.tags.forEach((tag) => {
+          if (tagCounts[tag.tag_name]) {
+            tagCounts[tag.tag_name]++;
           } else {
-            tagCounts[tag] = 1;
+            tagCounts[tag.tag_name] = 1;
+            tagTypes[tag.tag_name] = tag.tag_type || 'Unknown';
           }
         });
       }
     });
-  
+
+    const totalTags = Object.values(tagCounts).reduce((sum, count) => sum + count, 0);
+
     const sortedTags = Object.keys(tagCounts).sort((a, b) => {
       if (sortCriteria === 'name') {
         return a.localeCompare(b);
@@ -203,70 +215,146 @@ const Readd = () => {
         return tagCounts[b] - tagCounts[a];
       }
     });
-  
+
+    const rows = sortedTags.map((tag, index) => ({
+      id: index,
+      tag: tag,
+      count: tagCounts[tag],
+      tagType: tagTypes[tag],
+      percentage: ((tagCounts[tag] / totalTags) * 100).toFixed(2),
+    }));
+
     const columns = [
       {
         field: 'tag',
         headerName: 'Tag Name',
-        width: 400,
+        width: 200,
         headerClassName: 'super-app-theme--header',
       },
       {
         field: 'count',
         headerName: 'Decisions Count',
-        width: 375,
+        width: 150,
         headerClassName: 'super-app-theme--header',
       },
       {
-        field: 'count',
-        headerName: 'Decisions Count',
-        width: 200, // Adjust width as needed
+        field: 'tagType',
+        headerName: 'Tag Type',
+        width: 200,
         headerClassName: 'super-app-theme--header',
+        sortable: false,
       },
     ];
-  
-    const rows = sortedTags.map((tag, index) => ({
-      id: index,
-      tag,
-      count: tagCounts[tag],
+
+
+    const pieData = rows.map(row => ({
+      name: row.tag,
+      value: row.count,
+      tagType: row.tagType,
+      percentage: row.percentage,
     }));
-  
+
+    const advancedTagsData = pieData.filter(data => data.tagType === 'Advanced Tags');
+    const decisionMaturityTagsData = pieData.filter(data => data.tagType === 'Decision Maturity');
+    const otherTagsData = pieData.filter(data => data.tagType !== 'Advanced Tags' && data.tagType !== 'Decision Maturity');
+
+    const COLORS = [
+      '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF6384',
+      '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+      '#FF5370', '#7E57C2', '#78909C', '#8D6E63', '#D4E157'
+    ];
+
     return (
-      <TableContainer component={Paper} sx={{  padding: 2, maxWidth: '800px',margin: 'auto', borderRadius:'10px', }}>
-        <DataGrid
-          rows={rows.slice(0, 50)}
-          columns={columns}
-          autoHeight
-          pageSize={50}
-          rowsPerPageOptions={[50]}
-          // disableSelectionOnClick
-          hideFooter
-          sx={{
-            '& .super-app-theme--header': {
-              backgroundColor: '#526D82',
-              // color: 'red',
-              '& .super-app-theme--header:hover':{
-                backgroundColor:'rgb(197, 200, 202)'
-              }
-            },
-          //   '& .MuiDataGrid-columnHeader-sortIcon': {
-          //   color: 'red',
-          //   backgroundColor: '#526D82',
-          //   '& .MuiDataGrid-columnHeader-sortIcon:hover': {
-          //     color: 'orange', 
-          //   },
-          // },
-          '& .MuiDataGrid-cell': {
-            textAlign: 'baseline', 
-          },
-          }}
-        />
-      </TableContainer>
+      <div className='d-flex flex-row'>
+        <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '580px', margin: 'auto', borderRadius: '10px' }}>
+          <DataGrid
+            rows={rows.slice(0, 50)}
+            columns={columns}
+            autoHeight
+            pageSize={50}
+            rowsPerPageOptions={[50]}
+            hideFooter
+            sx={{
+              '& .super-app-theme--header': {
+                backgroundColor: '#526D82',
+                '&:hover': {
+                  backgroundColor: 'rgb(197, 200, 202)',
+                },
+              },
+              '& .MuiDataGrid-cell': {
+                textAlign: 'baseline',
+              },
+            }}
+          />
+        </TableContainer>
+
+        <div className='justify-content-center align-items-center w-100'>
+          <div className='d-flex flex-column align-items-center'>
+            <h3>Advanced Tags:</h3>
+            <PieChart width={350} height={350}>
+              <Pie
+                data={advancedTagsData}
+                cx={175}
+                cy={175}
+                outerRadius={120}
+                paddingAngle={1}
+                dataKey="value"
+              >
+                {advancedTagsData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+              <Legend />
+            </PieChart>
+          </div>
+
+          <div className='d-flex flex-column align-items-center '>
+            <h3>Other Tags: </h3>
+            <PieChart width={400} height={400}>
+              <Pie
+                data={otherTagsData}
+                cx={175}
+                cy={175}
+                outerRadius={120}
+                paddingAngle={1}
+                dataKey="value"
+              >
+                {otherTagsData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+              <Legend />
+            </PieChart>
+          </div>
+
+          <div className='d-flex flex-column align-items-center'>
+            <h3>Decision Driver Tags:</h3>
+            <PieChart width={350} height={350}>
+              <Pie
+                data={decisionMaturityTagsData}
+                cx={175}
+                cy={175}
+                outerRadius={120}
+                paddingAngle={1}
+                dataKey="value"
+              >
+                {decisionMaturityTagsData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+              <Legend />
+            </PieChart>
+          </div>
+        </div>
+      </div>
     );
   };
 
   const renderTimelineView = () => {
-    const tags = [...new Set(data.flatMap(decision => decision.tagsArray))];
+    const tags = [...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))];
 
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
@@ -274,7 +362,7 @@ const Readd = () => {
         {tags.map((tag, tagIndex) => (
           <Box key={tag} sx={{ marginBottom: 4 }}>
             <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>{tag}</Typography>
-            {filteredData.filter(decision => decision.tagsArray.includes(tag) && (selectedTag === '' || tag === selectedTag)).map((decision, index) => (
+            {filteredData.filter(decision => decision.tags.some(t => t.tag_name.includes(tag)) && (selectedTag === '' || tag === selectedTag)).map((decision, index) => (
               <Box
                 key={decision.decision_id}
                 sx={{
@@ -307,11 +395,13 @@ const Readd = () => {
                     <Typography variant="body2">Decision Due Date: {new Date(decision.decision_due_date).toLocaleDateString()}</Typography>
                     <Typography variant="body2">Decision Taken Date: {decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--'}</Typography>
                     <Typography variant="body2">Decision Details: {decision.user_statement}</Typography>
-                    <Typography variant="body2">Tags: {decision.tagsArray && decision.tagsArray.join(', ')}</Typography>
+                    <Typography variant="body2">Tags:  {decision.tags.map(tag => (
+                      <Chip key={tag.id} label={tag.tag_name} />
+                    ))}</Typography>
                     <Typography variant="body2">Decision Reasons:</Typography>
-                    {decision.decision_reason_text && decision.decision_reason_text.map(reason => (
-                      <Typography key={reason} variant="body2" sx={{ marginLeft: 2 }}>
-                        - {reason}
+                    {decision.decision_reason && decision.decision_reason.map(reason => (
+                      <Typography variant="body2" key={reason.id}>
+                        {reason.decision_reason_text}
                       </Typography>
                     ))}
                     <Typography variant="body2">Comments: {comments[decision.decision_id] ? comments[decision.decision_id].length : 0}</Typography>
@@ -359,7 +449,7 @@ const Readd = () => {
           Add Decision
         </Button>
       </Link>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
         <Box>
           <Button
             variant={view === 'table' ? 'contained' : 'outlined'}
@@ -457,12 +547,13 @@ const Readd = () => {
                 }}
               >
                 <MenuItem value="">All Tags</MenuItem>
-                {[...new Set(data.flatMap(decision => decision.tagsArray))].map((tag, index) => (
+                {[...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))].map((tag, index) => (
                   <MenuItem key={index} value={tag}>
                     {tag}
                   </MenuItem>
                 ))}
               </Select>
+
             )}
           </Box>
         )}
