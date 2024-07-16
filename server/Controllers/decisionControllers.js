@@ -2,7 +2,7 @@ const getConnection = require('../Models/database');
 const crypto = require('crypto');
 
 const postInfo = async (req, res) => {
-  const { decision_name, user_statement, tags, decision_reason_text, decision_due_date, decision_taken_date } = req.body;
+  const { decision_name, user_statement, tags, decision_reason, decision_due_date, decision_taken_date } = req.body;
   let conn;
 
   try {
@@ -31,32 +31,36 @@ const postInfo = async (req, res) => {
       return encryptedText;
     }
 
-    const decisionReasonTexts = decision_reason_text.map(item => item.decision_reason_text);
-
+    const decisionReasonTexts = Array.isArray(decision_reason) ? decision_reason.map(item => item.decision_reason_text) : [];
     const encryptedReasonTexts = decisionReasonTexts.map(reasonText => encryptText(reasonText, req.user.key));
-    const encryptedDesicionName = encryptText(decision_name, req.user.key);
-    const encrypedUserStatement = encryptText(user_statement, req.user.key);
+    const encryptedDecisionName = encryptText(decision_name, req.user.key);
+    const encryptedUserStatement = encryptText(user_statement, req.user.key);
 
     const decisionResult = await conn.query(
       "INSERT INTO techcoach_lite.techcoach_decision (decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [encryptedDesicionName, userName, currentDate, formattedDueDate, formattedTakenDate, encrypedUserStatement, userId]
+      [encryptedDecisionName, userName, currentDate, formattedDueDate, formattedTakenDate, encryptedUserStatement, userId]
     );
 
     const decisionId = decisionResult.insertId;
 
     const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
     for (const tagName of tagsArray) {
-      const tag = await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = tag_name",
-        [tagName.trim()]
-      );
+      if (tagName && tagName.length > 0) {
+        const tagRows = await conn.query(
+          "SELECT id FROM techcoach_lite.techcoach_tag_info WHERE tag_name = ?",
+          [tagName.trim()]
+        );
 
-      const tagId = tag.insertId || tag.tag_id;
-
-      await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
-        [decisionId, tagId]
-      );
+        if (tagRows.length > 0) {
+          const tagId = tagRows[0].id;
+          await conn.query(
+            "INSERT INTO techcoach_lite.techcoach_decision_tags (decision_id, tag_id) VALUES (?, ?)",
+            [decisionId, tagId]
+          );
+        } else {
+          console.error(`Tag name ${tagName} not found in techcoach_tag_info`);
+        }
+      }
     }
 
     for (const encryptedReasonText of encryptedReasonTexts) {
@@ -67,7 +71,6 @@ const postInfo = async (req, res) => {
     }
 
     await conn.commit();
-    if (conn) conn.release() 
     res.status(200).json({ message: 'Data inserted successfully' });
 
   } catch (error) {
@@ -93,29 +96,32 @@ const getInfo = async (req, res) => {
 
     const decisionData = await conn.query(
       `SELECT 
-          d.*, 
-          GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
-          (
-              SELECT JSON_ARRAYAGG(
-                  JSON_OBJECT(
-                      'id', r.reason_id, 
-                      'decision_reason_text', r.decision_reason_text
-                  )
-              )
-              FROM techcoach_lite.techcoach_reason r
-              WHERE d.decision_id = r.decision_id
-              GROUP BY r.decision_id
-          ) AS decision_reason_text
+        d.*,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', t.id,
+            'tag_name', t.tag_name,
+            'tag_type', t.tag_type
+          )
+        ) AS tags,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', r.reason_id,
+            'decision_reason_text', r.decision_reason_text
+          )
+        ) AS reasons
       FROM 
-          techcoach_lite.techcoach_decision d
+        techcoach_lite.techcoach_decision d
       LEFT JOIN 
-          techcoach_lite.techcoach_decision_tag dt ON d.decision_id = dt.decision_id
+        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
       LEFT JOIN 
-          techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
+        techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
       LEFT JOIN 
-          techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
       WHERE
-          d.decision_id = ?
+        d.decision_id = ?
+      GROUP BY
+        d.decision_id
       `, [id]
     );
 
@@ -127,35 +133,42 @@ const getInfo = async (req, res) => {
 
     // Define decryptText function
     const decryptText = (text, key) => {
-      const decipher = crypto.createDecipher('aes-256-cbc', key);
-      let decryptedText = decipher.update(text, 'hex', 'utf8');
-      decryptedText += decipher.final('utf8');
-      return decryptedText;
+      if (!text) return text; // Ensure text is defined
+      try {
+        const decipher = crypto.createDecipher('aes-256-cbc', key);
+        let decryptedText = decipher.update(text, 'hex', 'utf8');
+        decryptedText += decipher.final('utf8');
+        return decryptedText;
+      } catch (error) {
+        console.error('Error decrypting text:', error);
+        return null;
+      }
     };
 
     // Decrypt decision data
     const decryptedDecisionData = decisionData.map(decision => {
-      // Decrypt any encrypted fields here
+      const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags;
+      const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
+
       return {
         decision_id: decision.decision_id,
         decision_name: decryptText(decision.decision_name, req.user.key),
         user_statement: decryptText(decision.user_statement, req.user.key),
         decision_due_date: decision.decision_due_date,
         decision_taken_date: decision.decision_taken_date,
-        tags: decision.tags ? decision.tags.split(',') : [],
-        decision_reason_text: Array.isArray(decision.decision_reason_text)
-          ? decision.decision_reason_text.map(reason => ({
-            id: reason.id,
-            decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
-          }))
-          : typeof decision.decision_reason_text === 'string'
-            ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
-            : []
+        tags: tags.map(tag => ({
+          id: tag.id,
+          tag_name: tag.tag_name,
+          tag_type: tag.tag_type
+        })),
+        decision_reason: reasons.map(reason => ({
+          id: reason.id,
+          decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
+        }))
       };
     });
-    if (conn) conn.release()
 
-    res.status(200).json({ decisions: decryptedDecisionData });
+    res.status(200).json({ decisionData: decryptedDecisionData });
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'An error occurred while processing your request' });
@@ -167,7 +180,7 @@ const getInfo = async (req, res) => {
 };
 
 
-const getallInfo =  async (req, res) => {
+const getallInfo = async (req, res) => {
   let conn;
   // console.log('qawqaw')
   // console.log(req.user)
@@ -177,64 +190,71 @@ const getallInfo =  async (req, res) => {
 
     const decisionData = await conn.query(
       `SELECT 
-            d.*, 
-            GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
-            (
-                SELECT JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'id', r.reason_id, 
-                        'decision_reason_text', r.decision_reason_text
-                    )
-                )
-                FROM techcoach_lite.techcoach_reason r
-                WHERE d.decision_id = r.decision_id
-                GROUP BY r.decision_id
-            ) AS decision_reason_text
-        FROM 
-            techcoach_lite.techcoach_decision d
-        LEFT JOIN 
-            techcoach_lite.techcoach_decision_tag dt ON d.decision_id = dt.decision_id
-        LEFT JOIN 
-            techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
-        LEFT JOIN 
-            techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
-        GROUP BY 
-             d.decision_id;
-        `
-
+        d.*,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', t.id,
+            'tag_name', t.tag_name,
+            'tag_type', t.tag_type
+          )
+        ) AS tags,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', r.reason_id,
+            'decision_reason_text', r.decision_reason_text
+          )
+        ) AS reasons
+      FROM 
+        techcoach_lite.techcoach_decision d
+      LEFT JOIN 
+        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+      LEFT JOIN 
+        techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+      LEFT JOIN 
+        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+      GROUP BY
+        d.decision_id
+      `
     );
-    console.log(decisionData)
-    // Check if decisionData is defined and not empty
-    if (!decisionData || decisionData.length === 0) {
-      console.error('No decisions found');
-      return res.status(404).json({ error: 'Decision not found' });
-    }
+
     // Define decryptText function
     const decryptText = (text, key) => {
-      const decipher = crypto.createDecipher('aes-256-cbc', key);
-      let decryptedText = decipher.update(text, 'hex', 'utf8');
-      decryptedText += decipher.final('utf8');
-      return decryptedText;
+      if (!text) return text; // Ensure text is defined
+      try {
+        const decipher = crypto.createDecipher('aes-256-cbc', key);
+        let decryptedText = decipher.update(text, 'hex', 'utf8');
+        decryptedText += decipher.final('utf8');
+        return decryptedText;
+      } catch (error) {
+        console.error('Error decrypting text:', error);
+        return null;
+      }
     };
 
-    const decryptedDecisions = decisionData.map(decision => ({
-      ...decision,
-      decision_name: decryptText(decision.decision_name, req.user.key),
-      user_statement: decryptText(decision.user_statement, req.user.key),
-      tags: decision.tags ? decision.tags.split(',') : [],
-      decision_reason_text: Array.isArray(decision.decision_reason_text)
-        ? decision.decision_reason_text.map(reason => ({
+    // Decrypt decision data
+    const decryptedDecisionData = decisionData.map(decision => {
+      const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags;
+      const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
+
+      return {
+        decision_id: decision.decision_id,
+        decision_name: decryptText(decision.decision_name, req.user.key),
+        user_statement: decryptText(decision.user_statement, req.user.key),
+        decision_due_date: decision.decision_due_date,
+        decision_taken_date: decision.decision_taken_date,
+        tags: tags.map(tag => ({
+          id: tag.id,
+          tag_name: tag.tag_name,
+          tag_type: tag.tag_type
+        })),
+        decision_reason: reasons.map(reason => ({
           id: reason.id,
           decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
         }))
-        : typeof decision.decision_reason_text === 'string'
-          ? decision.decision_reason_text.split(',').map(reason => decryptText(reason, req.user.key))
-          : []
-    }));
-    if (conn) conn.release() 
+      };
+    });
 
-
-    res.status(200).json({ decisions: decryptedDecisions });
+    res.status(200).json({ decisionData: decryptedDecisionData });
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'An error occurred while processing your request' });
@@ -248,97 +268,105 @@ const getallInfo =  async (req, res) => {
 
 const putInfo = async (req, res) => {
   const { id } = req.params;
-  const { decision_name, created_by, creation_date, decision_due_date, decision_taken_date, user_statement, tags, decision_reason_text } = req.body;
+  const { decision_name, user_statement, tags, decision_reason, decision_due_date, decision_taken_date } = req.body;
   let conn;
 
   try {
     conn = await getConnection();
     await conn.beginTransaction();
 
-    // Format dates
-    const formattedCreationDate = creation_date ? new Date(creation_date).toISOString().slice(0, 10) : null;
-    const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
-    let formattedTakenDate = null;
+    const userId = req.user.id;
+    const userName = req.user.name;
+    const currentDate = new Date().toISOString().slice(0, 10);
 
-    // Ensure decision_taken_date is provided and in valid format
-    if (decision_taken_date) {
-      if (!isValidDate(decision_taken_date)) {
-        throw new Error('Invalid decision_taken_date');
-      }
-      formattedTakenDate = new Date(decision_taken_date).toISOString().slice(0, 10);
-    }
-    // Function to check if a value is a valid date
-    function isValidDate(dateString) {
-      const regEx = /^\d{4}-\d{2}-\d{2}$/;
-      return dateString.match(regEx) !== null;
-    }
-    
-    // Function to encrypt text
+    const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
+    const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
+
     function encryptText(text, key) {
       const cipher = crypto.createCipher('aes-256-cbc', key);
       let encryptedText = cipher.update(text, 'utf8', 'hex');
       encryptedText += cipher.final('hex');
       return encryptedText;
     }
-    // Encrypt decision_name and user_statement
+
+    const decisionReasonTexts = Array.isArray(decision_reason) ? decision_reason.map(item => item.decision_reason_text) : [];
+    const encryptedReasonTexts = decisionReasonTexts.map(reasonText => encryptText(reasonText, req.user.key));
     const encryptedDecisionName = encryptText(decision_name, req.user.key);
     const encryptedUserStatement = encryptText(user_statement, req.user.key);
 
     // Update the decision record
     await conn.query(
-      "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, created_by = ?, creation_date = IFNULL(?, creation_date), decision_due_date = ?, decision_taken_date = ?, user_statement = ? WHERE decision_id = ?",
-      [encryptedDecisionName, created_by, formattedCreationDate, formattedDueDate, formattedTakenDate, encryptedUserStatement, id]
+      "UPDATE techcoach_lite.techcoach_decision SET decision_name = ?, decision_due_date = ?, decision_taken_date = ?, user_statement = ?, user_id = ? WHERE decision_id = ?",
+      [encryptedDecisionName, formattedDueDate, formattedTakenDate, encryptedUserStatement, userId, id]
     );
 
-    // Handle tags
-    if (tags) {
-      // Delete existing tags associated with the decision
-      await conn.query(
-        "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
-        [id]
+    // Retrieve existing tags
+    const existingTagRows = await conn.query(
+      `SELECT t.tag_name
+       FROM techcoach_lite.techcoach_decision_tags dt
+       JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+       WHERE dt.decision_id = ?`,
+      [id]
+    );
+
+    const existingTags = existingTagRows.map(row => row.tag_name);
+    const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
+
+    const tagsToAdd = tagsArray.filter(tag => !existingTags.includes(tag));
+    const tagsToRemove = existingTags.filter(tag => !tagsArray.includes(tag));
+
+    // Remove tags
+    for (const tagName of tagsToRemove) {
+      const tagRows = await conn.query(
+        "SELECT id FROM techcoach_lite.techcoach_tag_info WHERE tag_name = ?",
+        [tagName.trim()]
       );
 
-      // Insert new tags for the decision
-      const tagsArray = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []);
-      for (const tagName of tagsArray) {
-        const tag = await conn.query(
-          "INSERT INTO techcoach_lite.techcoach_tag (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE tag_name = VALUES(tag_name)",
-          [tagName.trim()]
-        );
-
-        const tagId = tag.insertId || tag.tag_id;
-
+      if (tagRows.length > 0) {
+        const tagId = tagRows[0].id;
         await conn.query(
-          "INSERT INTO techcoach_lite.techcoach_decision_tag (decision_id, tag_id) VALUES (?, ?)",
+          "DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id = ? AND tag_id = ?",
           [id, tagId]
         );
       }
     }
 
-    // Handle decision_reason_text
-    if (decision_reason_text) {
-      // Delete existing reasons associated with the decision
-      await conn.query(
-        "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
-        [id]
-      );
-
-      // Encrypt decision reason texts
-      const encryptedReasonTexts = decision_reason_text.map(reasonObj => encryptText(reasonObj.decision_reason_text, req.user.key));
-
-      // Insert new reasons for the decision
-      for (const encryptedReasonText of encryptedReasonTexts) {
-        await conn.query(
-          "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
-          [id, encryptedReasonText]
+    // Add new tags
+    for (const tagName of tagsToAdd) {
+      if (tagName && tagName.trim().length > 0) {
+        const tagRows = await conn.query(
+          "SELECT id FROM techcoach_lite.techcoach_tag_info WHERE tag_name = ?",
+          [tagName.trim()]
         );
+
+        if (tagRows.length > 0) {
+          const tagId = tagRows[0].id;
+          await conn.query(
+            "INSERT INTO techcoach_lite.techcoach_decision_tags (decision_id, tag_id) VALUES (?, ?)",
+            [id, tagId]
+          );
+        } else {
+          console.error(`Tag name ${tagName} not found in techcoach_tag_info`);
+        }
       }
     }
 
-    // Commit transaction and send success response
-    await conn.commit();
-    if (conn) conn.release() 
+    // Remove existing reasons
+    await conn.query(
+      `DELETE FROM techcoach_lite.techcoach_reason 
+       WHERE decision_id = ?`,
+      [id]
+    );
 
+    // Add new reasons
+    for (const encryptedReasonText of encryptedReasonTexts) {
+      await conn.query(
+        "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+        [id, encryptedReasonText]
+      );
+    }
+
+    await conn.commit();
     res.status(200).json({ message: 'Data updated successfully' });
 
   } catch (error) {
@@ -351,7 +379,7 @@ const putInfo = async (req, res) => {
     if (conn) {
       conn.release();
     }
-  } 
+  }
 };
 
 
@@ -365,7 +393,7 @@ const deleteInfo = async (req, res) => {
 
 
     await conn.query(
-      "DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id = ?",
+      "DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id = ?",
       [id]
     );
 
@@ -398,12 +426,9 @@ const deleteInfo = async (req, res) => {
   }
 };
 
-
-const getall = async (req, res, next) => {
+const getall = async (req, res) => {
   let conn;
-  // console.log('aaa');
-  // console.log(req.user, "sgcjcsdjy");
-  // console.log('key get from:', req.user.key);
+
   try {
     conn = await getConnection();
     const user = req.user;
@@ -415,74 +440,88 @@ const getall = async (req, res, next) => {
     console.log('User:', user);
 
     const decisionData = await conn.query(
-      `SELECT d.*, GROUP_CONCAT(DISTINCT t.tag_name) AS tag_name, GROUP_CONCAT(DISTINCT r.decision_reason_text) AS decision_reason_text
-      FROM techcoach_lite.techcoach_decision d
-      JOIN techcoach_lite.techcoach_decision_tag dt ON d.decision_id = dt.decision_id
-      JOIN techcoach_lite.techcoach_tag t ON dt.tag_id = t.tag_id
-      JOIN techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
-      WHERE d.user_id=${user.id}
-      GROUP BY d.decision_id
-      ORDER BY d.creation_date DESC;`
+      `SELECT 
+        d.*,
+        JSON_ARRAYAGG(DISTINCT
+          JSON_OBJECT(
+            'id', dt.id,
+            'tag_name', t.tag_name,
+            'tag_type', t.tag_type
+          )
+        ) AS tags,
+        JSON_ARRAYAGG(DISTINCT
+          JSON_OBJECT(
+            'id', r.reason_id,
+            'decision_reason_text', r.decision_reason_text
+          )
+        ) AS reasons
+      FROM 
+        techcoach_lite.techcoach_decision d
+      LEFT JOIN 
+        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+      LEFT JOIN 
+        techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+      LEFT JOIN 
+        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+      WHERE 
+        d.user_id = ?
+      GROUP BY 
+        d.decision_id
+      ORDER BY 
+        d.decision_id DESC`,
+      [user.id]
     );
-
-    // console.log('vvvvvv', decisionData);
 
     // Define decryptText function
     const decryptText = (text, key) => {
+      if (!text) return null; // Ensure text is defined
       try {
-        // console.log('Key length:', key);
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
         decryptedText += decipher.final('utf8');
         return decryptedText;
       } catch (error) {
         console.error('Error decrypting text:', error);
-        return null; // Return null or handle the error as appropriate for your application
+        return null;
       }
     };
 
-    // Define decryptReasonText function
-    const decryptReasonText = (reason, key) => {
-      try {
-        // console.log('Key length:', key);
-        const decipher = crypto.createDecipher('aes-256-cbc', key);
-        let decryptedText = decipher.update(reason, 'hex', 'utf8');
-        decryptedText += decipher.final('utf8');
-        return decryptedText;
-      } catch (error) {
-        console.error('Error decrypting reason text:', error);
-        return null; // Return null or handle the error as appropriate for your application
-      }
-    };
+    // Decrypt decision data
+    const decryptedDecisionData = decisionData.map(decision => {
+      const tags = Array.isArray(decision.tags) ? decision.tags : JSON.parse(decision.tags || '[]');
+      const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
 
-    const decryptedDecisionData = decisionData.map(decision => ({
-      decision_id: decision.decision_id,
-      decision_name: decryptText(decision.decision_name, req.user.key),
-      user_statement: decryptText(decision.user_statement, req.user.key),
-      decision_due_date: decision.decision_due_date,
-      decision_taken_date: decision.decision_taken_date,
-      tagsArray: decision.tag_name ? decision.tag_name.split(',') : [], // Splitting tag names into an array
-      decision_reason_text: decision.decision_reason_text
-        ? decision.decision_reason_text.split(',').map(reason => decryptReasonText(reason, req.user.key))
-        : [],
-    }));
 
-    // console.log("hhhh", decryptedDecisionData);
-    await conn.commit();
-    if (conn) conn.release() 
+      return {
+        decision_id: decision.decision_id,
+        decision_name: decryptText(decision.decision_name, req.user.key),
+        user_statement: decryptText(decision.user_statement, req.user.key),
+        decision_due_date: decision.decision_due_date,
+        decision_taken_date: decision.decision_taken_date,
+        tags: tags.map(tag => ({
+          id: tag.id,
+          tag_name: tag.tag_name,
+          tag_type: tag.tag_type
+        })),
+        decision_reason: reasons.map(reason => ({
+          id: reason.id,
+          decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
+        }))
+      };
+    });
 
+    // console.log('Decrypted Decisions:', decryptedDecisionData);
 
     res.status(200).json({ decisionData: decryptedDecisionData });
-
-  } catch (err) {
-    console.error('Error processing query parameters:', err);
+  } catch (error) {
+    console.error('Error processing query parameters:', error);
     if (conn) {
       await conn.rollback(); // Rollback the transaction in case of error
     }
     res.status(500).send({ message: 'Internal Server Error' }); // Handle the error gracefully
   } finally {
     if (conn) {
-      conn.release(); // Release the connection in any case
+      conn.release();
     }
   }
 };
