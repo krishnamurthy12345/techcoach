@@ -86,16 +86,22 @@ const Readd = () => {
   };
 
   const filteredData = data
-    .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
-    .filter(decision => {
-      const decisionNameMatch = decision.decision_name &&
-        decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase());
+  .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
+  .filter(decision => {
+    const decisionNameMatch = decision.decision_name &&
+      typeof decision.decision_name === 'string' &&
+      decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase());
 
-      const tagMatch = decision.tags &&
-        decision.tags.some(tag => tag.tag_name.toLowerCase().includes(selectedTag.toLowerCase()));
+    const tagMatch = decision.tags &&
+      Array.isArray(decision.tags) &&
+      decision.tags.some(tag => tag.tag_name &&
+        typeof tag.tag_name === 'string' &&
+        tag.tag_name.toLowerCase().includes(selectedTag.toLowerCase())
+      );
 
-      return decisionNameMatch || tagMatch;
-    });
+    return decisionNameMatch || tagMatch;
+  });
+
 
 
   // Calculate indices for the current page
