@@ -94,8 +94,8 @@ const Profile = () => {
       'Decision Due Date': new Date(decision.decision_due_date).toLocaleDateString(),
       'Decision Taken Date': decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--',
       'Decision Details': decision.user_statement,
-      'Tags': decision.tagsArray ? decision.tagsArray.join(',') : '',
-      'Decision Reasons': decision.decision_reason_text ? decision.decision_reason_text.join(',') : ''
+      'Tags': decision.tags ? decision.tags.map(tag => tag.tag_name).join(', ') : '',
+    'Decision Reasons': decision.decision_reason ? decision.decision_reason.map(reason => reason.decision_reason_text).join(', ') : ''
     }));
 
     const worksheetDecisions = XLSX.utils.json_to_sheet(decisionData);
@@ -179,7 +179,7 @@ const Profile = () => {
     });
   
     doc.save('profile_data.pdf');
-    alert('Profile data downloaded successfully');
+    toast('Profile data downloaded successfully');
   };
    
   if (loading) {

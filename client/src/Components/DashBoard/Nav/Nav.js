@@ -92,15 +92,22 @@ const Nav = () => {
     sharedDecisionCount();
   }, []);
 
-  const filteredData = data.filter(decision => {
-    return (
-      decision.user_id === loggedInUserId &&
-      ((decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-        (!decision.decision_taken_date))
-    );
-  });
+  // const filteredData = data.filter(decision => {
+  //   return (
+  //     decision.user_id === loggedInUserId &&
+  //     ((decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+  //       (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+  //       (!decision.decision_taken_date))
+  //   );
+  // });
 
+  const filteredData = data.filter(decision => {
+    const decisionNameMatch = decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const tagMatch = Array.isArray(decision.tags) && decision.tags.some(tag => tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const isPending = !decision.decision_taken_date;
+    return decision.user_id === loggedInUserId && (decisionNameMatch || tagMatch || isPending);
+  });
+  
   const liveDecisionsCount = filteredData.length;
   const pendingDecisionsCount = pendingDecisionsData.length;
 
