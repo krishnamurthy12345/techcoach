@@ -86,21 +86,21 @@ const Readd = () => {
   };
 
   const filteredData = data
-  .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
-  .filter(decision => {
-    const decisionNameMatch = decision.decision_name &&
-      typeof decision.decision_name === 'string' &&
-      decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase());
+    .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
+    .filter(decision => {
+      const decisionNameMatch = decision.decision_name &&
+        typeof decision.decision_name === 'string' &&
+        decision.decision_name.toLowerCase().includes(selectedTag.toLowerCase());
 
-    const tagMatch = decision.tags &&
-      Array.isArray(decision.tags) &&
-      decision.tags.some(tag => tag.tag_name &&
-        typeof tag.tag_name === 'string' &&
-        tag.tag_name.toLowerCase().includes(selectedTag.toLowerCase())
-      );
+      const tagMatch = decision.tags &&
+        Array.isArray(decision.tags) &&
+        decision.tags.some(tag => tag.tag_name &&
+          typeof tag.tag_name === 'string' &&
+          tag.tag_name.toLowerCase().includes(selectedTag.toLowerCase())
+        );
 
-    return decisionNameMatch || tagMatch;
-  });
+      return decisionNameMatch || tagMatch;
+    });
 
 
 
@@ -262,7 +262,12 @@ const Readd = () => {
 
     const advancedTagsData = pieData.filter(data => data.tagType === 'Advanced Tags');
     const decisionMaturityTagsData = pieData.filter(data => data.tagType === 'Decision Maturity');
-    const otherTagsData = pieData.filter(data => data.tagType !== 'Advanced Tags' && data.tagType !== 'Decision Maturity');
+    const sharpenthesawData = pieData.filter(data => data.tagType === 'Sharpen the Saw');
+    const OutcomeData = pieData.filter(data => data.tagType === 'Outcome');
+    const TimeSpanData = pieData.filter(data => data.tagType === 'Time Span');
+    const UrgencyData = pieData.filter(data => data.tagType === 'Urgency');
+    const FinancialData = pieData.filter(data => data.tagType === 'Financial Outcome');
+    // const otherTagsData = pieData.filter(data => data.tagType !== 'Advanced Tags' && data.tagType !== 'Decision Maturity');
 
     const COLORS = [
       '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF6384',
@@ -271,92 +276,200 @@ const Readd = () => {
     ];
 
     return (
-      <div className='d-flex flex-row'>
-        <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '580px', margin: 'auto', borderRadius: '10px' }}>
-          <DataGrid
-            rows={rows.slice(0, 50)}
-            columns={columns}
-            autoHeight
-            pageSize={50}
-            rowsPerPageOptions={[50]}
-            hideFooter
-            sx={{
-              '& .super-app-theme--header': {
-                backgroundColor: '#526D82',
-                '&:hover': {
-                  backgroundColor: 'rgb(197, 200, 202)',
-                },
-              },
-              '& .MuiDataGrid-cell': {
-                textAlign: 'baseline',
-              },
-            }}
-          />
-        </TableContainer>
-
-        <div className='justify-content-center align-items-center w-100'>
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Advanced Tags:</h3>
-            <PieChart width={350} height={350}>
-              <Pie
-                data={advancedTagsData}
-                cx={175}
-                cy={175}
-                outerRadius={120}
-                paddingAngle={1}
-                dataKey="value"
-              >
-                {advancedTagsData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-              <Legend />
-            </PieChart>
+      <div className='container-fluid'>
+        <div className='row'>
+          <div className='col-12 col-lg-6 d-flex justify-content-center'>
+            <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '580px', borderRadius: '10px', marginBottom: '20px' }}>
+              <DataGrid
+                rows={rows.slice(0, 50)}
+                columns={columns}
+                autoHeight
+                pageSize={50}
+                rowsPerPageOptions={[50]}
+                hideFooter
+                sx={{
+                  '& .super-app-theme--header': {
+                    backgroundColor: '#526D82',
+                    '&:hover': {
+                      backgroundColor: 'rgb(197, 200, 202)',
+                    },
+                  },
+                  '& .MuiDataGrid-cell': {
+                    textAlign: 'baseline',
+                  },
+                }}
+              />
+            </TableContainer>
           </div>
 
-          <div className='d-flex flex-column align-items-center '>
-            <h3>Other Tags: </h3>
-            <PieChart width={400} height={400}>
-              <Pie
-                data={otherTagsData}
-                cx={175}
-                cy={175}
-                outerRadius={120}
-                paddingAngle={1}
-                dataKey="value"
-              >
-                {otherTagsData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-              <Legend />
-            </PieChart>
-          </div>
+          <div className='col-12 col-lg-6'>
+            <div className='row'>
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Advanced Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={advancedTagsData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {advancedTagsData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
 
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Decision Driver Tags:</h3>
-            <PieChart width={350} height={350}>
-              <Pie
-                data={decisionMaturityTagsData}
-                cx={175}
-                cy={175}
-                outerRadius={120}
-                paddingAngle={1}
-                dataKey="value"
-              >
-                {decisionMaturityTagsData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-              <Legend />
-            </PieChart>
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Sharpen The Saw Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={sharpenthesawData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {sharpenthesawData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Time Span Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={TimeSpanData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {TimeSpanData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
+
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Outcome Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={OutcomeData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {OutcomeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Urgency Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={UrgencyData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {UrgencyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
+
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Decision Driver Tags:</h3>
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={decisionMaturityTagsData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={110}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {decisionMaturityTagsData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend />
+                  </PieChart>
+                </div>
+              </div>
+
+              <div className='row'>
+                <div className='col-12 col-md-6 d-flex justify-content-center'>
+                  <div className='d-flex flex-column align-items-center'>
+                    <h3>Financial Tags:</h3>
+                    <PieChart width={300} height={300}>
+                      <Pie
+                        data={FinancialData}
+                        cx={150}
+                        cy={150}
+                        outerRadius={100}
+                        paddingAngle={1}
+                        dataKey="value"
+                      >
+                        {FinancialData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                      <Legend />
+                    </PieChart>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
+
+
   };
 
   const renderTimelineView = () => {
