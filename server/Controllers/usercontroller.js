@@ -382,7 +382,7 @@ const deleteProfile = async (req, res) => {
     await conn.query("DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     // Delete from techcoach_decision_tag
-    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tag WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     // Delete from techcoach_shared_decisions (depending on techcoach_decision)
     await conn.query("DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
