@@ -279,7 +279,7 @@ const Readd = () => {
       <div className='container-fluid'>
         <div className='row'>
           <div className='col-12 col-lg-6 d-flex justify-content-center'>
-            <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '580px', borderRadius: '10px', marginBottom: '20px' }}>
+            <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '585px', borderRadius: '10px', marginBottom: '20px' }}>
               <DataGrid
                 rows={rows.slice(0, 50)}
                 columns={columns}
