@@ -39,10 +39,12 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                 if (selectedMemberDetails) {
                     const memberName = selectedMemberDetails.displayname;
 
+                    console.log("aceptttttttttttt or not", decision);
+
                     const decisionSummary = {
                         decisionName: decision.decision_name,
                         userStatement: decision.user_statement,
-                        reasons: decision.decision_reason_text.join(', '),
+                        reasons: decision.decision_reason.join(', '),
                         dueDate: decision.decision_due_date,
                         takenDate: decision.decision_taken_date
                     };
