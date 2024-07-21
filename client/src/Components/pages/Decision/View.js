@@ -43,9 +43,11 @@ const View = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
+                console.log("responseeeee from detailssssssssss", response.data.decisionData[0]);
                 const responseData = response.data;
-                if (responseData && responseData.decisions && responseData.decisions.length > 0) {
-                    const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason_text } = responseData.decisions[0];
+                console.log("responseeeee from afterrrrrrrrrrrrrrrrrr", responseData);
+                if (responseData && responseData.decisionData && responseData.decisionData.length > 0) {
+                    const { decision_name, decision_due_date, decision_taken_date, user_statement, tags, decision_reason } = responseData.decisionData[0];
                     const formattedDecisionDueDate = decision_due_date ? new Date(decision_due_date).toISOString().split('T')[0] : '';
                     const formattedDecisionTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().split('T')[0] : '';
                     setDecision({
@@ -53,9 +55,12 @@ const View = () => {
                         decision_due_date: formattedDecisionDueDate,
                         decision_taken_date: formattedDecisionTakenDate,
                         user_statement,
-                        user_id,
-                        tagsArray: tags,
-                        decision_reason_text: decision_reason_text.map(reasonObj => reasonObj.decision_reason_text),
+                        tagsArray: tags.map(tag => ({
+                            id: tag.id,
+                            tag_name: tag.tag_name,
+                            tag_type: tag.tag_type
+                        })),
+                        decision_reason: decision_reason.map(reasonObj => reasonObj.decision_reason_text),
                     });
                 } else {
                     console.error("Invalid response format:", responseData);
@@ -67,6 +72,7 @@ const View = () => {
 
         fetchData();
     }, [id]);
+
 
     useEffect(() => {
         const fetchInnerCircleDetails = async () => {
@@ -185,7 +191,7 @@ const View = () => {
                 <Typography variant="body1"><b>Decision Details:</b> {decision.user_statement}</Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Reasons:</b> {decision.decision_reason_text && decision.decision_reason_text.join(', ')}</Typography>
+                <Typography variant="body1"><b>Decision Reasons:</b> {decision.decision_reason && decision.decision_reason.join(', ')}</Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
                 <Typography variant="body1"><b>Decision Due Date:</b> {decision.decision_due_date}</Typography>
@@ -194,7 +200,9 @@ const View = () => {
                 <Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.join(', ')}</Typography>
+            <Typography variant="body1">
+                <b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}
+            </Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
                 <Link to='/readd'>
