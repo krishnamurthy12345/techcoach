@@ -344,6 +344,24 @@ const innerCircleInvitation = async (email) =>{
     }
 }
 
+const innerCircleAddInvitation = async (email) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCircleAddInvitation`,
+        {email},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log("response for Inner Circle Invitation", response);
+        return response.data; 
+    } catch (error) {
+        console.error("Error Inviting the person to the Decision App", error);
+        throw error;
+    }
+}
+
 const getSharedDecisionDetails = async () =>{
     const token = localStorage.getItem('token');
     try {
@@ -383,5 +401,6 @@ export {
     mailToInnerCircleDecisionShare,
     innerCirclePostComment,
     innerCircleInvitation,
-    getSharedDecisionDetails
+    getSharedDecisionDetails, 
+    innerCircleAddInvitation
  };

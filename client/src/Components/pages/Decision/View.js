@@ -38,7 +38,7 @@ const View = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/details/${id}`, {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/getInfo_Referred/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -196,9 +196,13 @@ const View = () => {
             <Box sx={{ mb: 2 }}>
                 <Typography variant="body1"><b>Decision Due Date:</b> {decision.decision_due_date}</Typography>
             </Box>
+            
+            { decision.decision_taken_date && (
             <Box sx={{ mb: 2 }}>
                 <Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography>
             </Box>
+            )}
+
             <Box sx={{ mb: 2 }}>
             <Typography variant="body1">
                 <b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}

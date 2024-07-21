@@ -1,5 +1,5 @@
 const express = require('express');
-const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall } = require('../Controllers/decisionControllers');
+const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred } = require('../Controllers/decisionControllers');
 const authMiddleware = require('../Utility/AuthMiddleware');
 const createUserKey = require('../Utility/CreateUserKey');
 
@@ -12,6 +12,7 @@ router.get('/', getall)
 router.post('/details', postInfo);
 router.get('/details', getallInfo);
 router.get('/details/:id', getInfo);
+router.get('/getInfo_Referred/:id', getInfo_Referred);
 router.put('/details/:id', putInfo);
 router.delete('/details/:id', deleteInfo);
 
