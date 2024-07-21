@@ -125,15 +125,14 @@ const getInfo = async (req, res) => {
       `, [id]
     );
 
-    // Check if decisionData is defined and not empty
+    console.log("decisionnnnnnnnnn data", decisionData);
     if (!decisionData || decisionData.length === 0) {
       console.error('Decision not found for ID:', id);
       return res.status(404).json({ error: 'Decision not found' });
     }
 
-    // Define decryptText function
     const decryptText = (text, key) => {
-      if (!text) return text; // Ensure text is defined
+      if (!text) return text; 
       try {
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -145,7 +144,6 @@ const getInfo = async (req, res) => {
       }
     };
 
-    // Decrypt decision data
     const decryptedDecisionData = decisionData.map(decision => {
       const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags;
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
@@ -179,6 +177,110 @@ const getInfo = async (req, res) => {
   }
 };
 
+
+const getInfo_Referred = async (req, res) => {
+  const { id } = req.params;
+  let conn;
+
+  try {
+    conn = await getConnection();
+
+    const decisionData = await conn.query(
+      `SELECT 
+        d.*,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', t.id,
+            'tag_name', t.tag_name,
+            'tag_type', t.tag_type
+          )
+        ) AS tags,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', r.reason_id,
+            'decision_reason_text', r.decision_reason_text
+          )
+        ) AS reasons
+      FROM 
+        techcoach_lite.techcoach_decision d
+      LEFT JOIN 
+        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+      LEFT JOIN 
+        techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+      LEFT JOIN 
+        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+      WHERE
+        d.decision_id = ?
+      GROUP BY
+        d.decision_id
+      `, [id]
+    );
+
+
+    if (!decisionData || decisionData.length === 0) {
+      console.error('Decision not found for ID:', id);
+      return res.status(404).json({ error: 'Decision not found' });
+    }
+
+    const decryptText = (text, key) => {
+      if (!text) return text; 
+      try {
+        const decipher = crypto.createDecipher('aes-256-cbc', key);
+        let decryptedText = decipher.update(text, 'hex', 'utf8');
+        decryptedText += decipher.final('utf8');
+        return decryptedText;
+      } catch (error) {
+        console.error('Error decrypting text:', error);
+        return null;
+      }
+    };
+
+    const decryptedDecisionData = decisionData.map(decision => {
+
+      console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
+
+      const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags; 
+      const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
+
+      const removeDuplicates = (array) => {
+        const uniqueIds = new Set();
+        return array.filter(item => {
+          if (!uniqueIds.has(item.id)) {
+            uniqueIds.add(item.id);
+            return true;
+          }
+          return false;
+        });
+      };
+
+      return {
+        decision_id: decision.decision_id,
+        decision_name: decryptText(decision.decision_name, req.user.key),
+        user_statement: decryptText(decision.user_statement, req.user.key),
+        decision_due_date: decision.decision_due_date,
+        decision_taken_date: decision.decision_taken_date,
+        tags: removeDuplicates(tags.map(tag => ({
+          id: tag.id,
+          tag_name: tag.tag_name,
+          tag_type: tag.tag_type
+        }))),
+        decision_reason: removeDuplicates(reasons.map(reason => ({
+          id: reason.id,
+          decision_reason_text: decryptText(reason.decision_reason_text, req.user.key)
+        })))
+      };
+    });
+
+    res.status(200).json({ decisionData: decryptedDecisionData });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request' });
+  } finally {
+    if (conn) {
+      conn.release();
+    }
+  }
+};
 
 const getallInfo = async (req, res) => {
   let conn;
@@ -527,4 +629,4 @@ const getall = async (req, res) => {
 };
 
 
-module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall };
+module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred };

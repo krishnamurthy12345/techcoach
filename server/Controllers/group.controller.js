@@ -1202,6 +1202,74 @@ const innerCircleInvitation = async (req, res) => {
     }
 };
 
+const innerCircleAddInvitation = async (req, res) => {
+    // console.log("Request body invitation:", req.user);
+    // console.log("Request body invitation:", req.body);
+
+    const { email } = req.body;
+    const { email: senderEmail } = req.user;
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
+        const groupMemberRows = await conn.query(groupMemberQuery, [senderEmail]);
+        const groupMemberDetails = groupMemberRows[0];
+        console.log("Group member details:", groupMemberDetails);
+
+        const emailPayload = {
+            from: {
+                address: "Decision-Coach@www.careersheets.in"
+            },
+            to: [
+                {
+                    email_address: {
+                        address: email
+                    }
+                }
+            ],
+            subject: `You are invited to an Inner Circle`,
+            htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+                <p>Hi,</p>
+                <p>You are receiving this notification as is inviting you to become part of their inner circle.</p>
+                <p>Decision Coach application enables confidential collaboration between people who trust each other to support in making important decisions.</p>
+                <p>Accessing Decision Coach is simple. Use this Google email account to sign up and you are all set. And it is free.</p>
+                <p>If you are already a user of Decision Coach then just sign in.</p>
+                <p style="text-align: center;">
+                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+                </p>
+                <p style="text-align: center;">
+                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click Inner Circle to accept the invite</a>
+                </p>
+                <p>Regards,</p>
+                <p>Team @ Decision Coach</p>
+            </div>`
+        };
+
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
+
+        await conn.commit();
+        res.status(200).json({ message: 'Mail Sent Successfully' });
+    } catch (error) {
+        console.error('Error in sending mail on invite to inner circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
 const getSharedDecisionDetails = async (req, res) => {
     const { id } = req.user;
     let conn;
@@ -1319,5 +1387,6 @@ module.exports = {
     innerCirclePostComment, 
     innerCircleDecisionShare,
     innerCircleInvitation,
+    innerCircleAddInvitation,
     getSharedDecisionDetails
 };

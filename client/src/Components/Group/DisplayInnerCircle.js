@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch, addMemberToInnerCircle, innerCircleInvitation } from './Network_Call';
+import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch, addMemberToInnerCircle, innerCircleInvitation, innerCircleAddInvitation } from './Network_Call';
 import { Container, Row, Col, ListGroup, Button, Spinner, Card, Alert } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import ShareModal from '../Group/ShareModel';
 import withAuth from '../withAuth';
+import { decomposeColor } from '@mui/material';
 
 const DisplayInnerCircle = () => {
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
@@ -80,21 +81,6 @@ const DisplayInnerCircle = () => {
         }
     };
 
-    const handleAddMember = async (userId) => {
-        setLoadingAdd(true);
-        try {
-            await addMemberToInnerCircle(userId, innerCircleDetails.group.id);
-            toast("Added Successfully");
-            const updatedDetails = await getInnerCircleDetails();
-            setInnerCircleDetails(updatedDetails);
-            setPotentialMembers(prev => prev.filter(member => member.user_id !== userId));
-        } catch (error) {
-            console.error("Failed to add member", error);
-        } finally {
-            setLoadingAdd(false);
-        }
-    };
-
     useEffect(() => {
         if (innerCircleDetails && innerCircleDetails.error) {
             if (innerCircleDetails.error === "No members found for this group") {
@@ -123,10 +109,27 @@ const DisplayInnerCircle = () => {
         setSearchQuery(e.target.value);
     };
 
+    const handleAddMember = async (userId) => {
+        setLoadingAdd(true);
+        try {
+            await addMemberToInnerCircle(userId, innerCircleDetails.group.id);
+            await innerCircleAddInvitation(searchQuery);
+            toast("Added Successfully");
+            const updatedDetails = await getInnerCircleDetails();
+            setInnerCircleDetails(updatedDetails);
+            setPotentialMembers(prev => prev.filter(member => member.user_id !== userId));
+        } catch (error) {
+            console.error("Failed to add member", error);
+        } finally {
+            setLoadingAdd(false);
+        }
+    };
+
     console.log("inner", innerCircleDetails);
 
     const filteredMembers = potentialMembers.filter(member => member.email === searchQuery);
     const existingMemberEmails = innerCircleDetails?.members?.map(member => member.email) || [];
+    console.log("emaillllllllllllllll", existingMemberEmails);
     const isValidGmail = searchQuery.endsWith('@gmail.com');
 
     const inviteButtonStyle = {
@@ -139,7 +142,7 @@ const DisplayInnerCircle = () => {
     };
 
     const handleInvite = async (searchQuery) => {
-        setLoadingInvite(true); // Set loadingInvite to true
+        setLoadingInvite(true); 
         try {
             const response = await innerCircleInvitation(searchQuery);
 
@@ -157,7 +160,7 @@ const DisplayInnerCircle = () => {
             console.error('Error in Inviting:', error);
             toast('An error occurred while posting the comment');
         } finally {
-            setLoadingInvite(false); // Set loadingInvite to false
+            setLoadingInvite(false); 
         }
     };
 
@@ -260,7 +263,7 @@ const DisplayInnerCircle = () => {
                                                 </Button>
                                             </ListGroup.Item>
                                         ))}
-                                        {filteredMembers.length === 0 && !existingMemberEmails.includes(searchQuery) ? (
+                                        {!existingMemberEmails.includes(searchQuery) && filteredMembers.length === 0 && (
                                             <Button
                                                 onClick={() => handleInvite(searchQuery)}
                                                 style={inviteButtonStyle}
@@ -278,7 +281,8 @@ const DisplayInnerCircle = () => {
                                                     'Invite the Member for Decision App'
                                                 )}
                                             </Button>
-                                        ):(
+                                        )}
+                                        {existingMemberEmails.includes(searchQuery) && (
                                             <div className="alert alert-warning" role="alert" style={{ marginTop: '10px' }}>
                                                 Already Added Member
                                             </div>
