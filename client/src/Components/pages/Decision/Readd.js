@@ -309,7 +309,7 @@ const Readd = () => {
               <div className='col-12 col-md-6 d-flex justify-content-center'>
                 <div className='d-flex flex-column align-items-center'>
                   <h3>Advanced Tags:</h3>
-                  <PieChart width={300} height={300}>
+                  <PieChart width={350} height={450}>
                     <Pie
                       data={advancedTagsData}
                       cx={150}
@@ -323,35 +323,11 @@ const Readd = () => {
                       ))}
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend />
-                  </PieChart>
+                    <Legend/>
+                    </PieChart>
                 </div>
               </div>
 
-              <div className='col-12 col-md-6 d-flex justify-content-center'>
-                <div className='d-flex flex-column align-items-center'>
-                  <h3>Sharpen The Saw Tags:</h3>
-                  <PieChart width={300} height={300}>
-                    <Pie
-                      data={sharpenthesawData}
-                      cx={150}
-                      cy={150}
-                      outerRadius={100}
-                      paddingAngle={1}
-                      dataKey="value"
-                    >
-                      {sharpenthesawData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend />
-                  </PieChart>
-                </div>
-              </div>
-            </div>
-
-            <div className='row'>
               <div className='col-12 col-md-6 d-flex justify-content-center'>
                 <div className='d-flex flex-column align-items-center'>
                   <h3>Time Span Tags:</h3>
@@ -369,8 +345,32 @@ const Readd = () => {
                       ))}
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend />
-                  </PieChart>
+                    <Legend layout="horizontal" align="right"  />
+                    </PieChart>
+                </div>
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className='col-12 col-md-6 d-flex justify-content-center'>
+                <div className='d-flex flex-column align-items-center'>
+                  <h3>Sharpen The Saw Tags:</h3>
+                  <PieChart width={300} height={350}>
+                    <Pie
+                      data={sharpenthesawData}
+                      cx={150}
+                      cy={150}
+                      outerRadius={100}
+                      paddingAngle={1}
+                      dataKey="value"
+                    >
+                      {sharpenthesawData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
+                    <Legend layout="horizontal" align="right"  />
+                    </PieChart>
                 </div>
               </div>
 
@@ -392,7 +392,7 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                  </PieChart>
+                    </PieChart>
                 </div>
               </div>
             </div>
@@ -416,14 +416,14 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                  </PieChart>
+                    </PieChart>
                 </div>
               </div>
 
               <div className='col-12 col-md-6 d-flex justify-content-center'>
                 <div className='d-flex flex-column align-items-center'>
                   <h3>Decision Driver Tags:</h3>
-                  <PieChart width={300} height={300}>
+                  <PieChart width={300} height={350}>
                     <Pie
                       data={decisionMaturityTagsData}
                       cx={150}
@@ -438,7 +438,7 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                  </PieChart>
+                    </PieChart>
                 </div>
               </div>
 
@@ -461,7 +461,7 @@ const Readd = () => {
                       </Pie>
                       <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                       <Legend />
-                    </PieChart>
+                      </PieChart>
                   </div>
                 </div>
               </div>

@@ -79,19 +79,24 @@ input[type='submit'] {
     border-radius: 5px;
     margin:5px;
     max-width: 300px;
-    /* width: 20%; */
 }
 
-.tag-container {
+/* .tag-container {
     display: flex;
     flex-wrap: wrap;
+    gap: 15px;
     align-items: center;
     justify-content: center; 
     margin-bottom: 10px;
 }
 .tag-item {
     margin-right: 15px;
+    flex-basis: 10%;
+    display: flex;
+    align-items: center;
   }
+   */
+
 .tag-label {
     display: flex;
     align-items: center; 
