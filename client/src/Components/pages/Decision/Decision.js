@@ -15,13 +15,13 @@ const Decision = () => {
     decision_due_date: '',
     decision_taken_date: '',
     user_statement: '',
-    tags:'',
+    tags: '',
     user_id: '',
     decision_reason: [''],
   });
   const [errors, setErrors] = useState({});
   const dropdownHeight = 200;
-  const dropdownWidth = 550;
+  const dropdownWidth = 650;
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -35,20 +35,20 @@ const Decision = () => {
       })
         .then((resp) => {
           console.log(resp.data); // Log the entire response
-  
+
           const { decisionData } = resp.data;
           if (decisionData && decisionData.length > 0) {
             const decision = decisionData[0]; // Extract the first decision object
             const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason } = decision;
-  
+
             const formatDate = (dateString) => dateString ? dateString.split('T')[0] : '';
-  
+
             const formattedDecisionDueDate = formatDate(decision_due_date);
             const formattedDecisionTakenDate = formatDate(decision_taken_date);
 
             const uniqueDecisionReasons = Array.from(new Set(decision_reason.map(reasonObj => reasonObj.decision_reason_text)));
 
-  
+
             console.log(decision);
             setFormData(prevState => ({
               ...prevState,
@@ -82,7 +82,7 @@ const Decision = () => {
     "Best", "Good", "Hobby", "Travel", "Hasty", "Time Sensitive",
     "Financial Loss", "Financial Gain"
   ];
-  
+
   const advancedTags = [
     "Board", "Brand", "Consultant", "Corporate Governance", "Customer", "Employee", "Expense", "Hiring",
     "Investment", "Legal Compliance", "Operational", "Partner", "Policy", "Product", "Project", "Prospect",
@@ -90,7 +90,7 @@ const Decision = () => {
   ];
 
   const decisionDriverTags = [
-    "Fully Data Driven","Not Data Driven", "Partially Data Driven",
+    "Fully Data Driven", "Not Data Driven", "Partially Data Driven",
   ];
 
   const filteredTags = tags.filter(tag =>
@@ -238,7 +238,7 @@ const Decision = () => {
         <form onSubmit={handleSubmit}>
           <div>
             <div className='form-group'>
-              <label htmlFor='decision_name'>Decision Name <span className="required" style={{color:"red"}}>*</span></label>
+              <label htmlFor='decision_name'>Decision Name <span className="required" style={{ color: "red" }}>*</span></label>
               <input
                 type='text'
                 id='decision_name'
@@ -250,7 +250,7 @@ const Decision = () => {
               {errors.decision_name && <span className="error">{errors.decision_name}</span>}
             </div>
             <div className='form-group'>
-              <label htmlFor='decision_due_date'>Decision Due Date <span className="required" style={{color:"red"}}>*</span></label>
+              <label htmlFor='decision_due_date'>Decision Due Date <span className="required" style={{ color: "red" }}>*</span></label>
               <input
                 type='date'
                 id='decision_due_date'
@@ -263,7 +263,7 @@ const Decision = () => {
             </div>
             <div className='form-group'>
               <label htmlFor='decision_taken_date'>Decision Taken Date</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap:"1rem" }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: "1rem" }}>
                 <input
                   type='date'
                   id='decision_taken_date'
@@ -283,7 +283,7 @@ const Decision = () => {
               {errors.decision_taken_date && <span className="error">{errors.decision_taken_date}</span>}
             </div>
             <div className='form-group'>
-              <label htmlFor='user_statement'>Decision Details <span className="required" style={{color:"red"}}>*</span></label>
+              <label htmlFor='user_statement'>Decision Details <span className="required" style={{ color: "red" }}>*</span></label>
               <input
                 type='text'
                 id='user_statement'
@@ -295,7 +295,7 @@ const Decision = () => {
               {errors.user_statement && <span className="error">{errors.user_statement}</span>}
             </div>
             <div className='form-group'>
-              <label>Decision Reasons <span className="required" style={{color:"red"}}>*</span></label>
+              <label>Decision Reasons <span className="required" style={{ color: "red" }}>*</span></label>
               {formData.decision_reason && formData.decision_reason.map((reason, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
                   <input
@@ -318,7 +318,7 @@ const Decision = () => {
               <button className='btnn2' type='button' onClick={handleAddReason}>Add Another Reason</button>
             </div>
             <div className='form-group'>
-              <label>Select Tags <span className="required" style={{color:"red"}}>*</span></label>
+              <label>Select Tags <span className="required" style={{ color: "red" }}>*</span></label>
               <input
                 type="text"
                 placeholder="Search tags..."
@@ -337,20 +337,21 @@ const Decision = () => {
                   borderRadius: '5px',
                   display: 'flex',
                   flexWrap: 'wrap',
-                  justifyContent: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
                   marginBottom: '10px',
                   margin: 'auto',
                 }}
               >
                 {filteredTags.map((tag, index) => (
-                  <div key={index} className='tag-item'>
-                    <label className='tag-label' htmlFor={tag}>{tag}
+                  <div key={index} className='tag-item' style={{ flexBasis: '17%' }}>
+                    <label className='tag-label' htmlFor={tag}>
                       <input
                         type="checkbox"
                         id={tag}
                         checked={selectedTags.includes(tag)}
                         onChange={() => handleTagSelection(tag)}
-                      />
+                      /> {tag}
                     </label>
                   </div>
                 ))}
@@ -379,20 +380,22 @@ const Decision = () => {
                       borderRadius: '5px',
                       display: 'flex',
                       flexWrap: 'wrap',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
                       justifyContent: 'center',
                       marginBottom: '10px',
                       margin: 'auto',
                     }}
                   >
                     {filteredAdvancedTags.map((tag, index) => (
-                      <div key={index} className='tag-item'>
-                        <label className='tag-label' htmlFor={tag}>{tag}
+                      <div key={index} className='tag-item' style={{ flexBasis: '17%' }} >
+                        <label className='tag-label' htmlFor={tag}>
                           <input
                             type="checkbox"
                             id={tag}
                             checked={selectedTags.includes(tag)}
                             onChange={() => handleTagSelection(tag)}
-                          />
+                          /> {tag}
                         </label>
                       </div>
                     ))}
@@ -410,20 +413,22 @@ const Decision = () => {
                       borderRadius: '5px',
                       display: 'flex',
                       flexWrap: 'wrap',
-                      justifyContent: 'center',
+                      gap: '5px',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
                       marginBottom: '10px',
                       margin: 'auto',
                     }}
                   >
                     {filteredDecisionDriverTags.map((tag, index) => (
-                      <div key={index} className='tag-item'>
-                        <label className='tag-label' htmlFor={tag}>{tag}
+                      <div key={index} className='tag-item' style={{ flexBasis: '25%' }} >
+                        <label className='tag-label' htmlFor={tag}>
                           <input
                             type="checkbox"
                             id={tag}
                             checked={selectedTags.includes(tag)}
                             onChange={() => handleTagSelection(tag)}
-                          />
+                          /> {tag}
                         </label>
                       </div>
                     ))}
@@ -432,13 +437,13 @@ const Decision = () => {
               </>
             )}
           </div>
-          <div style={{display:"flex", justifyContent:"center", gap: "10px"}}>
-            <input type='submit' value={id ? "Update" : "Save"}  />
+          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+            <input type='submit' value={id ? "Update" : "Save"} />
             <input type='button' value="Cancel" onClick={handleCancel} className="cancel-button" />
           </div>
         </form>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 };

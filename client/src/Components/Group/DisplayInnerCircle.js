@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch, addMemberToInnerCircle, innerCircleInvitation, innerCircleAddInvitation } from './Network_Call';
-import { Container, Row, Col, ListGroup, Button, Spinner, Card, Alert } from 'react-bootstrap';
+import { Container, ListGroup, Button, Spinner, Card, Alert } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import ShareModal from '../Group/ShareModel';
 import withAuth from '../withAuth';
-import { decomposeColor } from '@mui/material';
+// import { decomposeColor } from '@mui/material';
 
 const DisplayInnerCircle = () => {
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
