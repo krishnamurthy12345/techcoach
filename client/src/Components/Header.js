@@ -93,6 +93,9 @@ const Header = () => {
                                                 <Link to='/profile' className="dropdown-item">Profile</Link>
                                             </li>
                                             <li>
+                                                <Link to='/skillget' className="dropdown-item">Soft Skills</Link>
+                                            </li>
+                                            <li>
                                                 <Link to='/' onClick={handleLogout} className="dropdown-item">Logout</Link>
                                             </li>
                                         </ul>
