@@ -1,0 +1,125 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import './EditSkill.css';
+import { useNavigate, useParams } from 'react-router-dom';
+import { MdDescription } from 'react-icons/md';
+
+const EditSkill = () => {
+    const [skill, setSkill] = useState(null);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    useEffect(() => {
+        const fetchSkill = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/skill/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setSkill(response.data.skills[0]); // Assuming response returns an array with one skill
+            } catch (err) {
+                setError('Error fetching skill data');
+                console.log('Error fetching skill data:', err);
+            }
+        };
+
+        fetchSkill();
+    }, [id]);
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setSkill(prevSkill => ({
+            ...prevSkill,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, { skills: [skill] }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            navigate('/skillget');
+        } catch (err) {
+            setError('Error updating skill data');
+            console.log('Error updating skill data:', err);
+        }
+    };
+
+    const toggleDescription = () => {
+        setSkill(prevSkill => ({
+            ...prevSkill,
+            showDescription: !prevSkill.showDescription
+        }));
+    };
+
+    if (!skill) {
+        return <p>Loading...</p>;
+    }
+
+    return (
+        <div>
+            <h3 className='center'>Edit Skill</h3>
+            <form className='form' onSubmit={handleSubmit}>
+                <table className='table'>
+                    <thead>
+                        <tr>
+                            <th>S.no</th>
+                            <th>Skill Name</th>
+                            <th>Rating (1-10)</th>
+                            <th>Our Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1.</td>
+                            <td>
+                                <div className='skill-container'>
+                                    <span>{skill.skill_name}</span>
+                                    <MdDescription
+                                        className='show-description-icon'
+                                        onClick={toggleDescription}
+                                    />
+                                    {skill.showDescription && (
+                                        <p className='description'>
+                                            Description: {skill.description}
+                                        </p>
+                                    )}
+                                </div>
+                            </td>
+                            <td>
+                                <input
+                                    type='number'
+                                    min='1'
+                                    max='10'
+                                    name='rating'
+                                    value={skill.rating}
+                                    onChange={handleChange}
+                                />
+                            </td>
+                            <td>
+                                <textarea
+                                    className='textarea'
+                                    name='comments'
+                                    value={skill.comments}
+                                    onChange={handleChange}
+                                ></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {error && <p className='error'>{error}</p>}
+                <button type='submit' className='btn btn-primary bg-secondary'>Update</button>
+            </form>
+        </div>
+    );
+};
+
+export default EditSkill;

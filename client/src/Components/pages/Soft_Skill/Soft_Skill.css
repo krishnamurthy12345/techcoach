@@ -1,0 +1,84 @@
+.center {
+  text-align: center;
+}
+
+.table {
+  margin-top: 20px;
+  width: 90%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.textarea {
+  width: 80%;
+  height: 60px;
+}
+
+.skill-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.show-description-icon {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.description {
+  margin-top: 10px;
+  font-style: italic;
+  color: #555;
+}
+
+.btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .table, .table th, .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table th {
+    display: none;
+  }
+
+  .table td {
+    position: relative;
+    padding-left: 50%;
+    text-align: right;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: 50%;
+    padding-right: 10px;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .textarea {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

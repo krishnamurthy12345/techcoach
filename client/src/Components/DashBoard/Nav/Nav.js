@@ -123,7 +123,7 @@ const Nav = () => {
   };
 
   const navigateToReceivedDecisions = () => {
-    navigate('/receivedDecisions');
+    navigate('/sharedByMe');
   };
 
   const navigateToTotalDecisions = () => {
@@ -219,7 +219,8 @@ const Nav = () => {
                             }}
                           >
                             Edit
-                          </Button>                        </TableCell>
+                          </Button>                 
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
