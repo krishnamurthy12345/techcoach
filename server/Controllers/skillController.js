@@ -87,6 +87,24 @@ const postSkill = async (req, res) => {
   }
 };
 
+const getMasterSkills = async (req, res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const rows = await conn.query("SELECT skill_id, skill_name,description FROM techcoach_lite.techcoach_skill");
+    
+    // console.log('Fetched master skills:', rows); 
+    if (rows.length > 0) {
+      res.status(200).json({ skills: rows });
+    } 
+  } catch (error) {
+    console.log('Error fetching master skills:', error);
+    res.status(500).json({ error: 'An error occurred while fetching master skills' });
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 // const getAllSkill = async (req, res) => {
 //   let conn;
 
@@ -141,24 +159,6 @@ const getAllSkill = async (req, res) => {
     if (conn) conn.release();
   }
 };
-
-// Endpoint to get all skill names from the master table
-const getSkillNames = async (req, res) => {
-  let conn;
-
-  try {
-    conn = await getConnection();
-    const rows = await conn.query("SELECT skill_name FROM techcoach_lite.techcoach_skill");
-    res.status(200).json(rows);
-  } catch (error) {
-    console.log('Error fetching skill names:', error);
-    res.status(500).json({ error: 'An error occurred while fetching skill names' });
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
-// Add route for the new endpoint
 
 // const getSkill = async (req, res) => {
 //   const { id } = req.params; 
@@ -534,4 +534,4 @@ const deleteSkill = async (req, res) => {
   }
 };
 
-module.exports = { postSkill, getAllSkill, getSkill,getSkillNames, putSkill, deleteAllSkill, deleteSkill }
+module.exports = { postSkill,getMasterSkills, getAllSkill, getSkill, putSkill, deleteAllSkill, deleteSkill }

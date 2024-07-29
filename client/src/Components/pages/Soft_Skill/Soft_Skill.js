@@ -1,21 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Soft_Skill.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { MdDescription } from 'react-icons/md';
+import { ToastContainer, toast } from 'react-toastify';
 
 const SoftSkill = () => {
-  const [skills, setSkills] = useState([
-    { skill_name: 'Verbal Communication', rating: '', comments: '', description: 'Ability to speak English fluently with colleagues and customers.', showDescription: false },
-    { skill_name: 'Written Communication', rating: '', comments: '', description: 'Ability to write fluently in English for emails, chats, and documents with good vocabulary usage.', showDescription: false }
-  ]);
-  const [error, setError] = useState('');
-
+  const [skills, setSkills] = useState([]);
   const navigate = useNavigate();
+
+  const fetchSkills = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/skill/master-skills`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log('Fetched skills:', response.data.skills); 
+      setSkills(response.data.skills.map(skill => ({ ...skill, showDescription: false, rating: '', comments: '' })));
+    } catch (err) {
+      console.log('Error fetching skill data:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSkills();
+  }, []);
 
   const handleChange = (index, event) => {
     const values = [...skills];
-    values[index][event.target.name] = event.target.value;
+    // Handle change based on the input name
+    if (event.target.name === 'rating') {
+      values[index][event.target.name] = parseInt(event.target.value, 10);
+    } else if (event.target.name === 'comments') {
+      values[index][event.target.name] = event.target.value;
+    }
     setSkills(values);
   };
 
@@ -23,10 +43,13 @@ const SoftSkill = () => {
     event.preventDefault();
     try {
       await axios.post(`${process.env.REACT_APP_API_URL}/skill`, { skills });
+      toast("Soft Skill Added Successfully");
+      setTimeout(() =>{
       navigate('/skillget');
+    },1500);
     } catch (err) {
-      setError('Error adding skill data');
       console.log('Error adding skill data:', err);
+      toast("Error adding Soft Skill data");
     }
   };
 
@@ -47,14 +70,14 @@ const SoftSkill = () => {
     <div>
       <h3 className='center mt-5'>Soft Skills - Self Assessment</h3>
       <form className='form' onSubmit={handleSubmit}>
-        <table className='table '>
+        <table className='table'>
           <thead>
             <tr>
               <th>S.no</th>
               <th>Skill Name</th>
               <th>Rating (1-10)</th>
               <th>Confidence Level</th>
-              <th>Our Comments</th>
+              <th>Assessment Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -81,7 +104,7 @@ const SoftSkill = () => {
                     min='1'
                     max='10'
                     name='rating'
-                    value={skill.rating}
+                    value={skill.rating || ''}
                     onChange={(event) => handleChange(index, event)}
                   />
                 </td>
@@ -90,7 +113,7 @@ const SoftSkill = () => {
                   <textarea
                     className='textarea'
                     name='comments'
-                    value={skill.comments}
+                    value={skill.comments || ''}
                     onChange={(event) => handleChange(index, event)}
                   ></textarea>
                 </td>
@@ -100,10 +123,9 @@ const SoftSkill = () => {
         </table>
         <button type='submit' className='btn btn-light bg-dark'>Submit</button>
       </form>
-      {error && <p className='error'>{error}</p>}
+      <ToastContainer />
     </div>
   );
 };
 
 export default SoftSkill;
-
