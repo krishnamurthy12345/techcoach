@@ -3,10 +3,11 @@ import axios from 'axios';
 import './EditSkill.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MdDescription } from 'react-icons/md';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditSkill = () => {
     const [skill, setSkill] = useState(null);
-    const [error, setError] = useState('');
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -21,8 +22,8 @@ const EditSkill = () => {
                 });
                 setSkill(response.data.skills[0]); // Assuming response returns an array with one skill
             } catch (err) {
-                setError('Error fetching skill data');
                 console.log('Error fetching skill data:', err);
+                toast.error('Error fetching skill data');
             }
         };
 
@@ -46,10 +47,13 @@ const EditSkill = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            navigate('/skillget');
+            toast.success("Soft Skill Updated Successfully");
+            setTimeout(() => {
+                navigate('/skillget');
+            }, 1500);
         } catch (err) {
-            setError('Error updating skill data');
             console.log('Error updating skill data:', err);
+            toast.error('Error updating skill data');
         }
     };
 
@@ -61,7 +65,7 @@ const EditSkill = () => {
     };
 
     if (!skill) {
-        return <p>Loading...</p>;
+        return <div>Loading...</div>;
     }
 
     return (
@@ -115,9 +119,9 @@ const EditSkill = () => {
                         </tr>
                     </tbody>
                 </table>
-                {error && <p className='error'>{error}</p>}
                 <button type='submit' className='btn btn-primary bg-secondary'>Update</button>
             </form>
+            <ToastContainer />
         </div>
     );
 };
