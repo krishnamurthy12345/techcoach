@@ -184,7 +184,7 @@ const Skillget = () => {
           <tr>
             <th>Skill Name</th>
             <th>Rating</th>
-            <th>Assessment Notes</th>
+            <th>Assessment Notes and Action Plan</th>
             <th>Improvement</th>
           </tr>
         </thead>

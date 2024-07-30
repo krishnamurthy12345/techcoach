@@ -4,7 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { Pagination, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress, Select, MenuItem } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
-import { MdDelete, MdModeEdit } from 'react-icons/md';
+import { MdDelete, MdModeEdit, MdLink } from 'react-icons/md';
 import { GrFormView } from 'react-icons/gr';
 import { DataGrid } from '@mui/x-data-grid';
 import 'react-toastify/dist/ReactToastify.css';
@@ -188,6 +188,15 @@ const Readd = () => {
                   >
                     <GrFormView />
                   </IconButton>
+                  <IconButton
+                    component={Link}
+                    to={`/link`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#526D82' }}
+                  >
+                    <MdLink />
+                    </IconButton>
                 </TableCell>
               </TableRow>
             );
@@ -323,8 +332,8 @@ const Readd = () => {
                       ))}
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend/>
-                    </PieChart>
+                    <Legend />
+                  </PieChart>
                 </div>
               </div>
 
@@ -345,8 +354,8 @@ const Readd = () => {
                       ))}
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend layout="horizontal" align="right"  />
-                    </PieChart>
+                    <Legend layout="horizontal" align="right" />
+                  </PieChart>
                 </div>
               </div>
             </div>
@@ -369,8 +378,8 @@ const Readd = () => {
                       ))}
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
-                    <Legend layout="horizontal" align="right"  />
-                    </PieChart>
+                    <Legend layout="horizontal" align="right" />
+                  </PieChart>
                 </div>
               </div>
 
@@ -392,7 +401,7 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                    </PieChart>
+                  </PieChart>
                 </div>
               </div>
             </div>
@@ -416,7 +425,7 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                    </PieChart>
+                  </PieChart>
                 </div>
               </div>
 
@@ -438,7 +447,7 @@ const Readd = () => {
                     </Pie>
                     <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                     <Legend />
-                    </PieChart>
+                  </PieChart>
                 </div>
               </div>
 
@@ -461,7 +470,7 @@ const Readd = () => {
                       </Pie>
                       <Tooltip content={({ payload }) => payload[0] ? `${payload[0].name}: ${payload[0].value} (${payload[0].payload.percentage}%)` : null} />
                       <Legend />
-                      </PieChart>
+                    </PieChart>
                   </div>
                 </div>
               </div>

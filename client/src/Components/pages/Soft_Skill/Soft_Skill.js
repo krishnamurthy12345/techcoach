@@ -77,7 +77,7 @@ const SoftSkill = () => {
               <th>Skill Name</th>
               <th>Rating (1-10)</th>
               <th>Confidence Level</th>
-              <th>Assessment Notes</th>
+              <th>Assessment Notes and Action Plan</th>
             </tr>
           </thead>
           <tbody>

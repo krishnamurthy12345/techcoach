@@ -12,6 +12,7 @@ router.use(createUserKey);
 router.get("/profile", userController.getUserList);
 
 router.post("/data",userController.postGeneralProfile);
+router.get("/data/master-profiles",userController.getMasterProfiles);
 router.get("/data",userController.getProfile);
 router.put("/data",userController.putProfile);
 router.delete("/data",userController.deleteProfile);

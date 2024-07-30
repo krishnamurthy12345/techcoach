@@ -2,7 +2,6 @@ const getConnection = require('../Models/database');
 const crypto = require('crypto');
 
 
-
 const getUserList = async (req, res) => {
   let conn;
   try {
@@ -114,6 +113,24 @@ const postGeneralProfile = async (req, res) => {
   }
 };
 
+const getMasterProfiles = async (req,res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const rows = await conn.query('SELECT header_id ,header_name FROM techcoach_lite.techcoach_personal_header');
+    // console.log('Fetched master profile:',rows);
+    if (rows.length > 0) {
+      res.status(200).json({profiles : rows })
+    } else {
+      res.status(404).json({ message: 'No profiles found' });
+    }
+  } catch (error) {
+    console.log('Error fetching master profiles:',error);
+    res.status(500).json({ error:'An error occured while fetching master profiles'});
+  } finally {
+    if (conn) conn.release();
+  }
+}
 
 const decryptText = (encryptedText, key) => {
   if (!encryptedText) return null;
@@ -429,4 +446,4 @@ const deleteProfile = async (req, res) => {
 
 
 
-module.exports = { getUserList, postGeneralProfile, getProfile, putProfile,deleteProfile };
+module.exports = { getUserList, postGeneralProfile,getMasterProfiles, getProfile, putProfile,deleteProfile };
