@@ -50,7 +50,7 @@
 
 @media (max-width: 768px) {
   .table, .table th, .table td {
-    display: block;
+    display: inline-block;
     width: 100%;
   }
 

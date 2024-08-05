@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MdDescription } from 'react-icons/md';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import withAuth from '../../withAuth';
 
 const EditSkill = () => {
     const [skill, setSkill] = useState(null);
@@ -126,4 +127,4 @@ const EditSkill = () => {
     );
 };
 
-export default EditSkill;
+export default withAuth(EditSkill);
