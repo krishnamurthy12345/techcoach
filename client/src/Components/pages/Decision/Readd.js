@@ -190,7 +190,7 @@ const Readd = () => {
                   </IconButton>
                   <IconButton
                     component={Link}
-                    to={`/link`}
+                    to={`/link/${decision.decision_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: '#526D82' }}

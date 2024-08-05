@@ -3,16 +3,20 @@ import './AddLink.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import withAuth from '../../withAuth';
+import { useNavigate,Link } from 'react-router-dom';
 
 const AddLink = () => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
+  const [skillName, setSkillName] = useState('');
+  const [decisionId, setDecisionId] = useState('');
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showSkillOptions, setShowSkillOptions] = useState(false);
-  const [isDropdown, setIsDropdown] = useState(true);
-  const [activeSection, setActiveSection] = useState(null); // State to keep track of active section
+  
+  const navigate= useNavigate();
 
   const fetchProfiles = async () => {
     try {
@@ -22,7 +26,6 @@ const AddLink = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Fetched Profiles:', response.data.profiles);
       setProfiles(response.data.profiles);
     } catch (err) {
       console.log('Error fetching profile data:', err);
@@ -37,8 +40,7 @@ const AddLink = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Fetched Skills:', response.data.skills);
-      setSkills(response.data.skills.map(skill => ({ ...skill })));
+      setSkills(response.data.skills);
     } catch (err) {
       console.log('Error fetching skill data:', err);
     }
@@ -51,12 +53,10 @@ const AddLink = () => {
 
   const handleSWOTClick = () => {
     setShowProfileOptions(!showProfileOptions);
-    setActiveSection('profile');
   };
 
   const handleSoftSkillClick = () => {
     setShowSkillOptions(!showSkillOptions);
-    setActiveSection('skill');
   };
 
   const handleProfileChange = (e) => {
@@ -77,111 +77,118 @@ const AddLink = () => {
     }
   };
 
-  const handleSubmit = async (event) => {
+
+  const handleDecisionIdChange = (e) => {
+    setDecisionId(e.target.value);
+  };
+
+  const handleProfileSubmit = async (event) => {
     event.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      if (activeSection === 'profiles') {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/user/data`, {
-          profiles: selectedProfiles,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else if (activeSection === 'skills') {
-        await axios.post(`${process.env.REACT_APP_API_URL}/skill`, {
-          skills: selectedSkills,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
-      toast.success("Data Added Successfully");
-      setTimeout(() => {
-        // Optionally reset state or perform other actions
-      }, 1500);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/links`, {
+        decision_id: decisionId,
+        header_ids: selectedProfiles,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Profiles Linked Successfully");
+      navigate('/getall');
     } catch (err) {
-      console.log('Error adding data:', err);
-      toast.error("Error adding data");
+      console.log('Error linking profiles:', err);
+      toast.error("Error adding profile link");
+    }
+  };
+
+  const handleSkillSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/link`, {
+        decision_id: decisionId,
+        skill_id: selectedSkills,
+        skill_name: skillName,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Skill link added successfully");
+      navigate('/getall');
+    } catch (err) {
+      console.error('Error adding skill link:', err);
+      toast.error("Error adding skill link");
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className='addlink'>
+    <div className='addlink'>
+      <div>
+        <input
+          type="text"
+          placeholder="Decision ID"
+          value={decisionId}
+          onChange={handleDecisionIdChange}
+        />
+        <span><p>please fill the decision Id for url in last /(number) </p></span>
         <div>
-          <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
-          {showProfileOptions && (
-            <div className='options-container'>
-              {isDropdown ? (
-                <select multiple onChange={handleProfileChange}>
-                  {profiles.map((profile) => (
-                    <option key={profile.header_id} value={profile.header_id}>
-                      {profile.header_name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div>
-                  {profiles.map((profile) => (
-                    <div key={profile.header_id}>
-                      <label htmlFor={`profile-${profile.header_id}`}>
-                        {profile.header_name}
-                        <input
-                          type="checkbox"
-                          id={`profile-${profile.header_id}`}
-                          value={profile.header_id}
-                          onChange={handleProfileChange}
-                        />
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
+        {showProfileOptions && (
+          <div className='options-container'>
+            {profiles.map((profile) => (
+              <div key={profile.header_id}>
+                <label htmlFor={`profile-${profile.header_id}`}>
+                  <input
+                    type="checkbox"
+                    id={`profile-${profile.header_id}`}
+                    value={profile.header_id}
+                    onChange={handleProfileChange}
+                  />
+                  {profile.header_name}
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <button type='submit' onClick={handleProfileSubmit} className='savebtn'>Save SWOT Link</button>
+      </div>
+      <div>
+       
         <div>
-          <button type="button" className='soft-skill' onClick={handleSoftSkillClick}>Soft-Skill Assessment</button>
+          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Select Skills</button>
           {showSkillOptions && (
             <div className='options-container'>
-              {isDropdown ? (
-                <select multiple onChange={handleSkillChange}>
-                  {skills.map((skill) => (
-                    <option key={skill.skill_id} value={skill.skill_id}>
-                      {skill.skill_name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div>
-                  {skills.map((skill) => (
-                    <div key={skill.skill_id}>
-                      <label htmlFor={`skill-${skill.skill_id}`}>
-                        {skill.skill_name}
-                        <input
-                          type="checkbox"
-                          id={`skill-${skill.skill_id}`}
-                          value={skill.skill_id}
-                          onChange={handleSkillChange}
-                        />
-                      </label>
-                    </div>
-                  ))}
+              {skills.map((skill) => (
+                <div key={skill.skill_id}>
+                  <label htmlFor={`skill-${skill.skill_id}`}>
+                    <input
+                      type="checkbox"
+                      id={`skill-${skill.skill_id}`}
+                      value={skill.skill_id}
+                      onChange={handleSkillChange}
+                    />
+                    {skill.skill_name}
+                  </label>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>
-        <div>
-          <button type='submit' className='savebtn'>Save</button>
-        </div>
-      </form>
+        <button type='submit' className='savebtn' onClick={handleSkillSubmit}>Save Skill Link</button>
+      </div>
+      <div>
+        <Link to='/getall'>
+        <button className='getpage'>
+          Go to GetLink Page
+        </button>
+        </Link>
+      </div>
       <ToastContainer />
     </div>
   );
 };
 
-export default AddLink;
+export default withAuth(AddLink);

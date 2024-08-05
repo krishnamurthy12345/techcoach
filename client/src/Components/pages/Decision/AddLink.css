@@ -1,25 +1,72 @@
-.addlink{
-    background-color: antiquewhite;
-    display: flex;
+.addlink {
+  background-color: antiquewhite;
+  display: flex;
+  flex-direction: column; 
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.swot, .soft-skill, .savebtn {
+  background-color: rgb(65, 67, 73);
+  color: white;
+  border-radius: 5px;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.savebtn {
+  background-color: rgb(62, 162, 37);
+}
+
+.options-container {
+  width: 100%; 
+  max-width: 600px; 
+}
+
+input[type='text'] {
+  width: 100%; 
+  max-width: 300px; 
+  margin-bottom: 10px;
+}
+
+input[type='checkbox'] {
+  margin-right: 10px;
+}
+
+button {
+  width: 100%; 
+  max-width: 300px;
+  margin-top: 10px;
+}
+.getpage{
+  border-radius: 5px;
+  padding: 3px;
+}
+.getpage:hover{
+  border-radius: 5px;
+  background-color: rgb(166, 209, 247);
+  padding: 3px;
+}
+
+@media (min-width: 768px) {
+  .addlink {
+    flex-direction: row; 
     justify-content: space-evenly;
-    margin-top: 20px;
-    padding: 10px;
-}
-.swot{
-    background-color:rgb(65, 67, 73) ;
-    color: white;
-    border-radius: 5px;
-    padding: 3px;
-}
-.soft-skill{
-    background-color: rgb(65, 67, 73);
-    color: white;
-    border-radius: 5px;
-    padding: 3px;
-}
-.savebtn{
-    margin-top: 10px;
-    margin-left: 100px;
-    border-radius: 5px;
-    background-color: rgb(62, 162, 37);
+  }
+
+  .options-container {
+    width: 600px; 
+  }
+
+  input[type='text'] {
+    width: 200px; 
+  }
+
+  button {
+    width: auto; 
+    max-width: none; 
+  }
 }

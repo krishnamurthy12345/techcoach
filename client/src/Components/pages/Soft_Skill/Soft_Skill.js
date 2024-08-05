@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { MdDescription } from 'react-icons/md';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../../withAuth';
 
 const SoftSkill = () => {
   const [skills, setSkills] = useState([]);
@@ -86,7 +87,7 @@ const SoftSkill = () => {
                 <td>{index + 1}.</td>
                 <td>
                   <div className='skill-container'>
-                    <span>{skill.skill_name}</span>
+                    <span>{skill.skill_name}  <span className="required" style={{ color: "red" }}>*</span></span>
                     <MdDescription
                       className='show-description-icon'
                       onClick={() => toggleDescription(index)}
@@ -128,4 +129,4 @@ const SoftSkill = () => {
   );
 };
 
-export default SoftSkill;
+export default withAuth(SoftSkill);
