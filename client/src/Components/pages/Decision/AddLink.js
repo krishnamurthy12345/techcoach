@@ -4,19 +4,18 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import withAuth from '../../withAuth';
-import { useNavigate,Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 
 const AddLink = () => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
-  const [skillName, setSkillName] = useState('');
-  const [decisionId, setDecisionId] = useState('');
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showSkillOptions, setShowSkillOptions] = useState(false);
+  const { id } = useParams();
   
-  const navigate= useNavigate();
+  const navigate = useNavigate();
 
   const fetchProfiles = async () => {
     try {
@@ -49,7 +48,7 @@ const AddLink = () => {
   useEffect(() => {
     fetchProfiles();
     fetchSkills();
-  }, []);
+  }, [id]);
 
   const handleSWOTClick = () => {
     setShowProfileOptions(!showProfileOptions);
@@ -77,18 +76,13 @@ const AddLink = () => {
     }
   };
 
-
-  const handleDecisionIdChange = (e) => {
-    setDecisionId(e.target.value);
-  };
-
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.REACT_APP_API_URL}/api/links`, {
-        decision_id: decisionId,
         header_ids: selectedProfiles,
+        decision_id: id,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -107,9 +101,8 @@ const AddLink = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.REACT_APP_API_URL}/api/link`, {
-        decision_id: decisionId,
         skill_id: selectedSkills,
-        skill_name: skillName,
+        decision_id: id,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -126,37 +119,35 @@ const AddLink = () => {
   return (
     <div className='addlink'>
       <div>
-        <input
+        {/* <input
           type="text"
           placeholder="Decision ID"
-          value={decisionId}
-          onChange={handleDecisionIdChange}
-        />
-        <span><p>please fill the decision Id for url in last /(number) </p></span>
+          value={id}
+          readOnly
+        /> */}
         <div>
-        <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
-        {showProfileOptions && (
-          <div className='options-container'>
-            {profiles.map((profile) => (
-              <div key={profile.header_id}>
-                <label htmlFor={`profile-${profile.header_id}`}>
-                  <input
-                    type="checkbox"
-                    id={`profile-${profile.header_id}`}
-                    value={profile.header_id}
-                    onChange={handleProfileChange}
-                  />
-                  {profile.header_name}
-                </label>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <button type='submit' onClick={handleProfileSubmit} className='savebtn'>Save SWOT Link</button>
+          <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
+          {showProfileOptions && (
+            <div className='options'>
+              {profiles.map((profile) => (
+                <div key={profile.header_id}>
+                  <label htmlFor={`profile-${profile.header_id}`}>
+                    <input
+                      type="checkbox"
+                      id={`profile-${profile.header_id}`}
+                      value={profile.header_id}
+                      onChange={handleProfileChange}
+                    />
+                    {profile.header_name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button type='submit' onClick={handleProfileSubmit} className='savebtn'>Save SWOT Link</button>
       </div>
       <div>
-       
         <div>
           <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Select Skills</button>
           {showSkillOptions && (
@@ -181,9 +172,9 @@ const AddLink = () => {
       </div>
       <div>
         <Link to='/getall'>
-        <button className='getpage'>
-          Go to GetLink Page
-        </button>
+          <button className='getpage'>
+            Go to GetLink Page
+          </button>
         </Link>
       </div>
       <ToastContainer />

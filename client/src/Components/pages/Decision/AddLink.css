@@ -8,6 +8,10 @@
   padding: 10px;
 }
 
+.message{
+  color: #666;
+  font-size: 10px;
+}
 .swot, .soft-skill, .savebtn {
   background-color: rgb(65, 67, 73);
   color: white;
@@ -26,13 +30,13 @@
   max-width: 600px; 
 }
 
-input[type='text'] {
+input[type='textt'] {
   width: 100%; 
   max-width: 300px; 
   margin-bottom: 10px;
 }
 
-input[type='checkbox'] {
+input[type='checkboxx'] {
   margin-right: 10px;
 }
 
@@ -57,11 +61,11 @@ button {
     justify-content: space-evenly;
   }
 
-  .options-container {
+  .options {
     width: 600px; 
   }
 
-  input[type='text'] {
+  input[type='textt'] {
     width: 200px; 
   }
 

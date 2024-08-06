@@ -19,7 +19,7 @@
   height: 60px;
 }
 
-.skill-container {
+.skill-option {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -48,9 +48,48 @@
   margin-top: 10px;
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
+  .table {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .table th, .table td {
+    display: block;
+    width: 100%;
+    text-align: right;
+    padding: 10px;
+  }
+
+  .table th {
+    display: none;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .skill-option {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .textarea {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
   .table, .table th, .table td {
-    display: inline-block;
+    display: block;
     width: 100%;
   }
 
@@ -59,23 +98,43 @@
   }
 
   .table td {
-    position: relative;
-    padding-left: 50%;
     text-align: right;
+    padding-left: 50%;
+    position: relative;
   }
 
   .table td::before {
     content: attr(data-label);
     position: absolute;
     left: 10px;
-    width: 50%;
-    padding-right: 10px;
-    text-align: left;
     font-weight: bold;
+  }
+
+  .skill-option {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .textarea {
     width: 100%;
+    height: 80px;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .table, .table th, .table td {
+    display: block;
+    width: 100%;
+    text-align: right;
+  }
+
+  .textarea {
+    width: 100%;
+    height: 100px;
   }
 
   .btn {

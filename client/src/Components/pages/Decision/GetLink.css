@@ -1,4 +1,4 @@
-.card-container {
+.skill-decision,.swot-decision {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -9,24 +9,13 @@
   margin-left: 20px;
   margin-top: 50px;
 }  
-.card {
+.skill-decisions,.swot-decisions {
     background-color: #f8f8f8;
     border-radius: 8px;
     padding: 16px;
     width: 250px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-}
-  
-.card h3 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    color: #333;
-}
-  
-.card p {
-    margin: 0;
-    /* color: #666; */
 }
 .goback{
     border-radius: 5px;
