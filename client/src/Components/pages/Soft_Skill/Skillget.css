@@ -57,10 +57,4 @@
         max-width: 80rem;
         margin: 0 auto;
       }
-      .action{
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        cursor: pointer;
-      }
 }

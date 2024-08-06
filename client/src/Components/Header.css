@@ -8,7 +8,7 @@ body {
 .navbar {
   display: flex;
   justify-content: space-between;
-  align-items:flex-end;
+  align-items: flex-end;
   background-color: #3f5362;
   font-size: 18px;
   color: white;
@@ -60,14 +60,14 @@ body {
   background-color: #3f5362;
   color: white;
   border: none;
-  max-width: 250px; /* Ensure the dropdown does not exceed this width */
+  max-width: 250px;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .navbar-nav .nav-item .dropdown-menu .dropdown-item {
   color: white;
-  text-align:start;
+  text-align: start;
   padding: 5px 10px;
   border-radius: 5px;
   margin: 5px 0;
@@ -78,6 +78,7 @@ body {
   color: white;
 }
 
+/* Responsive Styles */
 @media (max-width: 992px) {
   .navbar-nav .nav-item {
     text-align: right;
@@ -143,6 +144,75 @@ body {
   }
 
   .navbar-nav .nav-item .dropdown-menu {
-    max-width: 100%; /* Ensure dropdown fits within the screen */
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar {
+    padding: 5px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image {
+    width: 35px;
+    height: 35px;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  .navbar-nav .nav-item {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .navbar-nav .nav-link {
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .collapse.navbar-collapse.show {
+    padding: 5px;
+    background-color: #1A293D;
+  }
+
+  .navbar-toggler {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 340px) {
+  .navbar {
+    padding: 2px;
+  }
+
+  .image {
+    width: 30px;
+    height: 30px;
+  }
+
+  .navbar-nav {
+    margin-top: 0;
+  }
+
+  .navbar-nav .nav-item {
+    margin-bottom: 6px;
+  }
+
+  .navbar-nav .nav-link {
+    padding: 6px 0;
+  }
+
+  .btn {
+    padding: 6px 12px;
+  }
+
+  .navbar-nav .nav-item .dropdown-menu .dropdown-item {
+    padding: 4px 8px;
   }
 }

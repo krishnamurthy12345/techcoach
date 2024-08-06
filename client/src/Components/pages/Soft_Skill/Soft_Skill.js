@@ -86,7 +86,7 @@ const SoftSkill = () => {
               <tr key={index}>
                 <td>{index + 1}.</td>
                 <td>
-                  <div className='skill-container'>
+                  <div className='skill-option'>
                     <span>{skill.skill_name}  <span className="required" style={{ color: "red" }}>*</span></span>
                     <MdDescription
                       className='show-description-icon'
