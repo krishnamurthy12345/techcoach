@@ -54,7 +54,7 @@ const Readd = () => {
   }, []);
 
 
-  console.log("dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", data);
+  console.log("dataa", data);
 
 
   const fetchComments = async decisionId => {
