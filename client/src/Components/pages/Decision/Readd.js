@@ -484,20 +484,60 @@ const Readd = () => {
   };
 
   const renderTimelineView = () => {
-    const tags = [...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))];
-
+    // Filter decisions based on selected tag or tag type
+    const filteredDecisions = data.filter(decision => {
+      if (selectedTag === 'Advanced Tags') {
+        return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
+      } 
+      if(selectedTag === 'Sharpen the Saw') {
+        return decision.tags.some(tag => tag.tag_type === 'Sharpen the Saw') 
+      }
+      if (selectedTag === 'Outcome') {
+        return decision.tags.some(tag => tag.tag_type === 'Outcome')
+      }
+      if (selectedTag === 'Time Span') {
+        return decision.tags.some(tag => tag.tag_type === 'Time Span')
+      }
+      if (selectedTag === 'Urgency') {
+        return decision.tags.some(tag => tag.tag_type === 'Urgency')
+      }
+      if (selectedTag === 'Financial Outcome') {
+        return decision.tags.some(tag => tag.tag_type === 'Financial Outcome')
+      }
+      if (selectedTag === 'Decision Maturity') {
+        return decision.tags.some(tag => tag.tag_type === 'Decision Maturity')
+      }
+       else if (selectedTag !== '' && selectedTag !== 'All Tags') {
+        return decision.tags.some(tag => tag.tag_name === selectedTag);
+      }
+      return true;
+    });
+  
+    // Group decisions by month
+    const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
+      const month = new Date(decision.decision_taken_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+      if (!acc[month]) acc[month] = [];
+      acc[month].push(decision);
+      return acc;
+    }, {});
+  
+    // Render the timeline view
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Box sx={{ position: 'absolute', left: '50%', top: '0%', bottom: '0%', width: '4px', backgroundColor: '#526D82', transform: 'translateX(-50%)', borderRadius: '0.1rem', zIndex: 1 }} />
-        {tags.map((tag, tagIndex) => (
-          <Box key={tag} sx={{ marginBottom: 4 }}>
-            <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>{tag}</Typography>
-            {filteredData.filter(decision => decision.tags.some(t => t.tag_name.includes(tag)) && (selectedTag === '' || tag === selectedTag)).map((decision, index) => (
+  
+        {Object.entries(decisionsByMonth).map(([month, decisions]) => (
+          <Box key={month} sx={{ marginBottom: 4 }}>
+            <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>
+              {month}
+            </Typography>
+  
+            {decisions.map((decision, index) => (
               <Box
                 key={decision.decision_id}
                 sx={{
                   display: 'flex',
-                  justifyContent: tagIndex % 2 === 0 ? 'flex-start' : 'flex-end',
+                  justifyContent: index % 2 === 0 ? 'flex-start' : 'flex-end',
                   position: 'relative',
                   marginBottom: 2
                 }}
@@ -525,7 +565,7 @@ const Readd = () => {
                     <Typography variant="body2">Decision Due Date: {new Date(decision.decision_due_date).toLocaleDateString()}</Typography>
                     <Typography variant="body2">Decision Taken Date: {decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--'}</Typography>
                     <Typography variant="body2">Decision Details: {decision.user_statement}</Typography>
-                    <Typography variant="body2">Tags:  {decision.tags.map(tag => (
+                    <Typography variant="body2">Tags: {decision.tags.map(tag => (
                       <Chip key={tag.id} label={tag.tag_name} />
                     ))}</Typography>
                     <Typography variant="body2">Decision Reasons:</Typography>
@@ -544,7 +584,7 @@ const Readd = () => {
       </Box>
     );
   };
-
+  
   const handlePageChange = (event, pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -677,11 +717,17 @@ const Readd = () => {
                 }}
               >
                 <MenuItem value="">All Tags</MenuItem>
-                {[...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))].map((tag, index) => (
+                <MenuItem value="Advanced Tags">Advanced Tags</MenuItem>
+                <MenuItem value = "Sharpen the Saw">Sharpen the Saw</MenuItem>
+                <MenuItem value = "Time Span">Time Span</MenuItem>
+                <MenuItem value = 'Outcome'>OutCome</MenuItem>
+                <MenuItem value='Decision Maturity'>Decision Maturity</MenuItem>
+                <MenuItem value = 'Financial Outcome'>Financial Outcome</MenuItem>
+                {/* {[...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))].map((tag, index) => (
                   <MenuItem key={index} value={tag}>
                     {tag}
                   </MenuItem>
-                ))}
+                ))} */}
               </Select>
 
             )}

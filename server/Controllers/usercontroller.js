@@ -398,7 +398,7 @@ const deleteProfile = async (req, res) => {
     // Delete from techcoach_reason (depending on techcoach_decision)
     await conn.query("DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
-    // Delete from techcoach_decision_tag
+    // Delete from techcoach_decision_tags
     await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     // Delete from techcoach_shared_decisions (depending on techcoach_decision)
@@ -429,6 +429,11 @@ const deleteProfile = async (req, res) => {
     // Finally, delete the user profile
     await conn.query("DELETE FROM techcoach_lite.techcoach_task WHERE user_id = ?", [userId]);
 
+    await conn.query("DELETE FROM techcoach_lite.techcoach_skill_value WHERE user_id = ?",[userId]);
+
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_skill WHERE user_id = ?",[userId]);
+    
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_header WHERE user_id = ?",[userId]);
     await conn.commit();
     res.status(200).json({ message: 'Profile and associated data deleted successfully' });
   } catch (error) {
