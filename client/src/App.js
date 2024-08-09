@@ -23,8 +23,8 @@ import ShareWithMe from './Components/DashBoard/ShareWithMe.js';
 import SoftSkill from './Components/pages/Soft_Skill/Soft_Skill.js';
 import Skillget from './Components/pages/Soft_Skill/Skillget.js';
 import EditSkill from './Components/pages/Soft_Skill/EditSkill.js';
-import AddLink from './Components/pages/Decision/AddLink.js';
-import GetLink from './Components/pages/Decision/GetLink.js';
+import AddLink from './Components/pages/Decision-Link/AddLink.js';
+import GetLink from './Components/pages/Decision-Link/GetLink.js';
 
 function App() {
   console.log("one is working")
@@ -45,23 +45,22 @@ function App() {
       <Routes>
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
-        {/* <Route path='/dashboard' element={<Nav />} /> */}
         <Route path='/dashboard' element={<DashboardRedirect />} />
+        <Route path='/innerCircle' element={<InnerCircle />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/decision' element={<Decision />} />
+        <Route path='/softskill' element={<SoftSkill />} />
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
 
-        <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
-
         {/* Soft_Skills Routes */}
-        <Route path='/softskill' element={<SoftSkill />} />
         <Route path='/skillget' element={<Skillget />} />
         <Route path='/editskill/:id' element={<EditSkill />} />
+
+        {/* decision-swot-skill Routes */}
         <Route path='/link/:id' element={<AddLink />} />
         <Route path='/getall' element={<GetLink />} />
-
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
@@ -72,17 +71,15 @@ function App() {
         {/* Share Decision */}
         <Route path='/sharedDecisions' element={<SharedDecision />} />
         <Route path='/sharedByMe' element={<ShareWithMe />} />
-
+        <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
 
         {/* Create Group Routes */}
-        <Route path='/innerCircle' element={<InnerCircle />} />
         <Route path='/group' element={<MultipleMemberGroup />} />
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
         <Route path='/shareAcceptOrNot' element={<AcceptOrNot />} />
 
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
-
 
       </Routes>
     </div>
