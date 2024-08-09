@@ -504,7 +504,7 @@ const Readd = () => {
       if (selectedTag === 'Decision Maturity') {
         return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
       } 
-      else if (selectedTag !== '' && selectedTag !== 'All Tags') {
+      if (selectedTag !== '' && selectedTag !== 'All Tags') {
         return decision.tags.some(tag => tag.tag_name === selectedTag);
       }
       return true;
