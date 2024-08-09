@@ -509,9 +509,9 @@ const Readd = () => {
       }
       return true;
     });
-  
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
       const month = new Date(decision.decision_creation_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
       return acc;
@@ -526,14 +526,15 @@ const Readd = () => {
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Box sx={{ position: 'absolute', left: '50%', top: '0%', bottom: '0%', width: '4px', backgroundColor: '#526D82', transform: 'translateX(-50%)', borderRadius: '0.1rem', zIndex: 1 }} />
-  
         {sortedMonths.map((month, index) => (
+
           <Box key={month} sx={{ marginBottom: 4 }}>
             <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>
               {month}
             </Typography>
   
             {decisionsByMonth[month].map((decision) => (
+
               <Box
                 key={decision.decision_id}
                 sx={{
@@ -585,8 +586,6 @@ const Readd = () => {
       </Box>
     );
   };
-  
-  
   const handlePageChange = (event, pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -725,7 +724,9 @@ const Readd = () => {
                 <MenuItem value = 'Outcome'>OutCome</MenuItem>
                 <MenuItem value='Decision Maturity'>Decision Maturity</MenuItem>
                 <MenuItem value = 'Financial Outcome'>Financial Outcome</MenuItem>
+
                 </Select>
+
             )}
           </Box>
         )}
@@ -733,7 +734,7 @@ const Readd = () => {
       {view === 'table' && renderTableView()}
       {view === 'timeline' && renderTimelineView()}
       {view === 'tabular' && renderTabularView()}
-      {(view === 'table' || view === 'tabular') && (
+      {(view === 'table') && (
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
           <Pagination
             count={Math.ceil(filteredData.length / recordsPerPage)}
