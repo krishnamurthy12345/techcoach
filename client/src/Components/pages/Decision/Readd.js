@@ -737,7 +737,7 @@ const Readd = () => {
       {view === 'table' && renderTableView()}
       {view === 'timeline' && renderTimelineView()}
       {view === 'tabular' && renderTabularView()}
-      {(view === 'table' || view === 'tabular') && (
+      {(view === 'table') && (
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
           <Pagination
             count={Math.ceil(filteredData.length / recordsPerPage)}
