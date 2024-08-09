@@ -62,6 +62,14 @@ function App() {
         <Route path='/link/:id' element={<AddLink />} />
         <Route path='/getall' element={<GetLink />} />
 
+        {/* Soft_Skills Routes */}
+        <Route path='/softskill' element={<SoftSkill />} />
+        <Route path='/skillget' element={<Skillget />} />
+        <Route path='/editskill/:id' element={<EditSkill />} />
+        <Route path='/link/:id' element={<AddLink />} />
+        <Route path='/getall' element={<GetLink />} />
+
+
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
@@ -72,7 +80,6 @@ function App() {
         <Route path='/sharedDecisions' element={<SharedDecision />} />
         <Route path='/sharedByMe' element={<ShareWithMe />} />
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
-
         {/* Create Group Routes */}
         <Route path='/group' element={<MultipleMemberGroup />} />
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
