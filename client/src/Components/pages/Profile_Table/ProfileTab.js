@@ -154,7 +154,7 @@ const ProfileTab = () => {
   };
 
   return (
-    <div className='profile-container'>
+    <div className='profile-page'>
       <h3 className='profile-title'>Profile Details</h3>
       <form onSubmit={handleSubmit} className='profile-header'>
         <center>

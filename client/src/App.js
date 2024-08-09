@@ -19,6 +19,12 @@ import ProfileTab from './Components/pages/Profile_Table/ProfileTab.js';
 import SharedDecision from './Components/Group/SharedDecisions.js';
 import DashboardRedirect from '../src/Components/DashboardRedirect.js'; 
 import ReceivedDecisionsTab from '../src/Components/DashBoard/ReceivedDecisionsTab.js'; 
+import ShareWithMe from './Components/DashBoard/ShareWithMe.js';
+import SoftSkill from './Components/pages/Soft_Skill/Soft_Skill.js';
+import Skillget from './Components/pages/Soft_Skill/Skillget.js';
+import EditSkill from './Components/pages/Soft_Skill/EditSkill.js';
+import AddLink from './Components/pages/Decision/AddLink.js';
+import GetLink from './Components/pages/Decision/GetLink.js';
 
 function App() {
   console.log("one is working")
@@ -49,6 +55,14 @@ function App() {
 
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
 
+        {/* Soft_Skills Routes */}
+        <Route path='/softskill' element={<SoftSkill />} />
+        <Route path='/skillget' element={<Skillget />} />
+        <Route path='/editskill/:id' element={<EditSkill />} />
+        <Route path='/link/:id' element={<AddLink />} />
+        <Route path='/getall' element={<GetLink />} />
+
+
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
@@ -57,6 +71,7 @@ function App() {
 
         {/* Share Decision */}
         <Route path='/sharedDecisions' element={<SharedDecision />} />
+        <Route path='/sharedByMe' element={<ShareWithMe />} />
 
 
         {/* Create Group Routes */}
