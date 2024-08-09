@@ -319,9 +319,8 @@ const getallInfo = async (req, res) => {
       `
     );
 
-    // Define decryptText function
     const decryptText = (text, key) => {
-      if (!text) return text; // Ensure text is defined
+      if (!text) return text; 
       try {
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -333,7 +332,6 @@ const getallInfo = async (req, res) => {
       }
     };
 
-    // Decrypt decision data
     const decryptedDecisionData = decisionData.map(decision => {
       const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags;
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
@@ -598,6 +596,7 @@ const getall = async (req, res) => {
         decision_id: decision.decision_id,
         decision_name: decryptText(decision.decision_name, req.user.key),
         user_statement: decryptText(decision.user_statement, req.user.key),
+        decision_creation_date:decision.creation_date,
         decision_due_date: decision.decision_due_date,
         decision_taken_date: decision.decision_taken_date,
         tags: tags.map(tag => ({

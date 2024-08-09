@@ -36,7 +36,6 @@ const Readd = () => {
         });
         const responseData = response.data;
         if (Array.isArray(responseData.decisionData)) {
-          // Sort decisions by date (most recent first)
           const sortedData = responseData.decisionData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           setData(sortedData);
           sortedData.forEach(decision => {
@@ -106,7 +105,6 @@ const Readd = () => {
 
 
 
-  // Calculate indices for the current page
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -479,60 +477,64 @@ const Readd = () => {
         </div>
       </div>
     );
-
-
   };
 
   const renderTimelineView = () => {
-    // Filter decisions based on selected tag or tag type
-    const filteredDecisions = data.filter(decision => {
-      if (selectedTag === 'Advanced Tags') {
-        return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
-      } 
-      if(selectedTag === 'Sharpen the Saw') {
-        return decision.tags.some(tag => tag.tag_type === 'Sharpen the Saw') 
+    const filteredDecisions = data
+      .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
+      .filter(decision => {
+        if (selectedTag === 'Advanced Tags') {
+          return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
+        } 
+      if (selectedTag === 'Sharpen the Saw') {
+        return decision.tags.some(tag => tag.tag_type === 'Sharpen the Saw');
       }
       if (selectedTag === 'Outcome') {
-        return decision.tags.some(tag => tag.tag_type === 'Outcome')
+        return decision.tags.some(tag => tag.tag_type === 'Outcome');
       }
       if (selectedTag === 'Time Span') {
-        return decision.tags.some(tag => tag.tag_type === 'Time Span')
+        return decision.tags.some(tag => tag.tag_type === 'Time Span');
       }
       if (selectedTag === 'Urgency') {
-        return decision.tags.some(tag => tag.tag_type === 'Urgency')
+        return decision.tags.some(tag => tag.tag_type === 'Urgency');
       }
       if (selectedTag === 'Financial Outcome') {
-        return decision.tags.some(tag => tag.tag_type === 'Financial Outcome')
+        return decision.tags.some(tag => tag.tag_type === 'Financial Outcome');
       }
       if (selectedTag === 'Decision Maturity') {
-        return decision.tags.some(tag => tag.tag_type === 'Decision Maturity')
-      }
-       else if (selectedTag !== '' && selectedTag !== 'All Tags') {
+        return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
+      } 
+      else if (selectedTag !== '' && selectedTag !== 'All Tags') {
         return decision.tags.some(tag => tag.tag_name === selectedTag);
       }
       return true;
     });
-  
-    // Group decisions by month
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
-      const month = new Date(decision.decision_taken_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+      const month = new Date(decision.decision_creation_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
       return acc;
     }, {});
   
-    // Render the timeline view
+    const sortedMonths = Object.keys(decisionsByMonth).sort((a, b) => {
+      const [monthA, yearA] = a.split(' ');
+      const [monthB, yearB] = b.split(' ');
+      return new Date(`${yearA}-${new Date(a).getMonth() + 1}-01`) - new Date(`${yearB}-${new Date(b).getMonth() + 1}-01`);
+    });
+  
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Box sx={{ position: 'absolute', left: '50%', top: '0%', bottom: '0%', width: '4px', backgroundColor: '#526D82', transform: 'translateX(-50%)', borderRadius: '0.1rem', zIndex: 1 }} />
-  
-        {Object.entries(decisionsByMonth).map(([month, decisions]) => (
+        {sortedMonths.map((month, index) => (
+
           <Box key={month} sx={{ marginBottom: 4 }}>
             <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>
               {month}
             </Typography>
   
-            {decisions.map((decision, index) => (
+            {decisionsByMonth[month].map((decision) => (
+
               <Box
                 key={decision.decision_id}
                 sx={{
@@ -584,7 +586,6 @@ const Readd = () => {
       </Box>
     );
   };
-  
   const handlePageChange = (event, pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -723,12 +724,8 @@ const Readd = () => {
                 <MenuItem value = 'Outcome'>OutCome</MenuItem>
                 <MenuItem value='Decision Maturity'>Decision Maturity</MenuItem>
                 <MenuItem value = 'Financial Outcome'>Financial Outcome</MenuItem>
-                {/* {[...new Set(data.flatMap(decision => decision.tags.map(tag => tag.tag_name) || []))].map((tag, index) => (
-                  <MenuItem key={index} value={tag}>
-                    {tag}
-                  </MenuItem>
-                ))} */}
-              </Select>
+
+                </Select>
 
             )}
           </Box>
