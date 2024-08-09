@@ -484,6 +484,9 @@ const Readd = () => {
   };
 
   const renderTimelineView = () => {
+    if (showPendingDecisions) {
+      return null; 
+    }
     // Filter decisions based on selected tag or tag type
     const filteredDecisions = data.filter(decision => {
       if (selectedTag === 'Advanced Tags') {
@@ -507,7 +510,7 @@ const Readd = () => {
       if (selectedTag === 'Decision Maturity') {
         return decision.tags.some(tag => tag.tag_type === 'Decision Maturity')
       }
-       else if (selectedTag !== '' && selectedTag !== 'All Tags') {
+      if (selectedTag !== '' && selectedTag !== 'All Tags') {
         return decision.tags.some(tag => tag.tag_name === selectedTag);
       }
       return true;
@@ -520,19 +523,25 @@ const Readd = () => {
       acc[month].push(decision);
       return acc;
     }, {});
+
+    const sortedMonths = Object.keys(decisionsByMonth).sort((a,b) =>{
+      const [monthA, yearA] = a.split(' ');
+      const [monthB, yearB] = b.split(' ');
+      return new Date(`${yearA}-${new Date(a).getMonth() +1}-01`) - new Date(`${yearB}-${new Date(b).getMonth() +1}-01`);
+    });
   
     // Render the timeline view
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Box sx={{ position: 'absolute', left: '50%', top: '0%', bottom: '0%', width: '4px', backgroundColor: '#526D82', transform: 'translateX(-50%)', borderRadius: '0.1rem', zIndex: 1 }} />
   
-        {Object.entries(decisionsByMonth).map(([month, decisions]) => (
+        {sortedMonths.map((month, index) => (
           <Box key={month} sx={{ marginBottom: 4 }}>
             <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>
               {month}
             </Typography>
   
-            {decisions.map((decision, index) => (
+            {decisionsByMonth[month].map((decision) => (
               <Box
                 key={decision.decision_id}
                 sx={{
