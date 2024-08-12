@@ -177,7 +177,6 @@ const getInfo = async (req, res) => {
   }
 };
 
-
 const getInfo_Referred = async (req, res) => {
   const { id } = req.params;
   let conn;
@@ -492,6 +491,17 @@ const deleteInfo = async (req, res) => {
     await conn.beginTransaction();
 
 
+     // Delete from dependent tables first
+     await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_skill_linked_info WHERE decision_id = ?",
+      [id]
+    );
+
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id = ?",
+      [id]
+    );
+    
     await conn.query(
       "DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id = ?",
       [id]
