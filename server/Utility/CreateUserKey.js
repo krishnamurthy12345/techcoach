@@ -8,7 +8,7 @@ const createUserKey = async (req, res, next) => {
 
     try {
         const conn = await getConnection();
-        const [userData] = await conn.query('SELECT displayName, email FROM techcoach_lite.techcoach_task WHERE email = ?', req.user.email);
+        const [userData] = await conn.query('SELECT displayName, email FROM techcoach_lite.techcoach_users WHERE email = ?', req.user.email);
         // console.log('assss', userData);
         if (conn) { conn.release(); }
 

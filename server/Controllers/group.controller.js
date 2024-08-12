@@ -11,7 +11,7 @@ const getUserList = async (req, res) => {
     await conn.beginTransaction();
 
     const tasks = await conn.query(`
-      SELECT * FROM techcoach_lite.techcoach_task WHERE user_id != ?;
+      SELECT * FROM techcoach_lite.techcoach_users WHERE user_id != ?;
     `, [userId]);
 
     await conn.commit();
@@ -143,7 +143,7 @@ const getInnerCircleDetails = async (req, res) => {
 
         const memberDetailsQuery = `
             SELECT user_id, displayname, email 
-            FROM techcoach_lite.techcoach_task 
+            FROM techcoach_lite.techcoach_users 
             WHERE user_id = ?
         `;
 
@@ -209,7 +209,7 @@ const removeMemberFromInner = async (req, res) => {
 
 const getAddMemberNameList = async (req, res) => {
     const { existingMemberIds } = req.body;
-    console.log("request body from add member", existingMemberIds);
+    // console.log("request body from add member", existingMemberIds);
 
     const userId = req.user.id;
 
@@ -224,14 +224,14 @@ const getAddMemberNameList = async (req, res) => {
         if (existingMemberIds.length === 0) {
             query = `
                 SELECT * 
-                FROM techcoach_lite.techcoach_task 
+                FROM techcoach_lite.techcoach_users 
                 WHERE user_id != ?
             `;
             queryParams = [userId];
         } else {
             query = `
                 SELECT * 
-                FROM techcoach_lite.techcoach_task 
+                FROM techcoach_lite.techcoach_users 
                 WHERE user_id NOT IN (?) AND user_id != ?
             `;
             queryParams = [existingMemberIds, userId];
@@ -254,7 +254,7 @@ const getAddMemberNameList = async (req, res) => {
 
 const addMemberInInnerCircle = async(req, res) =>{
 
-    console.log("request body from add member list", req.body.data);
+    // console.log("request body from add member list", req.body.data);
     const {userId, groupId}  = req.body.data;
     try {
         conn = await getConnection();
@@ -280,7 +280,7 @@ const addMemberInInnerCircle = async(req, res) =>{
 
 const shareDecisionInInnerCircle = async (req, res) => {
     const { decisionId, groupId, memberId } = req.body;
-    console.log("req body frommmm share decisionnnnnnn", req.body);
+    // console.log("req body frommmm share decisionnnnnnn", req.body);
     let conn;
 
     try {
@@ -328,41 +328,6 @@ const getSharedMembers = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
-
-/* const getInnerCircleAcceptNotification = async (req, res) => {
-    let conn;
-
-    let userId = req.user.id;
-
-    console.log("user Id", userId);
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const notAcceptedMembersQuery = `
-            SELECT *
-            FROM techcoach_lite.techcoach_group_members
-            WHERE member_id = ? AND status = ''
-        `;
-        const notAcceptedMembersResult = await conn.query(notAcceptedMembersQuery, [userId]);
-
-        console.log("notification", notAcceptedMembersResult);
-        await conn.commit();
-
-        console.log("Result from fetched not accepted members:", notAcceptedMembersResult);
-
-        res.status(200).json({ 
-            message: 'Not Accepted Members Fetched Successfully', 
-            notAcceptedMembers: notAcceptedMembersResult 
-        });
-    } catch (error) {
-        console.error('Error fetching not accepted members:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-}; */
 
 const getInnerCircleAcceptNotification = async (req, res) => {
     let conn;
@@ -418,7 +383,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
 
                     const userQuery = `
                         SELECT *
-                        FROM techcoach_lite.techcoach_task
+                        FROM techcoach_lite.techcoach_users
                         WHERE user_id = ?`;
                     
                     const userResult = await conn.query(userQuery, [createdBy]);
@@ -436,7 +401,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
 
                 const userQuery = `
                     SELECT *
-                    FROM techcoach_lite.techcoach_task
+                    FROM techcoach_lite.techcoach_users
                     WHERE user_id = ?
                 `;
                 const userResult = await conn.query(userQuery, [createdBy]);
@@ -480,7 +445,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
 
 
 const acceptOrRejectInnerCircle = async (req, res) => {
-    console.log("reqqqqqqqqqq body", req.body);
+    // console.log("reqqqqqqqqqq body", req.body);
 
     const { groupId, status } = req.body.data; 
     const userId = req.user.id;
@@ -573,7 +538,7 @@ const getSharedDecisions = async (req, res) => {
 
             const userQuery = await conn.query(`
                 SELECT user_id, displayname, email 
-                FROM techcoach_lite.techcoach_task 
+                FROM techcoach_lite.techcoach_users 
                 WHERE user_id = ?
             `, [decisionDetails.user_id]);
 
@@ -595,7 +560,7 @@ const getSharedDecisions = async (req, res) => {
 
             const groupUserDetailsQuery = await conn.query(`
                 SELECT user_id, displayname, email 
-                FROM techcoach_lite.techcoach_task 
+                FROM techcoach_lite.techcoach_users 
                 WHERE user_id = ?
             `, [groupDetails[0].created_by]);
 
@@ -612,7 +577,7 @@ const getSharedDecisions = async (req, res) => {
 
             const decisionReasonQuery = await conn.query(`
                 SELECT decision_reason_text 
-                FROM techcoach_lite.techcoach_reason 
+                FROM techcoach_lite.techcoach_decision_reason 
                 WHERE decision_id = ?
             `, [decisionId]);
 
@@ -628,7 +593,7 @@ const getSharedDecisions = async (req, res) => {
                 SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
                        t.user_id, t.displayname, t.email
                 FROM techcoach_lite.techcoach_conversations d
-                LEFT JOIN techcoach_lite.techcoach_task t
+                LEFT JOIN techcoach_lite.techcoach_users t
                 ON d.groupMember = t.user_id
                 WHERE groupId = ? AND decisionId = ? AND groupMember = ?
             `, [groupId, decisionId, userId]);
@@ -640,7 +605,7 @@ const getSharedDecisions = async (req, res) => {
                     SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
                            t.user_id, t.displayname, t.email
                     FROM techcoach_lite.techcoach_conversations d
-                    LEFT JOIN techcoach_lite.techcoach_task t
+                    LEFT JOIN techcoach_lite.techcoach_users t
                     ON d.groupMember = t.user_id
                     WHERE parentCommentId IN (?)
                 `, [commentIds]);
@@ -679,7 +644,7 @@ const getSharedDecisions = async (req, res) => {
 
 
 const postCommentForDecision = async (req, res) => {
-    console.log("Request body", req.body);
+    // console.log("Request body", req.body);
 
     const { decisionId, groupMemberID, groupId, commentText } = req.body.data;
 
@@ -733,7 +698,7 @@ const getComments = async (req, res) => {
             FROM 
                 techcoach_lite.techcoach_conversations d
             LEFT JOIN 
-                techcoach_lite.techcoach_task t
+                techcoach_lite.techcoach_users t
             ON 
                 d.groupMember = t.user_id
             WHERE 
@@ -763,7 +728,7 @@ const getComments = async (req, res) => {
 const getSharedComments = async (req, res) => {
     const userId = req.user.id;
 
-    console.log("request from shared comments fetch", req.body);
+    // console.log("request from shared comments fetch", req.body);
     const { decisionId } = req.body;
     let conn;
     try {
@@ -783,7 +748,7 @@ const getSharedComments = async (req, res) => {
         FROM 
             techcoach_lite.techcoach_conversations d
         LEFT JOIN 
-            techcoach_lite.techcoach_task t
+            techcoach_lite.techcoach_users t
         ON 
             d.groupMember = t.user_id
         WHERE 
@@ -812,7 +777,7 @@ const getSharedComments = async (req, res) => {
 
 
 const removeCommentsAdded = async (req, res) => {
-    console.log("request from remove", req.body);
+    // console.log("request from remove", req.body);
 
     const { commentId } = req.body;
 
@@ -918,7 +883,7 @@ const innerCirclePostComment = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?';
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
         const groupMemberRows = await conn.query(groupMemberQuery, [groupMemberID]);
         const groupMemberDetails = groupMemberRows[0];
         console.log("Group member details:", groupMemberDetails);
@@ -975,75 +940,6 @@ const innerCirclePostComment = async (req, res) => {
 };
 
 
-/* const innerCircleDecisionShare = async (req, res) => {
-    console.log("Request body invitation:", req.body);
-
-    const { memberEmail, decisionSummary } = req.body;
-
-    const memberId = req.user.id;
-
-
-
-    const emailPayload = {
-        from: {
-            address: "Decision-Coach@www.careersheets.in"
-        },
-        to: [
-            {
-                email_address: {
-                    address: memberEmail
-                }
-            }
-        ],
-        subject: `Help ${memberName} decide`,
-        htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
-            <p>Dear ${memberName},</p>
-            <p>This is to notify that a decision has been shared with you to provide your inputs.</p>
-            <p>Please login and add comments. You can choose to notify them by email at the time of posting comment.</p>
-            <p>Here are the details of the decision:</p>
-            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
-                <p><strong>Decision Name:</strong> ${decisionSummary.decisionName}</p>
-                <p><strong>Due Date:</strong> ${decisionSummary.dueDate}</p>
-                <p><strong>Taken Date:</strong> ${decisionSummary.takenDate}</p>
-            </div>
-            <p style="text-align: center;">
-                <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
-            </p>
-            <p>Regards,</p>
-            <p>Team @ Decision Coach</p>
-        </div>`
-    };
-
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const memberNameQuery = 'SELECT displayname FROM techcoach_lite.techcoach_task WHERE user_id = ?';
-        const memberName = await conn.query(memberNameQuery, [memberId]);
-
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
-
-        await axios.post(zeptoMailApiUrl, emailPayload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
-            }
-        });
-
-        await conn.commit();
-        res.status(200).json({ message: 'Mail Sent Successfully' });
-    } catch (error) {
-        console.error('Error in sending mail on invite to inner circle:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-}; */
-
 const innerCircleDecisionShare = async (req, res) => {
     // console.log("Request body invitation:", req.body);
 
@@ -1063,7 +959,7 @@ const innerCircleDecisionShare = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
+        const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
         const rows = await conn.query(memberNameQuery, [memberEmail]);
 
         // console.log("ssssssssssss", rows)
@@ -1075,7 +971,7 @@ const innerCircleDecisionShare = async (req, res) => {
         const memberName = rows[0].displayname;
 
 
-        const subjectNameQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?';
+        const subjectNameQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
         const subjectNameRows = await conn.query(subjectNameQuery, [memberId]);
 
         
@@ -1152,7 +1048,7 @@ const innerCircleInvitation = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
         const groupMemberRows = await conn.query(groupMemberQuery, [senderEmail]);
         const groupMemberDetails = groupMemberRows[0];
         console.log("Group member details:", groupMemberDetails);
@@ -1215,7 +1111,7 @@ const innerCircleAddInvitation = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_task WHERE email = ?';
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
         const groupMemberRows = await conn.query(groupMemberQuery, [senderEmail]);
         const groupMemberDetails = groupMemberRows[0];
         console.log("Group member details:", groupMemberDetails);
@@ -1329,12 +1225,12 @@ const getSharedDecisionDetails = async (req, res) => {
         const decisionIds = sharedDecisions.map(sd => sd.decisionId);
 
         const tasks = await conn.query(
-            `SELECT * FROM techcoach_lite.techcoach_task WHERE user_id IN (?)`,
+            `SELECT * FROM techcoach_lite.techcoach_users WHERE user_id IN (?)`,
             [groupMembers]
         );
 
         const currentUser = (await conn.query(
-            `SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?`,
+            `SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?`,
             [id]
         ))[0];
 

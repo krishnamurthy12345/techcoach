@@ -13,7 +13,7 @@ const getUserList = async (req, res) => {
 
 
     const tasks = await conn.query(`
-        SELECT * FROM techcoach_lite.techcoach_task WHERE user_id = ?;
+        SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?;
       `, [userId]);
 
     await conn.commit();
@@ -70,7 +70,7 @@ const postGeneralProfile = async (req, res) => {
     for (const { headerName, headerValue } of headersAndValues) {
       if (headerValue && headerValue.length > 0) {
         const headerRows = await conn.query(
-          "SELECT header_id FROM techcoach_lite.techcoach_personal_header WHERE header_name = ?",
+          "SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE header_name = ?",
           [headerName]
         );
 
@@ -86,14 +86,14 @@ const postGeneralProfile = async (req, res) => {
           for (const value of headerValue) {
             const encryptedValue = encryptText(value, req.user.key);
             await conn.query(
-              "INSERT INTO techcoach_lite.techcoach_header_value (user_id, header_id, header_value) VALUES (?, ?, ?)",
+              "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
               [userId, headerId, encryptedValue]
             );
           }
         } else {
           const encryptedValue = encryptText(headerValue, req.user.key);
           await conn.query(
-            "INSERT INTO techcoach_lite.techcoach_header_value (user_id, header_id, header_value) VALUES (?, ?, ?)",
+            "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
             [userId, headerId, encryptedValue]
           );
         }
@@ -113,11 +113,12 @@ const postGeneralProfile = async (req, res) => {
   }
 };
 
+
 const getMasterProfiles = async (req,res) => {
   let conn;
   try {
     conn = await getConnection();
-    const rows = await conn.query('SELECT header_id ,header_name FROM techcoach_lite.techcoach_personal_header');
+    const rows = await conn.query('SELECT header_id ,header_name FROM techcoach_lite.techcoach_profile_swot_headers');
     // console.log('Fetched master profile:',rows);
     if (rows.length > 0) {
       res.status(200).json({profiles : rows })
@@ -132,6 +133,7 @@ const getMasterProfiles = async (req,res) => {
   }
 }
 
+
 const decryptText = (encryptedText, key) => {
   if (!encryptedText) return null;
   const decipher = crypto.createDecipher('aes-256-cbc', key);
@@ -139,6 +141,7 @@ const decryptText = (encryptedText, key) => {
   decryptedText += decipher.final('utf8');
   return decryptedText;
 };
+
 
 const getProfile = async (req, res) => {
   const userId = req.user.id;
@@ -162,7 +165,7 @@ const getProfile = async (req, res) => {
 
     // Query to get the header names and ids
     const headerNamesResult = await conn.query(
-      "SELECT header_id, header_name FROM techcoach_lite.techcoach_personal_header"
+      "SELECT header_id, header_name FROM techcoach_lite.techcoach_profile_swot_headers"
     );
 
     const headerMap = headerNamesResult.reduce((acc, { header_id, header_name }) => {
@@ -173,8 +176,8 @@ const getProfile = async (req, res) => {
     // Query to get the header values for the user
     const headerValuesResult = await conn.query(
       `SELECT v.id, h.header_name, v.header_value 
-      FROM techcoach_lite.techcoach_header_value v 
-      JOIN techcoach_lite.techcoach_personal_header h ON v.header_id = h.header_id 
+      FROM techcoach_lite.techcoach_profile_swot_values v 
+      JOIN techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
       WHERE v.user_id = ?`,
       [userId]
     );
@@ -203,6 +206,7 @@ const getProfile = async (req, res) => {
     if (conn) conn.release();
   }
 };
+
 
 const putProfile = async (req, res) => {
   const { dob, communication, skill, attitude, strength, weakness, opportunity, threat } = req.body;
@@ -246,7 +250,7 @@ const putProfile = async (req, res) => {
     for (const { headerName, headerValue } of headersAndValues) {
       if (headerValue && headerValue.length > 0) {
         const headerRows = await conn.query(
-          "SELECT header_id FROM techcoach_lite.techcoach_personal_header WHERE header_name = ?",
+          "SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE header_name = ?",
           [headerName]
         );
 
@@ -260,7 +264,7 @@ const putProfile = async (req, res) => {
 
         // Retrieve existing header values and their row_ids for the user and header
         const existingHeaderValues = await conn.query(
-          "SELECT id, header_value FROM techcoach_lite.techcoach_header_value WHERE user_id = ? AND header_id = ?",
+          "SELECT id, header_value FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ? AND header_id = ?",
           [userId, headerId]
         );
 
@@ -282,13 +286,13 @@ const putProfile = async (req, res) => {
                 // Update existing value
                 delete existingHeaderValuesMap[encryptedValue]; // Remove the value from the map
                 await conn.query(
-                  "UPDATE techcoach_lite.techcoach_header_value SET header_value = ? WHERE id = ?",
+                  "UPDATE techcoach_lite.techcoach_profile_swot_values SET header_value = ? WHERE id = ?",
                   [encryptedValue, existingHeaderValuesMap[encryptedValue]]
                 );
               } else {
                 // Insert new value
                 await conn.query(
-                  "INSERT INTO techcoach_lite.techcoach_header_value (user_id, header_id, header_value) VALUES (?, ?, ?)",
+                  "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
                   [userId, headerId, encryptedValue]
                 );
               }
@@ -302,13 +306,13 @@ const putProfile = async (req, res) => {
               // Update existing value
               delete existingHeaderValuesMap[encryptedValue]; // Remove the value from the map
               await conn.query(
-                "UPDATE techcoach_lite.techcoach_header_value SET header_value = ? WHERE id = ?",
+                "UPDATE techcoach_lite.techcoach_profile_swot_values SET header_value = ? WHERE id = ?",
                 [encryptedValue, existingHeaderValuesMap[encryptedValue]]
               );
             } else {
               // Insert new value
               await conn.query(
-                "INSERT INTO techcoach_lite.techcoach_header_value (user_id, header_id, header_value) VALUES (?, ?, ?)",
+                "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
                 [userId, headerId, encryptedValue]
               );
             }
@@ -321,7 +325,7 @@ const putProfile = async (req, res) => {
         // Delete removed values from the database
         if (valuesToDelete.length > 0) {
           await conn.query(
-            "DELETE FROM techcoach_lite.techcoach_header_value WHERE id IN (?)",
+            "DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE id IN (?)",
             [valuesToDelete]
           );
         }
@@ -341,6 +345,7 @@ const putProfile = async (req, res) => {
   }
 };
 
+
 const deleteProfile = async (req, res) => {
   const userId = req.user.id;
   let conn;
@@ -350,27 +355,27 @@ const deleteProfile = async (req, res) => {
     await conn.beginTransaction();
 
     // Delete from dependent tables first
-    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_header WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
-    await conn.query("DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
-    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     await conn.query("DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     await conn.query("DELETE FROM techcoach_lite.techcoach_conversations WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
-    // Delete from techcoach_decision_skill before techcoach_decision
-    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_skill WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
+    // Delete from techcoach_decision_skill_linked_info before techcoach_decision
+    await conn.query("DELETE FROM techcoach_lite.techcoach_decision_skill_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
 
     // Delete from techcoach_decision
     await conn.query("DELETE FROM techcoach_lite.techcoach_decision WHERE user_id = ?", [userId]);
 
-    // Delete from techcoach_skill_value before techcoach_task
-    await conn.query("DELETE FROM techcoach_lite.techcoach_skill_value WHERE user_id = ?", [userId]);
+    // Delete from techcoach_soft_skill_value before techcoach_users
+    await conn.query("DELETE FROM techcoach_lite.techcoach_soft_skill_value WHERE user_id = ?", [userId]);
 
     // Delete from other tables
-    await conn.query("DELETE FROM techcoach_lite.techcoach_header_value WHERE user_id = ?", [userId]);
+    await conn.query("DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ?", [userId]);
 
     await conn.query("DELETE FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?", [userId]);
 
@@ -382,8 +387,8 @@ const deleteProfile = async (req, res) => {
 
     await conn.query("DELETE FROM techcoach_lite.techcoach_groups WHERE created_by = ?", [userId]);
 
-    // Delete from techcoach_task
-    await conn.query("DELETE FROM techcoach_lite.techcoach_task WHERE user_id = ?", [userId]);
+    // Delete from techcoach_users
+    await conn.query("DELETE FROM techcoach_lite.techcoach_users WHERE user_id = ?", [userId]);
 
     await conn.commit();
     res.status(200).json({ message: 'Profile and associated data deleted successfully' });
