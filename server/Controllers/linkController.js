@@ -20,7 +20,7 @@ const postSkillLink = async (req, res) => {
 
         if (skill_name && !skill_id) {
             const rows = await conn.query(
-                "SELECT skill_id FROM techcoach_lite.techcoach_skill WHERE skill_name = ?",
+                "SELECT skill_id FROM techcoach_lite.techcoach_soft_skill WHERE skill_name = ?",
                 [skill_name]
             );
       
@@ -39,7 +39,7 @@ const postSkillLink = async (req, res) => {
 
         // Perform the insert, including user_id
         await conn.query(
-            "INSERT INTO techcoach_lite.techcoach_decision_skill (decision_id, skill_id, user_id) VALUES (?, ?, ?)",
+            "INSERT INTO techcoach_lite.techcoach_decision_skill_linked_info (decision_id, skill_id, user_id) VALUES (?, ?, ?)",
             [decision_id, skillId, userId]
         );
 
@@ -55,47 +55,6 @@ const postSkillLink = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
-// const postProfileLink = async (req, res) => {
-//     const { decision_id, header_id } = req.body;
-//     let conn;
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-        
-//         const userId = req.user.id;
-//         console.log('User ID from:', userId);
-
-//         const decisionRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id = ?", [decision_id]);
-//         if (decisionRows.length === 0) {
-//             await conn.rollback();
-//             return res.status(400).json({ error: 'Invalid decision_id' });
-//         }
-
-//         const headerRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_personal_header WHERE header_id = ?", [header_id]);
-//         if (headerRows.length === 0) {
-//             await conn.rollback();
-//             return res.status(400).json({ error: 'Invalid header_id' });
-//         }
-
-//         await conn.query(
-//             "INSERT INTO techcoach_lite.techcoach_decision_header (decision_id, header_id,user_id) VALUES (?, ?, ?)",
-//             [decision_id, header_id,userId]
-//         );
-
-//         await conn.commit();
-//         res.status(200).json({ message: 'Record inserted successfully' });
-//     } catch (err) {
-//         console.error('Error inserting data:', err);
-//         if (conn) {
-//             await conn.rollback();
-//         }
-//         res.status(500).json({ error: 'Database error' });
-//     } finally {
-//         if (conn) conn.release();
-//     }
-// };
 
 const postProfileLink = async (req, res) => {
     const { decision_id, header_ids } = req.body;
@@ -123,7 +82,7 @@ const postProfileLink = async (req, res) => {
 
         // Validate all header_ids
         for (const header_id of header_ids) {
-            const headerRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_personal_header WHERE header_id = ?", [header_id]);
+            const headerRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_profile_swot_headers WHERE header_id = ?", [header_id]);
             if (headerRows.length === 0) {
                 await conn.rollback();
                 return res.status(400).json({ error: `Invalid header_id: ${header_id}` });
@@ -133,7 +92,7 @@ const postProfileLink = async (req, res) => {
         // Insert each header_id with the current decision_id
         for (const header_id of header_ids) {
             await conn.query(
-                "INSERT INTO techcoach_lite.techcoach_decision_header (decision_id, header_id, user_id) VALUES (?, ?, ?)",
+                "INSERT INTO techcoach_lite.techcoach_decision_swot_linked_info (decision_id, header_id, user_id) VALUES (?, ?, ?)",
                 [decision_id, header_id, userId]
             );
         }
@@ -169,9 +128,9 @@ const getAllSkillLink = async (req, res) => {
                 d.decision_name,
                 s.skill_id,
                 s.skill_name
-            FROM techcoach_lite.techcoach_decision_skill ds
+            FROM techcoach_lite.techcoach_decision_skill_linked_info ds
             JOIN techcoach_lite.techcoach_decision d ON ds.decision_id = d.decision_id
-            JOIN techcoach_lite.techcoach_skill s ON ds.skill_id = s.skill_id
+            JOIN techcoach_lite.techcoach_soft_skill s ON ds.skill_id = s.skill_id
             WHERE 
                 d.user_id = ?
         `, [userId]);
@@ -224,9 +183,9 @@ const getAllProfileLink = async (req, res) => {
                 d.decision_name,
                 h.header_id,
                 h.header_name
-            FROM techcoach_lite.techcoach_decision_header dh
+            FROM techcoach_lite.techcoach_decision_swot_linked_info dh
             JOIN techcoach_lite.techcoach_decision d ON dh.decision_id = d.decision_id
-            JOIN techcoach_lite.techcoach_personal_header h ON dh.header_id = h.header_id
+            JOIN techcoach_lite.techcoach_profile_swot_headers h ON dh.header_id = h.header_id
             WHERE 
                 d.user_id = ?`,
             [userId]

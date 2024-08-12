@@ -30,12 +30,12 @@ passport.use(new GoogleStrategy({
         // Determine the correct path for the profile picture
         const profilePicture = profile.photos && profile.photos.length > 0 ? profile.photos[0].value : null;
 
-        const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_task WHERE email=?", [profile.email]);
+        const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_users WHERE email=?", [profile.email]);
         // connection.release();
 
         if (!existingUser || existingUser.length === 0) {
             // Insert the new user
-            const user = await connection.query("INSERT INTO techcoach_lite.techcoach_task (displayname, email,profilePicture) VALUES (?, ?, ?) RETURNING* ", [profile.displayName, profile.email,profilePicture]);
+            const user = await connection.query("INSERT INTO techcoach_lite.techcoach_users (displayname, email,profilePicture) VALUES (?, ?, ?) RETURNING* ", [profile.displayName, profile.email,profilePicture]);
             // console.log(user,"jfjyfku")
             sendWelcomeEmail(user);
             logLoginHistory(user.user_id);
