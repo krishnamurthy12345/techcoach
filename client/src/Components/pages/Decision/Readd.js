@@ -510,7 +510,10 @@ const Readd = () => {
       return true;
     });
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
-      const month = new Date(decision.decision_creation_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+      const decisionDate = decision.decision_taken_date 
+      ? new Date(decision.decision_taken_date)
+      : new Date(decision.decision_due_date);
+      const month = decisionDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
