@@ -523,7 +523,7 @@ const Readd = () => {
     const sortedMonths = Object.keys(decisionsByMonth).sort((a, b) => {
       const [monthA, yearA] = a.split(' ');
       const [monthB, yearB] = b.split(' ');
-      return new Date(`${yearA}-${new Date(a).getMonth() + 1}-01`) - new Date(`${yearB}-${new Date(b).getMonth() + 1}-01`);
+      return new Date(`${yearB}-${new Date(`${monthB} 1, ${yearB}`).getMonth() + 1}-01`) - new Date(`${yearA}-${new Date(`${monthA} 1, ${yearA}`).getMonth() + 1}-01`);
     });
   
     return (
