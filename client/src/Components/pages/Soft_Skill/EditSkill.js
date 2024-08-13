@@ -21,7 +21,8 @@ const EditSkill = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setSkill(response.data.skills[0]); // Assuming response returns an array with one skill
+                setSkill(response.data.skills[0]); 
+                console.log('updating skills:',response.data.skills)
             } catch (err) {
                 console.log('Error fetching skill data:', err);
                 toast.error('Error fetching skill data');

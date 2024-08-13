@@ -10,7 +10,7 @@ router.use(createUserKey);
 
 router.post('/', postSkill);
 router.get('/master-skills', getMasterSkills);
-router.get('/', getAllSkill);
+router.get('/get', getAllSkill);
 router.get('/:id', getSkill);
 router.put('/:id', putSkill);
 router.delete('/:id', deleteSkill);

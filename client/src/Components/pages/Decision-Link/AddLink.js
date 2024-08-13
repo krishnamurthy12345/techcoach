@@ -149,7 +149,7 @@ const AddLink = () => {
       </div>
       <div>
         <div>
-          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Select Skills</button>
+          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Soft-Skills Analysis</button>
           {showSkillOptions && (
             <div className='options-container'>
               {skills.map((skill) => (
@@ -168,7 +168,7 @@ const AddLink = () => {
             </div>
           )}
         </div>
-        <button type='submit' className='savebtn' onClick={handleSkillSubmit}>Save Skill Link</button>
+        <button type='submit' className='savebtn' onClick={handleSkillSubmit}>Save Soft-Skill Link</button>
       </div>
       <div>
         <Link to='/getall'>

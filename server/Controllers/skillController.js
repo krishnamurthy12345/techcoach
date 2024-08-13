@@ -82,7 +82,8 @@ const getAllSkill = async (req, res) => {
              tsv.skill_id, 
              tsv.rating, 
              tsv.comments, 
-             ts.skill_name 
+             ts.skill_name,
+             ts.description
       FROM 
             techcoach_lite.techcoach_soft_skill_value tsv
       JOIN 
@@ -121,7 +122,8 @@ const getSkill = async (req, res) => {
             tsv.skill_id, 
             tsv.rating, 
             tsv.comments, 
-            ts.skill_name 
+            ts.skill_name,
+            ts.description
         FROM 
             techcoach_lite.techcoach_soft_skill_value tsv
         JOIN 
