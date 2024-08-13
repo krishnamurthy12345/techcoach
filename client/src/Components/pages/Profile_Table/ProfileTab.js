@@ -3,6 +3,7 @@ import './ProfileTab.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import withAuth from '../../withAuth';
 
 const ProfileTab = () => {
   const [formData, setFormData] = useState({
@@ -192,4 +193,4 @@ const ProfileTab = () => {
   );
 };
 
-export default ProfileTab;
+export default withAuth(ProfileTab);

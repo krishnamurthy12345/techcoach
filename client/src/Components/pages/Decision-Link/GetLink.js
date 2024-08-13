@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './GetLink.css';
 import { Link } from 'react-router-dom';
+import withAuth from '../../withAuth';
 
 const GetLink = () => {
   const [skills, setSkills] = useState({});
@@ -133,4 +134,4 @@ const GetLink = () => {
   );
 };
 
-export default GetLink;
+export default withAuth(GetLink);
