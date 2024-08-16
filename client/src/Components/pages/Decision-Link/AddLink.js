@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import withAuth from '../../withAuth';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useNavigate, Link, useParams,useLocation } from 'react-router-dom';
 
 const AddLink = () => {
   const [profiles, setProfiles] = useState([]);
@@ -13,9 +13,14 @@ const AddLink = () => {
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showSkillOptions, setShowSkillOptions] = useState(false);
+
   const { id } = useParams();
-  
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const decision_name = params.get('name');
+
 
   const fetchProfiles = async () => {
     try {
@@ -101,7 +106,7 @@ const AddLink = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.REACT_APP_API_URL}/api/link`, {
-        skill_id: selectedSkills,
+        skill_ids: selectedSkills,
         decision_id: id,
       }, {
         headers: {
@@ -118,13 +123,18 @@ const AddLink = () => {
 
   return (
     <div className='addlink'>
-      <div>
-        {/* <input
+        <center>
+        <div className='bg-secondary text-white rounded p-2'>
+        <h4>{decision_name}</h4>
+        <input
           type="text"
-          placeholder="Decision ID"
+          placeholder="Decision Name"
           value={id}
           readOnly
-        /> */}
+        />
+        </div>
+        </center>
+      <div>
         <div>
           <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
           {showProfileOptions && (

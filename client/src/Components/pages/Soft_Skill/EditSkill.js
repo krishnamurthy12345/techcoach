@@ -72,8 +72,9 @@ const EditSkill = () => {
 
     return (
         <div>
-            <h3 className='center'>Edit Skill</h3>
-            <form className='form' onSubmit={handleSubmit}>
+            <h3 className='center'>Edit Soft-Skills</h3>
+            <form className='formm' onSubmit={handleSubmit}>
+                <center>
                 <table className='table'>
                     <thead>
                         <tr>
@@ -121,6 +122,7 @@ const EditSkill = () => {
                         </tr>
                     </tbody>
                 </table>
+                </center>
                 <button type='submit' className='btn btn-primary bg-secondary'>Update</button>
             </form>
             <ToastContainer />

@@ -1,12 +1,67 @@
 const getConnection = require('../Models/database');
 const crypto = require('crypto');
 
+// const postSkillLink = async (req, res) => {
+//     const { decision_id, skill_id, skill_name } = req.body; 
+//     let conn;
+
+//     if (!decision_id || (!skill_id && !skill_name)) {
+//         return res.status(400).json({ error: 'decision_id and either skill_id or skill_name are required' });
+//     }
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         const userId = req.user.id;
+//         console.log('User ID from:', userId);
+        
+//         let skillId = skill_id;
+
+//         if (skill_name && !skill_id) {
+//             const rows = await conn.query(
+//                 "SELECT skill_id FROM techcoach_lite.techcoach_soft_skill WHERE skill_name = ?",
+//                 [skill_name]
+//             );
+      
+//             if (rows.length === 0) {
+//                 await conn.rollback();
+//                 return res.status(400).json({ error: `Skill name '${skill_name}' not found` });
+//             }
+//             skillId = rows[0].skill_id;
+//         }
+
+//         const decisionRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id = ?", [decision_id]);
+//         if (decisionRows.length === 0) {
+//             await conn.rollback();
+//             return res.status(400).json({ error: 'Invalid decision_id' });
+//         }
+
+//         // Perform the insert, including user_id
+//         await conn.query(
+//             "INSERT INTO techcoach_lite.techcoach_decision_skill_linked_info (decision_id, skill_id, user_id) VALUES (?, ?, ?)",
+//             [decision_id, skillId, userId]
+//         );
+
+//         await conn.commit();
+//         res.status(200).json({ message: 'Record inserted successfully' });
+//     } catch (err) {
+//         console.error('Error inserting data:', err);
+//         if (conn) {
+//             await conn.rollback();
+//         }
+//         res.status(500).json({ error: 'Database error' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
+
 const postSkillLink = async (req, res) => {
-    const { decision_id, skill_id, skill_name } = req.body; 
+    const { decision_id, skill_ids, skill_names } = req.body; 
     let conn;
 
-    if (!decision_id || (!skill_id && !skill_name)) {
-        return res.status(400).json({ error: 'decision_id and either skill_id or skill_name are required' });
+    if (!decision_id || (!skill_ids && !skill_names)) {
+        return res.status(400).json({ error: 'decision_id and either skill_ids or skill_names are required' });
     }
 
     try {
@@ -16,19 +71,21 @@ const postSkillLink = async (req, res) => {
         const userId = req.user.id;
         console.log('User ID from:', userId);
         
-        let skillId = skill_id;
+        let finalSkillIds = skill_ids || [];
 
-        if (skill_name && !skill_id) {
-            const rows = await conn.query(
-                "SELECT skill_id FROM techcoach_lite.techcoach_soft_skill WHERE skill_name = ?",
-                [skill_name]
-            );
-      
-            if (rows.length === 0) {
-                await conn.rollback();
-                return res.status(400).json({ error: `Skill name '${skill_name}' not found` });
+        if (skill_names && skill_names.length > 0) {
+            for (const skill_name of skill_names) {
+                const rows = await conn.query(
+                    "SELECT skill_id FROM techcoach_lite.techcoach_soft_skill WHERE skill_name = ?",
+                    [skill_name]
+                );
+
+                if (rows.length === 0) {
+                    await conn.rollback();
+                    return res.status(400).json({ error: `Skill name '${skill_name}' not found` });
+                }
+                finalSkillIds.push(rows[0].skill_id);
             }
-            skillId = rows[0].skill_id;
         }
 
         const decisionRows = await conn.query("SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id = ?", [decision_id]);
@@ -37,14 +94,15 @@ const postSkillLink = async (req, res) => {
             return res.status(400).json({ error: 'Invalid decision_id' });
         }
 
-        // Perform the insert, including user_id
-        await conn.query(
-            "INSERT INTO techcoach_lite.techcoach_decision_skill_linked_info (decision_id, skill_id, user_id) VALUES (?, ?, ?)",
-            [decision_id, skillId, userId]
-        );
+        for (const skillId of finalSkillIds) {
+            await conn.query(
+                "INSERT INTO techcoach_lite.techcoach_decision_skill_linked_info (decision_id, skill_id, user_id) VALUES (?, ?, ?)",
+                [decision_id, skillId, userId]
+            );
+        }
 
         await conn.commit();
-        res.status(200).json({ message: 'Record inserted successfully' });
+        res.status(200).json({ message: 'Records inserted successfully' });
     } catch (err) {
         console.error('Error inserting data:', err);
         if (conn) {
