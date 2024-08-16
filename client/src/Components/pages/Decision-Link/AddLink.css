@@ -6,6 +6,8 @@
   align-items: center;
   margin-top: 20px;
   padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .message{
@@ -19,6 +21,9 @@
   padding: 10px;
   border: none;
   cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
 }
 
 .savebtn {
@@ -30,13 +35,15 @@
   max-width: 600px; 
 }
 
-input[type='textt'] {
+/* input[type='text'] {
   width: 100%; 
   max-width: 300px; 
   margin-bottom: 10px;
-}
+  padding: 5px;
+  box-sizing: border-box;
+} */
 
-input[type='checkboxx'] {
+input[type='checkbox'] {
   margin-right: 10px;
 }
 
@@ -48,6 +55,9 @@ button {
 .getpage{
   border-radius: 5px;
   padding: 3px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 10px;
 }
 .getpage:hover{
   border-radius: 5px;
@@ -72,5 +82,8 @@ button {
   button {
     width: auto; 
     max-width: none; 
+  }
+  .swot, .soft-skill, .savebtn, .getpage {
+    width: auto;
   }
 }
