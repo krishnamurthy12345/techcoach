@@ -78,6 +78,7 @@ const Skillget = () => {
           </Link>
         )}
       </div>
+      <div className='table-main'>
       <table className="table">
         <thead>
           <tr>
@@ -113,6 +114,7 @@ const Skillget = () => {
           ))}
         </tbody>
       </table>
+      </div>
       {skills.length > 0 && (
         <button className='deleteall' onClick={handleDeleteAll}>Delete All</button>
       )}

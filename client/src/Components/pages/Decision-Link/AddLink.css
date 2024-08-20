@@ -35,14 +35,6 @@
   max-width: 600px; 
 }
 
-/* input[type='text'] {
-  width: 100%; 
-  max-width: 300px; 
-  margin-bottom: 10px;
-  padding: 5px;
-  box-sizing: border-box;
-} */
-
 input[type='checkbox'] {
   margin-right: 10px;
 }
@@ -65,6 +57,37 @@ button {
   padding: 3px;
 }
 
+@media (max-width: 768px) {
+  .addlink {
+    padding: 15px;
+    margin-top: 15px;
+  }
+
+  .swot, .soft-skill, .savebtn, .getpage {
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .options-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .swot-list h5 {
+    font-size: 16px;
+  }
+
+  input[type='checkbox'] {
+    margin-right: 8px;
+  }
+
+  button {
+    max-width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .addlink {
     flex-direction: row; 
@@ -75,14 +98,11 @@ button {
     width: 600px; 
   }
 
-  input[type='textt'] {
-    width: 200px; 
-  }
-
   button {
     width: auto; 
     max-width: none; 
   }
+
   .swot, .soft-skill, .savebtn, .getpage {
     width: auto;
   }

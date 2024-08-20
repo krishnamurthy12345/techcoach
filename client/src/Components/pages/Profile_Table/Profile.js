@@ -28,6 +28,7 @@ const Profile = () => {
           }
         });
         const user = userResp.data.tasks && userResp.data.tasks.length ? userResp.data.tasks[0] : {};
+        console.log('asas',userResp);
         setUserData(user);
 
         const formResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
