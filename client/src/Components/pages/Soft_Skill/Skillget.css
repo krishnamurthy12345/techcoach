@@ -14,6 +14,10 @@
     display: block;
     padding: 10px;
 }
+.table-main {
+    overflow-x: auto;
+    width: 100%;
+}
 .table {
     max-width: 80rem;
     border-collapse:collapse;
@@ -56,6 +60,17 @@
     background-color: rgb(221, 39, 39);
     color: white;
     margin-left: 70px;
+}
+.show-description-icon {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.description {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #666;
 }
 @media (max-width: 768px){
     .table, .table th, .table td {

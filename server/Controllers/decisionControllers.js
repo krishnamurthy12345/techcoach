@@ -86,7 +86,6 @@ const postInfo = async (req, res) => {
   }
 };
 
-
 const getInfo = async (req, res) => {
   const { id } = req.params;
   let conn;
@@ -364,7 +363,6 @@ const getallInfo = async (req, res) => {
   }
 };
 
-
 const putInfo = async (req, res) => {
   const { id } = req.params;
   const { decision_name, user_statement, tags, decision_reason, decision_due_date, decision_taken_date } = req.body;
@@ -480,7 +478,6 @@ const putInfo = async (req, res) => {
     }
   }
 };
-
 
 const deleteInfo = async (req, res) => {
   const { id } = req.params;
