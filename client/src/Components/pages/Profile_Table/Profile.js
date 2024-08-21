@@ -9,6 +9,7 @@ import withAuth from '../../withAuth';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import './Profile.css';
+import { Button } from '@mui/material';
 
 
 const Profile = () => {
@@ -191,6 +192,10 @@ const Profile = () => {
     );
   }
 
+  const handleViewLinkedDecisions= () =>{
+
+  }
+
   return (
     <div className="card1">
       <div >
@@ -270,6 +275,18 @@ const Profile = () => {
         <div className='download-profile'>
           <p onClick={handleDownloadProfile}>Download Profile data</p>
         </div>
+        
+        <Link to='/getall'>
+          <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleViewLinkedDecisions}
+          >
+            View Linked Decisions
+          </Button>
+        </Link>
+          
+        
         <ToastContainer />
       </div>
       <center>

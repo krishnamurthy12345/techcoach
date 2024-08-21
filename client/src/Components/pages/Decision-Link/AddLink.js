@@ -199,6 +199,8 @@ import './AddLink.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Box, Typography, Tooltip } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import withAuth from '../../withAuth';
 import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 
@@ -338,7 +340,7 @@ const AddLink = () => {
   };
 
   return (
-    <div className='addlink'>
+      <div className='addlink'>
       <center>
         <div className='bg-secondary text-white rounded p-2'>
           <h4>{decision_name}</h4>
@@ -352,7 +354,13 @@ const AddLink = () => {
       </center>
       <div>
         <div>
-          <button type="button" className='swot' onClick={handleSWOTClick}>SWOT Analysis</button>
+          <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
+            <InfoIcon sx={{ mr: 1 }} />
+            <Typography variant="body2">
+              To link your decisions to your Profile data like SWOT, please click "Get Profile Data"
+            </Typography>
+          </Box>
+          <button type="button" className='swot' onClick={handleSWOTClick}>Get Profile Data</button>
           {showProfileOptions && (
             <div className='options'>
               {Array.isArray(profiles) && profiles.map((profile) => (
@@ -442,7 +450,13 @@ const AddLink = () => {
       </div>
       <div>
         <div>
-          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Soft-Skills Analysis</button>
+          <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
+            <InfoIcon sx={{ mr: 1 }} />
+            <Typography variant="body2">
+              To link your decisions to your Soft Skills, please click Get Soft Skills Data"
+            </Typography>
+          </Box>
+          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Get Soft Skills Data</button>
           {showSkillOptions && (
             <div className='options-container'>
               {Array.isArray(skills) && skills.map((skill) => (
@@ -467,14 +481,20 @@ const AddLink = () => {
         <button type='submit' className='savebtn' onClick={handleSkillSubmit}>Save Soft-Skill Link</button>
       </div>
       <div>
+        <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
+            <InfoIcon sx={{ mr: 1 }} />
+            <Typography variant="body2">
+              To link your decisions to your Profile data like SWOT, please click "Get Profile Data"
+            </Typography>
+          </Box>
         <Link to='/getall'>
           <button className='getpage'>
-            Go to GetLink Page
+          View Linked Decisions
           </button>
         </Link>
       </div>
       <ToastContainer />
-    </div>
+      </div>   
   );
 };
 
