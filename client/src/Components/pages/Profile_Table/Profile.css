@@ -143,6 +143,21 @@ h3 {
   padding: 7px;
   cursor: pointer;
 }
+.linked-decisions{
+  background-color: #3975bf;
+  border-radius: 7px;
+  color: white;
+  max-width: 150px;
+  height: auto;
+  text-align: center;
+  padding: 7px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.linked-decisions:hover {
+  text-decoration: none; 
+  color: white;
+}
 .delete-account{
   background-color: red;
   text-align: center;
