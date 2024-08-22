@@ -199,8 +199,6 @@ import './AddLink.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Box, Typography, Tooltip } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
 import withAuth from '../../withAuth';
 import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 
@@ -233,7 +231,7 @@ const AddLink = () => {
         },
       });
       console.log('Fetched profiles data:', response.data);
-      
+
       // Ensure profiles is an array
       setProfiles(Array.isArray(response.data.profiles) ? response.data.profiles : []);
       setAttitude(Array.isArray(response.data.attitude) ? response.data.attitude : []);
@@ -279,14 +277,14 @@ const AddLink = () => {
 
   const handleSoftSkillClick = () => {
     setShowSkillOptions(!showSkillOptions);
-    if(!showSkillOptions) {
+    if (!showSkillOptions) {
       fetchSkills();
     }
   };
 
   const handleProfileChange = (e) => {
     const { value, checked } = e.target;
-    setSelectedProfiles((prev) => 
+    setSelectedProfiles((prev) =>
       checked ? [...prev, value] : prev.filter((id) => id !== value)
     );
   };
@@ -317,7 +315,7 @@ const AddLink = () => {
       toast.error("Error adding profile link");
     }
   };
-  
+
 
   const handleSkillSubmit = async (event) => {
     event.preventDefault();
@@ -354,12 +352,10 @@ const AddLink = () => {
       </center>
       <div>
         <div>
-          <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
-            <InfoIcon sx={{ mr: 1 }} />
-            <Typography variant="body2">
-              To link your decisions to your Profile data like SWOT, please click "Get Profile Data"
-            </Typography>
-          </Box>
+          <div className='d-flex gap-2' style={{maxWidth:'400px'}}>
+            <IoIosInformationCircle className='fs-4' />
+            <p> To link your decisions to your Profile data like SWOT, please click "Get Profile Data" </p>
+          </div>
           <button type="button" className='swot' onClick={handleSWOTClick}>Get Profile Data</button>
           {showProfileOptions && (
             <div className='options'>
@@ -376,7 +372,7 @@ const AddLink = () => {
                   </label>
                 </div>
               ))}
-              <div className='swot-list'>
+              <div className='swot-list ml-3'>
                 <h5>Attitude</h5>
                 <div className='checkbox-container'>
                   {Array.isArray(attitude) && attitude.map((item) => (
@@ -450,15 +446,13 @@ const AddLink = () => {
       </div>
       <div>
         <div>
-          <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
-            <InfoIcon sx={{ mr: 1 }} />
-            <Typography variant="body2">
-              To link your decisions to your Soft Skills, please click Get Soft Skills Data"
-            </Typography>
-          </Box>
+          <div className='d-flex gap-2' style={{maxWidth:'400px'}}>
+          <IoIosInformationCircle className='fs-4' />
+          <p> To link your decisions to your Soft Skills, please click Get Soft Skills Data" </p>
+          </div>
           <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Get Soft Skills Data</button>
           {showSkillOptions && (
-            <div className='options-container'>
+            <div className='options-container ml-3'>
               {Array.isArray(skills) && skills.map((skill) => (
                 <div key={skill.skill_id}>
                   <label htmlFor={`skill-${skill.skill_id}`}>
@@ -468,9 +462,9 @@ const AddLink = () => {
                       value={skill.skill_id}
                       onChange={handleSkillChange}
                     />
-                    <strong>{skill.skill_name}</strong><br/>
-                    <span>Rating: {skill.rating}</span><br/>
-                    <span>Comments: {skill.comments}</span><br/>
+                    <strong>{skill.skill_name}</strong><br />
+                    <span>Rating: {skill.rating}</span><br />
+                    <span>Comments: {skill.comments}</span><br />
                     <span>Description: {skill.description} </span>
                   </label>
                 </div>
@@ -481,15 +475,13 @@ const AddLink = () => {
         <button type='submit' className='savebtn' onClick={handleSkillSubmit}>Save Soft-Skill Link</button>
       </div>
       <div>
-        <Box display="flex" alignItems="center" p={1}  color="black" borderRadius="4px" maxWidth="300px">
-            <InfoIcon sx={{ mr: 1 }} />
-            <Typography variant="body2">
-              To link your decisions to your Profile data like SWOT, please click "Get Profile Data"
-            </Typography>
-          </Box>
+        <div className='d-flex gap-2'style={{maxWidth:'400px'}}>
+        <IoIosInformationCircle className='fs-4' />
+        <p> To link your decisions to your Profile data like SWOT, please click "Get Profile Data" </p>
+        </div>
         <Link to='/getall'>
           <button className='getpage'>
-          View Linked Decisions
+            View Linked Decisions
           </button>
         </Link>
       </div>
