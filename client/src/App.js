@@ -25,6 +25,7 @@ import Skillget from './Components/pages/Soft_Skill/Skillget.js';
 import EditSkill from './Components/pages/Soft_Skill/EditSkill.js';
 import AddLink from './Components/pages/Decision-Link/AddLink.js';
 import GetLink from './Components/pages/Decision-Link/GetLink.js';
+import Decision_circle from './Components/Decision_Circle/Decision_circle.js';
 
 function App() {
   console.log("one is working")
@@ -67,6 +68,9 @@ function App() {
         <Route path='/decision/:id' element={<Decision />} />
         <Route path='/readd' element={<Readd />} />
         <Route path='/views/:id' element={<View />} />
+
+        {/* Decision Circle */}
+        <Route path='/decisioncircle' element={Decision_circle} />
 
         {/* Share Decision */}
         <Route path='/sharedDecisions' element={<SharedDecision />} />
