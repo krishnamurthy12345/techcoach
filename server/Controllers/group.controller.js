@@ -1260,21 +1260,10 @@ const innerCircleAddInvitation = async (req, res) => {
 //     }
 // };
 
+
 const getSharedDecisionDetails = async (req, res) => {
     const { id } = req.user; // Extracting the user ID from the request
     let conn;
-
-    const decryptText = (text, key) => {
-        try {
-            const decipher = crypto.createDecipher('aes-256-cbc', key);
-            let decryptedText = decipher.update(text, 'hex', 'utf8');
-            decryptedText += decipher.final('utf8');
-            return decryptedText;
-        } catch (error) {
-            console.error('Error decrypting text:', error);
-            return null;
-        }
-    };
 
     const encryptText = (text, key) => {
         try {
@@ -1287,6 +1276,20 @@ const getSharedDecisionDetails = async (req, res) => {
             return null;
         }
     };
+
+
+    const decryptText = (text, key) => {
+        if (!text) return text; 
+        try {
+          const decipher = crypto.createDecipher('aes-256-cbc', key);
+          let decryptedText = decipher.update(text, 'hex', 'utf8');
+          decryptedText += decipher.final('utf8');
+          return decryptedText;
+        } catch (error) {
+          console.error('Error decrypting text:', error);
+          return null;
+        }
+      };
 
     try {
         conn = await getConnection();
@@ -1319,23 +1322,33 @@ const getSharedDecisionDetails = async (req, res) => {
         }
 
         // Fetch all necessary data with a single query
-        const query = `
+        const shareData = await conn.query ( `
             SELECT sd.*, d.decision_name, d.user_statement, u.displayname 
             FROM techcoach_lite.techcoach_shared_decisions sd
             JOIN techcoach_lite.techcoach_decision d ON sd.decisionId = d.decision_id
             JOIN techcoach_lite.techcoach_users u ON sd.groupMember = u.user_id
             WHERE sd.groupId IN (SELECT id FROM techcoach_lite.techcoach_groups WHERE created_by = ?);
-        `;
-        const results = await conn.query(query, [id]);
+        `,[id]) ;
 
-        // Decrypt decision names and statements using the encrypted key
-        results.forEach(result => {
-            result.decision_name = decryptText(result.decision_name, encryptedKey);
-            result.user_statement = decryptText(result.user_statement, encryptedKey);
-        });
+        // console.log('shareDecisionss',shareData);
+
+        if(!shareData || shareData.length === 0){
+            console.error('decision not found',id);
+            return res.status(404).json({error: 'decision nt found'});
+        }
+        
+        const decryptedData = shareData.map(decision => {
+            const decision_name = typeof decision.decision_name === 'string' ? JSON.stringify(decision.decision_name) : decision.decision_name;
+            const user_statement = typeof decision.user_statement === 'string' ? JSON.stringify(decision.user_statement): decision.user_statement;
+            return {
+                decision_name: decryptText(decision.decision_name,req.user.key),
+                user_statement: decryptText(decision.user_statement,req.user.key),
+            }
+        })
+       
 
         await conn.commit();
-        res.status(200).json({ results });
+        res.status(200).json({ shareData:decryptedData });
     } catch (error) {
         if (conn) await conn.rollback();
         console.error('Error in fetching shared decision details', error);
