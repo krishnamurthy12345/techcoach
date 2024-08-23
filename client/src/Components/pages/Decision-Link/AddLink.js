@@ -261,7 +261,7 @@ const AddLink = () => {
         },
       });
       setSkills(response.data.skills || []);
-      setShowSkillOptions(true);
+      // setShowSkillOptions(true);
       console.log('Fetched skills data:', response.data.skills);
     } catch (err) {
       console.log('Error fetching skill data:', err);

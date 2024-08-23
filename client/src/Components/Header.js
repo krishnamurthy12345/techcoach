@@ -67,11 +67,12 @@ const Header = () => {
                                     <li className="nav-item">
                                         <a href="http://decisioncoach.techcoach4u.com" target="_blank" rel="noopener noreferrer" className="nav-link">Guide</a>
                                     </li>
-
+                                    {/* <li className="nav-item">
+                                        <Link to='/decisioncircle' className="nav-link">Decision Circle</Link>
+                                    </li> */}
                                     <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
-
                                     <li className="nav-item" style={{ marginRight: "0.5rem" }}>
                                         <Link to='/notification' className="nav-link position-relative">
                                             Notifications
