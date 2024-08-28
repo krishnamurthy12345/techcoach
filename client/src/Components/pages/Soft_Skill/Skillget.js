@@ -19,7 +19,7 @@ const Skillget = () => {
         },
       });
       setSkills(response.data.skills);
-      console.log('getting skills:',response.data.skills[0])
+      console.log('getting skills:', response.data.skills);
     } catch (err) {
       console.log('Error fetching skill data:', err);
       toast.error('Error fetching skill data');
@@ -68,56 +68,55 @@ const Skillget = () => {
     fetchSkills();
   }, []);
 
+  const filteredSkills = skills.filter(skill => skill.rating !== null && skill.comments !== null);
+
   return (
     <div className='skillget'>
       <h3 className="center mt-5">Soft Skills - Self Assessment</h3>
       <div>
-        {skills.length === 0 && (
-          <Link to="/softskill">
-            <button className='softskill-head'>Add Skills</button>
-          </Link>
-        )}
+        <Link to="/softskill">
+          <button className='softskill-head'>Add Skills</button>
+        </Link>
       </div>
       <div className='table-main'>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Skill Name</th>
-            <th>Rating</th>
-            <th>Assessment Notes and Action Plan</th>
-            <th>Improvement</th>
-          </tr>
-        </thead>
-        <tbody>
-          {skills.map((skill,index) => (
-            <tr key={skill.id}>
-              <td>{skill.skill_name}
-              <MdDescription
-                      className='show-description-icon'
-                      onClick={() => toggleDescription(index)}
-                    />
-                    {skill.showDescription && (
-                      <p className='description'>
-                        Description: {skill.description}
-                      </p>
-                    )}
-              </td>
-              <td>{skill.rating}</td>
-              <td>{skill.comments}</td>
-              <td className='action'>
-                <Link to={`/editskill/${skill.id}`}>
-                  <button className='edit'>Edit</button>
-                </Link>
-                <button className='delete' onClick={() => handleDelete(skill.id)}>Delete</button>
-              </td>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Skill Name</th>
+              <th>Rating</th>
+              <th>Assessment Notes and Action Plan</th>
+              <th>Improvement</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredSkills.map((skill, index) => (
+              <tr key={skill.id}>
+                <td>{skill.skill_name}
+                  <MdDescription
+                    className='show-description-icon'
+                    onClick={() => toggleDescription(index)}
+                  />
+                  {skill.showDescription && (
+                    <p className='description'>
+                      Description: {skill.description}
+                    </p>
+                  )}
+                </td>
+                <td>{skill.rating}</td>
+                <td>{skill.comments}</td>
+                <td className='action'>
+                  <Link to={`/editskill/${skill.id}`}>
+                    <button className='edit'>Edit</button>
+                  </Link>
+                  <button className='delete' onClick={() => handleDelete(skill.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      {skills.length > 0 && (
-        <button className='deleteall' onClick={handleDeleteAll}>Delete All</button>
-      )}
+      <button className='deleteall' onClick={handleDeleteAll}>Delete All</button>
+
       <ToastContainer />
     </div>
   );

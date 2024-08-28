@@ -48,7 +48,6 @@
   margin-top: 10px;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
   .table {
     width: 100%;
