@@ -129,8 +129,8 @@ const DisplayInnerCircle = () => {
 
     const filteredMembers = potentialMembers.filter(member => member.email === searchQuery);
     const existingMemberEmails = innerCircleDetails?.members?.map(member => member.email) || [];
-    console.log("emaillllllllllllllll", existingMemberEmails);
-    const isValidGmail = searchQuery.endsWith('@gmail.com & greenestep.com');
+    console.log("emaill", existingMemberEmails);
+    const isValidGmail = searchQuery.endsWith('@gmail.com') || searchQuery.endsWith('@greenestep.com');
 
     const inviteButtonStyle = {
         color: "black",

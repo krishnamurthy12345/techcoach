@@ -89,7 +89,7 @@ AND
     );
 
     res.status(200).json({ skills: rows });
-    console.log(rows,"assss")
+    // console.log(rows,"assss")
   } catch (error) {
     console.log('Error fetching skill data:', error);
     res.status(500).json({ error: 'An error occurred while fetching skill data' });
