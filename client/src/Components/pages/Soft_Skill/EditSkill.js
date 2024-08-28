@@ -21,8 +21,8 @@ const EditSkill = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setSkill(response.data.skills[0]); 
-                console.log('updating skills:',response.data.skills)
+                setSkill(response.data.skill[0]); 
+                console.log('updating skills:',response.data.skill[0])
             } catch (err) {
                 console.log('Error fetching skill data:', err);
                 toast.error('Error fetching skill data');
@@ -44,7 +44,7 @@ const EditSkill = () => {
         event.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, { skills: [skill] }, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, skill, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

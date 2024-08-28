@@ -215,7 +215,7 @@ h3 {
     align-items: center;
   }
 
-  .delete-account, .download-data, .download-profile {
+  .delete-account, .download-data, .download-profile, .linked-decisions {
     margin-top: 10px;
     width: 80%;
     text-align: center;
