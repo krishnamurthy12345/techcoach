@@ -123,32 +123,28 @@ const ShareWithMe = () => {
   console.log("filterDecisions",sharedDecisionDetails.sharedDecisions)
 
   return (
-    <div style={{ margin: "1rem" }}>
-      <div className='entertype'>
+    <Grid style={{ margin: "1rem" }}>
+      <Grid item xs={12} md={6} className='entertype'>
         <input
           type='text'
           placeholder='Search Decision Name'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ marginRight: '1rem',width:'500px' }}
+          style={{ marginRight: '1rem',width:'100%' }}
         />
+      </Grid>
+      <Grid item xs={6} md={3}>  
         <Select
           value={selectedTag}
           onChange={e => setSelectedTag(e.target.value)}
           displayEmpty
           inputProps={{ 'aria-label': 'Select Tag' }}
           sx={{
-            marginLeft: 2,
-            borderRadius: '0.5rem',
-            border: '0.1rem solid #526D82',
             width: '100%',
             maxWidth: '10rem',
             fontSize: '0.8rem',
             '@media (max-width: 600px)': {
-              maxWidth: '5rem'
-            },
-            '&:focus': {
-              outline: 'none'
+              maxWidth: '8rem'
             }
           }}
         >
@@ -162,13 +158,14 @@ const ShareWithMe = () => {
           <MenuItem value="Decision Maturity">Decision Maturity</MenuItem>
         </Select>
         <Button
-          className='bg-light rounded ml-2'
+          className='bg-light rounded mt-2'
           onClick={() => setShowPendingDecisions(!showPendingDecisions)}
         >
           {showPendingDecisions ? 'Show All Decisions' : 'Show Pending Decisions'}
         </Button>
-      </div>
-      <Grid container spacing={2}>
+      </Grid>
+
+      <Grid container spacing={2} className='mt-2'>
         {filteredDecisions.map(sharedDecision => (
           <Grid item xs={12} sm={6} md={4} key={sharedDecision.id}>
             <Card onClick={() => handleCardClick(sharedDecision.decisionId)} style={{ cursor: 'pointer', border: "0.01rem solid #3F5362" }}>
@@ -187,7 +184,7 @@ const ShareWithMe = () => {
           </Grid>
         ))}
       </Grid>
-    </div>
+    </Grid>
   );
 };
 
