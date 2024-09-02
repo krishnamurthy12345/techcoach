@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box, CircularProgress, Button } from '@mui/material';
 import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
 import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+import { getSharedDecisionDetails } from '../../Group/Network_Call';
 import './Nav.css';
 import withAuth from '../../withAuth';
-import { getSharedDecisionDetails } from '../../Group/Network_Call';
 
 const Nav = () => {
   const navigate = useNavigate();
