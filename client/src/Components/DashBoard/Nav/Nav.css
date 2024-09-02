@@ -92,11 +92,33 @@
 }
 .entertype{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 70px;
     width: 100%;
     align-items: center;
+    flex-wrap: wrap;
 }
 .pending{
     background-color: #dcb4b4;
+}
+@media (max-width:768px) {
+    .entertype {
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+        gap: 1rem;
+    }
+    
+    .entertype input {
+        width: 100%;
+    }
+    
+    .entertype .MuiSelect-root {
+        width: 100%;
+    }
+    
+    .share-decisions {
+        margin-top: 2rem;
+    }
+    
 }
