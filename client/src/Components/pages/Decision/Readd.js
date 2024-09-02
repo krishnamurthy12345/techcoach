@@ -483,7 +483,7 @@ const Readd = () => {
     const filteredDecisions = data
       .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
       .filter(decision => {
-        if (selectedTag === 'Advanced Tags') {
+      if (selectedTag === 'Advanced Tags') {
           return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
         } 
       if (selectedTag === 'Sharpen the Saw') {
