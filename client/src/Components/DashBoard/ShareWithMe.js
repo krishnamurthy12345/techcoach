@@ -130,10 +130,8 @@ const ShareWithMe = () => {
           placeholder='Search Decision Name'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ marginRight: '1rem',width:'100%' }}
-        />
-      </Grid>
-      <Grid item xs={6} md={3}>  
+          style={{width:'400px' }}
+        /> 
         <Select
           value={selectedTag}
           onChange={e => setSelectedTag(e.target.value)}
@@ -165,7 +163,7 @@ const ShareWithMe = () => {
         </Button>
       </Grid>
 
-      <Grid container spacing={2} className='mt-2'>
+      <Grid container spacing={2} className='mt-2 share-decisions'>
         {filteredDecisions.map(sharedDecision => (
           <Grid item xs={12} sm={6} md={4} key={sharedDecision.id}>
             <Card onClick={() => handleCardClick(sharedDecision.decisionId)} style={{ cursor: 'pointer', border: "0.01rem solid #3F5362" }}>
@@ -177,7 +175,7 @@ const ShareWithMe = () => {
                   Tags: {getTagNames(sharedDecision.decisionId).join(',')}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Shared By: {getUserName(sharedDecision.groupMember)}
+                  Shared with: {getUserName(sharedDecision.groupMember)}
                 </Typography>
               </CardContent>
             </Card>
