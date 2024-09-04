@@ -9,6 +9,8 @@ import withAuth from '../../withAuth';
 const SoftSkill = () => {
   const [skills, setSkills] = useState([]);
   const [selectedSkillIndex, setSelectedSkillIndex] = useState(null);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const fetchSkills = async () => {
@@ -51,6 +53,7 @@ const SoftSkill = () => {
 
   const handleSkillSelection = (index) => {
     setSelectedSkillIndex(index);
+    setIsSaveButtonDisabled(false);
   };
 
   const handleChange = (index, event) => {
@@ -63,14 +66,15 @@ const SoftSkill = () => {
     setSkills(values);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
-    if (selectedSkillIndex === null) {
-      toast("Please select a skill");
-      return;
+    if(selectedSkillIndex === null || isSaveButtonDisabled) {
+      return
     }
 
     const selectedSkill = skills[selectedSkillIndex];
+    setLoading(true);
+    setIsSaveButtonDisabled(true); // Disable the Save button
 
     try {
       await axios.post(`${process.env.REACT_APP_API_URL}/skill`, { 
@@ -85,15 +89,12 @@ const SoftSkill = () => {
     } catch (err) {
       console.log('Error adding skill data:', err);
       toast("Error adding Soft Skill data");
+      setIsSaveButtonDisabled(false); // Re-enable the Save button if there's an error
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSave = async (event) => {
-    event.preventDefault();
-    if(selectedSkillIndex === null) {
-      return
-    }
-  }
 
   const toggleDescription = (index) => {
     const values = [...skills];
@@ -111,7 +112,7 @@ const SoftSkill = () => {
   return (
     <div>
       <h3 className='center mt-5'>Soft Skills - Self Assessment</h3>
-      <form className='form' onSubmit={handleSubmit}>
+      <form className='form'>
         
         <table className='table'>
           <thead>
@@ -121,6 +122,7 @@ const SoftSkill = () => {
               <th>Rating (1-10)</th>
               <th>Confidence Level</th>
               <th>Assessment Notes and Action Plan</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -171,13 +173,17 @@ const SoftSkill = () => {
                   ></textarea>
                 </td>
                 <td>
-                  <button className='bg-success p-1 m-1 rounded'onClick={()=>handleSave}>save</button>
+                  <button className='bg-success p-1 m-1 rounded'
+                  disabled={loading || isSaveButtonDisabled}
+                  onClick={handleSave}
+                  >
+                  {loading ? 'Submitting...' : 'Save'}
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* <button type='submit' className='btn btn-light bg-dark'>Submit</button> */}
       </form>
       <ToastContainer />
     </div>

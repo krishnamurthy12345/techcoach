@@ -175,7 +175,7 @@ const ShareWithMe = () => {
                   Tags: {getTagNames(sharedDecision.decisionId).join(',')}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Shared By: {getUserName(sharedDecision.groupMember)}
+                  Shared with: {getUserName(sharedDecision.groupMember)}
                 </Typography>
               </CardContent>
             </Card>
