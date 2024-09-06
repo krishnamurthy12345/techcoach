@@ -1,0 +1,49 @@
+.circle{
+    background-color:white;
+    max-width: 800px;
+    border-radius: 20px;
+    text-align: center;
+    padding: 40px;
+}
+.me{
+    border-radius: 5px;
+    font-size: 18px;
+    padding: 5px;
+}
+
+.main-container {
+    position: relative;
+    z-index: 1;
+}
+
+.blur-background {
+    filter: blur(5px);
+}
+.circles {
+    margin-top: 500px;
+    display: flex;
+    justify-content: center; 
+    height: 200px;
+    margin: 0 auto;
+}
+.created-circle-card {
+    position: relative;
+    padding: 50px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+.close-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px; 
+    cursor: pointer;
+}
+.close-icon:hover{
+    color:red;
+}
+  
+.rounded.bg-secondary {
+    margin-top: 20px;
+    font-size: 18px; 
+  }
