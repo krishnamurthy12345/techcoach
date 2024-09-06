@@ -129,6 +129,50 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
+const getAddMemberNameList = async (req, res) => {
+  const { existingMemberIds } = req.body;
+  // console.log("request body from add member", existingMemberIds);
+
+  const userId = req.user.id;
+
+  let conn;
+  try {
+      conn = await getConnection();
+      await conn.beginTransaction();
+
+      let query;
+      let queryParams = [];
+
+      if (existingMemberIds.length === 0) {
+          query = `
+              SELECT * 
+              FROM techcoach_lite.techcoach_users 
+              WHERE user_id != ?
+          `;
+          queryParams = [userId];
+      } else {
+          query = `
+              SELECT * 
+              FROM techcoach_lite.techcoach_users 
+              WHERE user_id NOT IN (?) AND user_id != ?
+          `;
+          queryParams = [existingMemberIds, userId];
+      }
+
+      const result = await conn.query(query, queryParams);
+
+      console.log("Resulssssssssssst:", result);
+
+      await conn.commit();
+      res.status(200).json({ message: 'Members fetched successfully', result });
+  } catch (error) {
+      console.error('Error in fetching potential members', error);
+      if (conn) await conn.rollback();
+      res.status(500).json({ error: 'An error occurred while processing your request' });
+  } finally {
+      if (conn) conn.release();
+  }
+}
 
 
 module.exports = { 
