@@ -406,5 +406,4 @@ const deleteProfile = async (req, res) => {
 };
 
 
-
 module.exports = { getUserList, postGeneralProfile,getMasterProfiles, getProfile, putProfile,deleteProfile };

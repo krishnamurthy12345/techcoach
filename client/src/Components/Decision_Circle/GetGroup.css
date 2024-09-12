@@ -1,0 +1,96 @@
+.getGroup {
+    padding: 10px;
+}
+
+.sub-getGroup {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.getGroupName {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.getGroupName:hover {
+    transform: scale(1.01);
+}
+
+.getGroupName h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.getgroup-delete {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.getgroup-delete {
+    background-color: #c0392b;
+}
+.editgroupname{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.mdedit{
+    font-size: 20px;
+}
+.group-button{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.group-add{
+    background-color: rgb(5, 140, 5);
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-add:hover{
+    background-color: rgb(16, 104, 16);
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-remove{
+    background-color: red;
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-remove:hover{
+    background-color: rgb(203, 23, 23);
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+
+@media (max-width: 768px) {
+    .getGroup {
+        padding: 10px;
+    }
+
+    .getGroupName {
+        padding: 12px;
+    }
+
+    .sub-getGroup {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

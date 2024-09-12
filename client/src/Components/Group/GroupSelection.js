@@ -10,9 +10,9 @@ const GroupSelection = () => {
         navigate('/innerCircle?type_of_group=inner_circle');
     };
 
-    const navigateToGroup = () => {
-        navigate('/group?type_of_group=multiple_share_group');
-    };
+    // const navigateToGroup = () => {
+    //     navigate('/group?type_of_group=multiple_share_group');
+    // };
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem" }}>
