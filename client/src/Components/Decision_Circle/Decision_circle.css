@@ -9,6 +9,7 @@
     border-radius: 5px;
     font-size: 18px;
     padding: 5px;
+    border: none;
 }
 
 .main-container {
@@ -46,4 +47,41 @@
 .rounded.bg-secondary {
     margin-top: 20px;
     font-size: 18px; 
-  }
+    padding: 5px;
+}
+.group-button{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.group-add{
+    background-color: green;
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-add:hover{
+    background-color: rgb(15, 71, 15);
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-remove{
+    background-color: red;
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.group-remove:hover{
+    background-color: rgb(203, 23, 23);
+    border-radius: 5px;
+    width: 150px;
+    padding: 5px;
+}
+.creategroup{
+    border-radius: 5px;
+    background-color: brown;
+    color: white;
+    border: none;
+    padding: 5px;
+}

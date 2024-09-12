@@ -34,7 +34,7 @@ app.use('/api', decisionRoutes);
 app.use('/group', groupRoutes);
 app.use('/skill',skillRoutes);
 app.use('/api',linkRoutes);
-app.use('/api',multigroupRoutes);
+app.use('/group',multigroupRoutes);
 
 
 app.listen(PORT, () => {
