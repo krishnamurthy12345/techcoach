@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Decision_circle.css';
+import './DecisionCircle.css';
 import withAuth from '../withAuth';
 import { IoClose } from "react-icons/io5";
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const Decision_circle = () => {
+const DecisionCircle = () => {
   const [circleCreated, setCircleCreated] = useState(false);
   const [circleName, setCircleName] = useState('');
   const navigate = useNavigate();
@@ -96,4 +96,4 @@ const Decision_circle = () => {
   );
 };
 
-export default withAuth(Decision_circle);
+export default withAuth(DecisionCircle);

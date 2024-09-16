@@ -3,7 +3,7 @@ import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, 
 import CheckIcon from '@mui/icons-material/Check';
 import DoneIcon from '@mui/icons-material/Done'; 
 import { useNavigate } from 'react-router-dom';
-import { getSharedMemberss } from './Networkk_Call';
+import { getSharedMemberss,shareDecisionInDecisionCircle,mailToDecisionCircleDecisionShare } from './Networkk_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import withAuth from '../withAuth';
 
@@ -21,39 +21,70 @@ const AcceptMessage = ({ decisionCircleDetails, decision, id }) => {
 
     const handleSubmit = async () => {
         const payload = {
+            decisionId: id,
             groupId: decisionCircleDetails.group.id,
             memberId: selectedMember
         };
 
-        // Submit logic
+        try {
+            const response = await shareDecisionInDecisionCircle(payload);
+            if (response.status === 200) {
+                toast('Decision shared successfully!');
+                setSelectedMember(null); 
+                await getSharedMembersList(); 
+
+                const selectedMemberDetails = decisionCircleDetails.members.find(member => member.user_id === selectedMember);
+                const memberEmail = selectedMemberDetails?.email;
+
+                if (selectedMemberDetails) {
+                    const memberName = selectedMemberDetails.displayname;
+
+                    console.log("aceptttttttttttt or not", decision);
+
+                    const decisionSummary = {
+                        decisionName: decision.decision_name,
+                        userStatement: decision.user_statement,
+                        reasons: decision.decision_reason.join(', '),
+                        dueDate: decision.decision_due_date,
+                        takenDate: decision.decision_taken_date
+                    };
+
+                    const responseToMail = await mailToDecisionCircleDecisionShare(memberEmail, decisionSummary);
+                    console.log("response from the mail", responseToMail);
+                }
+
+            }  else {
+                toast('Failed to share decision.');
+            }
+        } catch (error) {
+            console.error('Error sharing decision:', error);
+            toast('An error occurred while sharing the decision.');
+        }
     };
 
-    console.log("selected member", selectedMember);
+    console.log("selected memebr", selectedMember);
 
     const getSharedMembersList = async () => {
-        if (decisionCircleDetails && decisionCircleDetails.group) {
-            const payload = {
-                groupId: decisionCircleDetails.group.id,
-            };
+        const payload = {
+            groupId: decisionCircleDetails.group.id,
+            decisionId: id
+        };
 
-            try {
-                const response = await getSharedMemberss(payload);
-                console.log("response from shared member list", response);
-                setSharedMembers(response);
-            } catch (error) {
-                console.error('Error in fetching the shared members:', error);
-                toast('An error occurred while fetching the shared member decision');
-            } finally {
-                setLoading(false); 
-            }
-        } else {
-            setLoading(false); // If no group exists, stop loading
+        try {
+            const response = await getSharedMemberss(payload);
+            console.log("response from shared member list", response);
+            setSharedMembers(response);
+        } catch (error) {
+            console.error('Error in fetching the shared members:', error);
+            toast('An error occurred while fetching the shared member decision');
+        } finally {
+            setLoading(false); 
         }
     };
 
     useEffect(() => {
         getSharedMembersList();
-    }, [decisionCircleDetails]);
+    }, [decisionCircleDetails.group.id]); 
 
     if (loading) {
         return (

@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box,Grid, Button } from '@mui/material';
-import { getUserListForDecisionCircle, decisionCircleCreation } from './Network_Call';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { getUserListForDecisionCircle, sendDecisionCircleInvitation } from '../Decision_Circle/Networkk_Call';
+import { ToastContainer,toast } from 'react-toastify';
 import withAuth from '../withAuth';
 
 const DecisionGroup = () => {
-    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
-    const type_of_group = queryParams.get('type_of_group');
+    const [loadingInvite, setLoadingInvite] = useState(false);
+
+    
 
     useEffect(() => {
         const fetchNames = async () => {
@@ -30,19 +28,32 @@ const DecisionGroup = () => {
         }
     };
 
-    const handleSubmit = async () => {
-        const groupData = {
-            type_of_group: type_of_group,
-            members: selectedUsers.map(user => ({
-                user_id: user.user_id
-            }))
-        };
-
-        const response = await decisionCircleCreation(groupData);
-        if(response.status === 200) {
-            navigate('/list-name');
+   
+      const handleInvite = async () => {
+        if (selectedUsers.length === 0) {
+            toast.error('No users selected for invitation');
+            return;
+        }
+    
+        // Iterate over selected users and send invitations
+        for (const user of selectedUsers) {
+            try {
+                setLoadingInvite(true); 
+                const response = await sendDecisionCircleInvitation(user.email);
+    
+                if (response.message === "Mail Sent Successfully") {
+                    toast.success(`Invitation sent to ${user.displayname}`);
+                } else {
+                    toast.error(`Failed to invite ${user.displayname}`);
+                }
+            } catch (error) {
+                toast.error(`Error inviting ${user.displayname}`);
+            } finally {
+                setLoadingInvite(false); 
+            }
         }
     };
+    
 
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
@@ -124,7 +135,7 @@ const DecisionGroup = () => {
                                             borderRadius: "0.5rem", 
                                             color: "white"
                                         }} 
-                                        onClick={handleSubmit}
+                                        onClick={handleInvite}
                                     >
                                         Submit
                                     </Button>
@@ -136,6 +147,8 @@ const DecisionGroup = () => {
                     </Paper>
                 </Grid>
             </Grid>
+            <ToastContainer />
+
         </Box>
     );
 };

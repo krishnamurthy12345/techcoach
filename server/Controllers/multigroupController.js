@@ -28,9 +28,14 @@ const getUserList = async (req, res) => {
 };
 
 const decisionCircleCreation = async (req, res) => {
-    // console.log("Request from creation of inner circle", req.body);
+    const { type_of_group = 'decision_circle', members } = req.body;
 
-    const { type_of_group, members } = req.body;
+    console.log('Request Body:', req.body);
+
+    // Validate input data
+    if (type_of_group || !Array.isArray(members) || members.length === 0) {
+        return res.status(400).json({ error: 'Invalid input data.' });
+    }
 
     let conn;
 
@@ -38,41 +43,38 @@ const decisionCircleCreation = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
         
-        const created_by = req.user.id;
-        //console.log("user id from circle creation", created_by);
+        const user_id = req.user.id;
 
+        // Insert group data
         const groupResult = await conn.query(
-            `INSERT INTO techcoach_lite.techcoach_decision_group (created_by, type_of_group, created_at) VALUES (?, ?, NOW())`,
-            [created_by, type_of_group]
+            `INSERT INTO techcoach_lite.techcoach_decision_group (user_id, created_at,type_of_group) VALUES (?,  NOW(), ?)`,
+            [user_id, type_of_group]
         );
 
-        //console.log("Result from groups", groupResult);
+        const groupId = groupResult.insertId ? groupResult.insertId.toString() : groupResult[0].insertId.toString();
 
-        const insertId = groupResult.insertId.toString(); 
-        const numericPart = insertId.split('n')[0];
-        const groupId = parseInt(numericPart);
-
+        // Insert group members
         for (const member of members) {
+            if (!member.user_id) {
+                throw new Error('Member user_id is missing');
+            }
             const memberId = member.user_id;
             await conn.query(
-                `INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?, ?,?)`,
-                [groupId, memberId,'']
+                `INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?, ?, ?)`,
+                [groupId, memberId, '']
             );
         }
 
         await conn.commit();
-        //console.log('Inner Circle Created successfully');
         res.status(200).json({ message: 'Decision Circle Created successfully', groupId });
     } catch (error) {
-        console.error('Error in creating Decision Circle', error);
+        console.error('Error in creating Decision Circle:', error.message);
+        if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
-        if (conn) {
-            conn.release();
-        }
+        if (conn) conn.release();
     }
 };
-
 
 const checkDecisionCircleExists = async (req, res) => {
     let conn;
@@ -83,7 +85,7 @@ const checkDecisionCircleExists = async (req, res) => {
         const query = `
             SELECT COUNT(*) AS count 
             FROM techcoach_lite.techcoach_decision_group
-            WHERE created_by = ?
+            WHERE user_id = ?
         `;
         const userId = req.user.id;
         const [result] = await conn.query(query, [userId]);
@@ -103,79 +105,73 @@ const checkDecisionCircleExists = async (req, res) => {
     }
 };
 
-// const getDecisionCircleDetails = async (req, res) => {
-//     let conn;
+const decisionCircleAddInvitation = async (req, res) => {
+    // console.log("Request body invitation:", req.user);
+    // console.log("Request body invitation:", req.body);
 
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
+    const { email } = req.body;
+    const { email: senderEmail } = req.user;
 
-//         const userId = req.user.id;
+    let conn;
 
-//         const groupQuery = `
-//             SELECT id, created_by, type_of_group, created_at
-//             FROM techcoach_lite.techcoach_decision_group
-//             WHERE created_by = ?
-//         `;
-        
-//         const [groupResult] = await conn.query(groupQuery, [userId]);
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
 
-//         console.log("Group Result", groupResult);
+        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
+        const groupMemberRows = await conn.query(groupMemberQuery, [senderEmail]);
+        const groupMemberDetails = groupMemberRows[0];
+        console.log("Group member details:", groupMemberDetails);
 
-//         if (groupResult === undefined) {
-//             return res.status(200).json({ error: 'No groups found for this user' });
-//         }
+        const emailPayload = {
+            from: {
+                address: "Decision-Coach@www.careersheets.in"
+            },
+            to: [
+                {
+                    email_address: {
+                        address: email
+                    }
+                }
+            ],
+            subject: `You are invited to an Decision Circle`,
+            htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
+                <p>Hi,</p>
+                <p>You are receiving this notification as is inviting you to become part of their decision circle.</p>
+                <p>Decision Coach application enables confidential collaboration between people who trust each other to support in making important decisions.</p>
+                <p>Accessing Decision Coach is simple. Use this Google email account to sign up and you are all set. And it is free.</p>
+                <p>If you are already a user of Decision Coach then just sign in.</p>
+                <p style="text-align: center;">
+                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+                </p>
+                <p style="text-align: center;">
+                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click Decision Circle to accept the invite</a>
+                </p>
+                <p>Regards,</p>
+                <p>Team @ Decision Coach</p>
+            </div>`
+        };
 
-//         const groupId = groupResult.id;
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
 
-//         const groupMemberQuery = `
-//             SELECT member_id, status
-//             FROM techcoach_lite.techcoach_decision_group_member
-//             WHERE group_id = ?
-//         `;
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
 
-//         const groupMemberResult = await conn.query(groupMemberQuery, [groupId]);
-
-//         console.log("Group Member Result", groupMemberResult);
-
-//         if (groupMemberResult.length === 0) {
-//             return res.status(200).json({ group: groupResult, error: 'No members found for this group' });
-//         }
-
-//         const memberDetailsQuery = `
-//             SELECT user_id, displayname, email 
-//             FROM techcoach_lite.techcoach_users 
-//             WHERE user_id = ?
-//         `;
-
-//         const memberDetailsPromises = groupMemberResult.map(async (member) => {
-//             const memberDetailsResult = await conn.query(memberDetailsQuery, [member.member_id]);
-//             if (memberDetailsResult.length > 0) {
-//                 // Assuming only one result per user_id
-//                 const memberDetail = memberDetailsResult[0];
-//                 return { ...memberDetail, status: member.status };
-//             }
-//             return null;
-//         });
-
-//         const memberDetailsResult = (await Promise.all(memberDetailsPromises)).filter(Boolean);
-
-//         console.log("Member Details Result", memberDetailsResult);
-
-//         await conn.commit();
-//         res.status(200).json({ group: groupResult, members: memberDetailsResult });
-//     } catch (error) {
-//         console.error('Error fetching Decision Circle details', error);
-//         if (conn) {
-//             await conn.rollback();
-//         }
-//         res.status(500).json({ error: 'An error occurred while fetching the group details' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
-// };
+        await conn.commit();
+        res.status(200).json({ message: 'Mail Sent Successfully' });
+    } catch (error) {
+        console.error('Error in sending mail on invite to inner circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
 
 const getDecisionCircleDetails = async (req, res) => {
     let conn;
@@ -186,62 +182,70 @@ const getDecisionCircleDetails = async (req, res) => {
 
         const userId = req.user.id;
 
-        // Retrieve all groups created by the user
         const groupQuery = `
-            SELECT id, created_by, type_of_group, created_at
+            SELECT id, user_id, type_of_group, created_at
             FROM techcoach_lite.techcoach_decision_group
-            WHERE created_by = ?
+            WHERE user_id = ?
         `;
         
-        const [groupResults] = await conn.query(groupQuery, [userId]);
+        const [groupResult] = await conn.query(groupQuery, [userId]);
 
-        if (!groupResults || groupResults.length === 0) {
+        console.log("Group Result", groupResult);
+
+        if (groupResult === undefined) {
             return res.status(200).json({ error: 'No groups found for this user' });
         }
 
-        // For each group, retrieve the members
-        const groupsWithMembers = await Promise.all(groupResults.map(async (group) => {
-            const groupId = group.id;
+        const groupId = groupResult.id;
 
-            const groupMemberQuery = `
-                SELECT member_id, status
-                FROM techcoach_lite.techcoach_decision_group_member
-                WHERE group_id = ?
-            `;
+        const groupMemberQuery = `
+            SELECT member_id, status
+            FROM techcoach_lite.techcoach_decision_group_member
+            WHERE group_id = ?
+        `;
 
-            const groupMembers = await conn.query(groupMemberQuery, [groupId]);
+        const groupMemberResult = await conn.query(groupMemberQuery, [groupId]);
 
-            const memberDetailsPromises = groupMembers.map(async (member) => {
-                const memberDetailsQuery = `
-                    SELECT user_id, displayname, email 
-                    FROM techcoach_lite.techcoach_users 
-                    WHERE user_id = ?
-                `;
+        console.log("Group Member Result", groupMemberResult);
 
-                const [memberDetails] = await conn.query(memberDetailsQuery, [member.member_id]);
-                return { ...memberDetails[0], status: member.status };
-            });
+        if (groupMemberResult.length === 0) {
+            return res.status(200).json({ group: groupResult, error: 'No members found for this group' });
+        }
 
-            const membersDetails = await Promise.all(memberDetailsPromises);
+        const memberDetailsQuery = `
+            SELECT user_id, displayname, email 
+            FROM techcoach_lite.techcoach_users 
+            WHERE user_id = ?
+        `;
 
-            return { ...group, members: membersDetails };
-        }));
+        const memberDetailsPromises = groupMemberResult.map(async (member) => {
+            const memberDetailsResult = await conn.query(memberDetailsQuery, [member.member_id]);
+            if (memberDetailsResult.length > 0) {
+                // Assuming only one result per user_id
+                const memberDetail = memberDetailsResult[0];
+                return { ...memberDetail, status: member.status };
+            }
+            return null;
+        });
+
+        const memberDetailsResult = (await Promise.all(memberDetailsPromises)).filter(Boolean);
+
+        console.log("Member Details Result", memberDetailsResult);
 
         await conn.commit();
-        res.status(200).json({ groups: groupsWithMembers });
+        res.status(200).json({ group: groupResult, members: memberDetailsResult });
     } catch (error) {
         console.error('Error fetching Decision Circle details', error);
         if (conn) {
             await conn.rollback();
         }
-        res.status(500).json({ error: 'An error occurred while fetching group details' });
+        res.status(500).json({ error: 'An error occurred while fetching the group details' });
     } finally {
         if (conn) {
             conn.release();
         }
     }
 };
-
 
 const removeMemberFromDecision = async (req, res) => {
     //console.log("request from remove", req.body);
@@ -600,73 +604,7 @@ const decisionCircleInvitation = async (req, res) => {
 };
 
 
-const decisionCircleAddInvitation = async (req, res) => {
-    // console.log("Request body invitation:", req.user);
-    // console.log("Request body invitation:", req.body);
 
-    const { email } = req.body;
-    const { email: senderEmail } = req.user;
-
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
-        const groupMemberRows = await conn.query(groupMemberQuery, [senderEmail]);
-        const groupMemberDetails = groupMemberRows[0];
-        console.log("Group member details:", groupMemberDetails);
-
-        const emailPayload = {
-            from: {
-                address: "Decision-Coach@www.careersheets.in"
-            },
-            to: [
-                {
-                    email_address: {
-                        address: email
-                    }
-                }
-            ],
-            subject: `You are invited to an Decision Circle`,
-            htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
-                <p>Hi,</p>
-                <p>You are receiving this notification as is inviting you to become part of their decision circle.</p>
-                <p>Decision Coach application enables confidential collaboration between people who trust each other to support in making important decisions.</p>
-                <p>Accessing Decision Coach is simple. Use this Google email account to sign up and you are all set. And it is free.</p>
-                <p>If you are already a user of Decision Coach then just sign in.</p>
-                <p style="text-align: center;">
-                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
-                </p>
-                <p style="text-align: center;">
-                    <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click Decision Circle to accept the invite</a>
-                </p>
-                <p>Regards,</p>
-                <p>Team @ Decision Coach</p>
-            </div>`
-        };
-
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
-
-        await axios.post(zeptoMailApiUrl, emailPayload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
-            }
-        });
-
-        await conn.commit();
-        res.status(200).json({ message: 'Mail Sent Successfully' });
-    } catch (error) {
-        console.error('Error in sending mail on invite to inner circle:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
 
 // group name Controllers
 const postdecisionGroup = async (req, res) => {
@@ -841,6 +779,7 @@ module.exports = {
     acceptOrRejectDecisionCircle,
     decisionCircleInvitation,
     decisionCircleAddInvitation,
+    // groupNames controller
     postdecisionGroup,
     getAlldecisionGroup,
     getDecisionGroup,

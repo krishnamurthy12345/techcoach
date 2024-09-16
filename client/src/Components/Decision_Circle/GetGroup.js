@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getAlldecisionGroup, deleteDecisionGroup, } from './Networkk_Call';
 import './GetGroup.css';
 import { MdEdit } from "react-icons/md";
-import { useNavigate } from 'react-router-dom';
+import { MdDeleteForever } from "react-icons/md";
+import { useNavigate, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const GetGroup = () => {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    // const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const fetchGroups = async () => {
@@ -20,9 +21,8 @@ const GetGroup = () => {
             setGroups(data);
             // toast.success('Groups fetched successfully');
         } catch (error) {
-            setError('Failed to fetch groups');
-            toast.error('Failed to fetch groups');
-            // console.error('Fetching error:', error);
+            // toast.error('Failed to fetch groups');
+            console.log('Fetching error:', error);
         } finally {
             setLoading(false);
         }
@@ -30,14 +30,16 @@ const GetGroup = () => {
 
 
     const handleDeleteGroup = async (id) => {
+        if (window.confirm('Are you sure that you want to delete this decision-circle group')) {
         try {
             await deleteDecisionGroup(id);
             fetchGroups();
+            setGroups(prevGroups => prevGroups.filter(group => group.id !== id));
             toast.success('Group deleted successfully');
         } catch (error) {
-            setError('Failed to delete group');
             toast.error('Failed to delete group');
         }
+    }
     };
 
     useEffect(() => {
@@ -45,13 +47,15 @@ const GetGroup = () => {
     }, []);
 
     return (
-        <div className="container getGroup">
+        <div className="getGroup">
             {loading ? (
                 <p>Loading groups...</p>
-            ) : error ? (
-                <p>{error}</p>
             ) : groups.length === 0 ? (
-                <p>Please create a group</p>
+                <div className='nogroup'>
+                    <p>Please create a group</p>
+                    <Link to='/decisioncircle'><button className='nogroup-button'>Click me</button></Link>
+                </div>
+
             ) : (
                 <div className="row sub-getGroup">
                     {groups.map(group => (
@@ -60,20 +64,21 @@ const GetGroup = () => {
                                 <div className='editgroupname'>
                                     <h3>{group.group_name}</h3>
                                     <div className='mdedit'>
-                                        <MdEdit onClick={()=> navigate(`/decisioncircle/${group.id}`)}/>
+                                        <MdEdit className='mdedit-icon' onClick={() => navigate(`/decisioncircle/${group.id}`)} />
+                                        <MdDeleteForever className='mdedit-icon1' onClick={() => handleDeleteGroup(group.id)} />
+                                        {/* <button className='getgroup-delete' onClick={() => handleDeleteGroup(group.id)}>Delete</button> */}
                                     </div>
                                 </div>
-                                <button className='getgroup-delete' onClick={() => handleDeleteGroup(group.id)}>Delete</button>
                                 <div className='group-button'>
-                                    <button className='group-add'>Add Person</button>
+                                    <Link to='/decisiongroup'><button className='group-add'>Add Person</button></Link>
                                     <button className='group-remove'>Remove Person</button>
+                                </div>
                             </div>
-                            </div>
-                     </div>
+                        </div>
                     ))}
                 </div>
             )}
-          <ToastContainer />
+            <ToastContainer />
         </div>
     );
 };

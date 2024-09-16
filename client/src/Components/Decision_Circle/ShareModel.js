@@ -29,3 +29,4 @@ const ShareModal = ({ showModal, handleClose, decisionGroup, decisionCircleDetai
 };
 
 export default withAuth(ShareModal);
+

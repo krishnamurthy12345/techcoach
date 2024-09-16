@@ -17,21 +17,22 @@ const getUserListForDecisionCircle = async () => {
     }
 };
 
-const decisionCircleCreation = async (groupData) => {
+const decisionCircleCreation = async ( type_of_group = 'decision_circle') => {
     const token = localStorage.getItem('token');
     try {
-        //console.log("group data", groupData);
         const response = await axios.post(
             `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-            groupData,
+            {
+                type_of_group
+            },
             {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             }
         );
-        //console.log("response from inner circle creation", response);
-        return response;
+        return response.data;
     } catch (error) {
         console.log(error);
         return error.message;
