@@ -80,10 +80,11 @@ const Notification = () => {
 
     return (
         <div>
+            <h3>Inner Circle Notifications</h3>
                 {/* Inner Circle Notifications */}
             {notifications.length === 0 ? (
                 <Typography variant="h5" style={{ textAlign: "center", marginTop: "1rem", backgroundColor: "aliceblue", padding: "1rem" }}>
-                    No notifications
+                    No Inner Circle notifications
                 </Typography>
             ) : (
                 notifications.map(notification => (
@@ -133,6 +134,7 @@ const Notification = () => {
 
 
             {/* Decision Circle Notifications */}
+            <h3>Decision Circle Notifications</h3>
             {decisionNotifications.length === 0 ? (
                 <Typography variant="h5" style={{ textAlign: "center", marginTop: "1rem", backgroundColor: "aliceblue", padding: "1rem" }}>
                     No decision circle notifications
