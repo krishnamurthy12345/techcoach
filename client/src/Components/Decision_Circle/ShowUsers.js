@@ -44,18 +44,23 @@ const ShowUsers = () => {
         } catch (err) {
             toast.error('An error occurred while fetching the details');
             console.error(err);
+            fetchGroupDetails(); 
         }
     };
 
-    const handleRemoveUser = async (userId) =>{
+    const handleRemoveUser = async (userId,e) =>{
+        e?.preventDefault();
         try{
+            setMembers((prevMembers) => prevMembers.filter(member => member.user_id !== userId));
             const response = await removeUsersFromGroup(groupId,userId);
             setGroups(response.group);
             setMembers(response.members);
+            fetchGroupDetails(); 
             toast.success('User removed successfully');
         } catch (error) {
             toast.error('Error removing user from group');
-            console.log('Fetching error:',error)
+            console.log('Fetching error:',error);
+            fetchGroupDetails();
         }
     }
 
@@ -73,11 +78,10 @@ const ShowUsers = () => {
     
     return (
         <div className="getGroupp">
-            {groups ? (
+            {groups && (
                 <div className="group-details">
                     <h4>{groupName || groups.group_name}</h4>
-                    <IoPersonAdd className='icon' onClick={handleAddPersonClick}
-                        disabled={!groups || !groups.group_name || !groups.id}   />
+                    <IoPersonAdd className='icon' onClick={handleAddPersonClick} />
                     {members.length > 0 ? (
                         <ul className="group-members">
                             {members.map(member => (
@@ -91,8 +95,6 @@ const ShowUsers = () => {
                         <p>No members found in this group.</p>
                     )}
                 </div>
-            ) : (
-                <p>Loading group details...</p>
             )}
             <ToastContainer />
         </div>
