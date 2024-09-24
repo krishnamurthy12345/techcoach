@@ -28,12 +28,13 @@ const getUserList = async (req, res) => {
 };
 
 const decisionCircleCreation = async (req, res) => {
-    const { type_of_group = 'decision_circle', members } = req.body;
+    const { group_name,members } = req.body;
+    const user_id = req.user.id; 
 
     console.log('Request Body:', req.body);
 
-    // Validate input data
-    if (type_of_group || !Array.isArray(members) || members.length === 0) {
+
+    if (!group_name || !members || !Array.isArray(members) || members.length === 0) {
         return res.status(400).json({ error: 'Invalid input data.' });
     }
 
@@ -43,34 +44,146 @@ const decisionCircleCreation = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
         
-        const user_id = req.user.id;
-
-        // Insert group data
         const groupResult = await conn.query(
-            `INSERT INTO techcoach_lite.techcoach_decision_group (user_id, created_at,type_of_group) VALUES (?,  NOW(), ?)`,
-            [user_id, type_of_group]
+            `SELECT id FROM techcoach_lite.techcoach_decision_group WHERE group_name = ?`,
+            [group_name]
         );
 
-        const groupId = groupResult.insertId ? groupResult.insertId.toString() : groupResult[0].insertId.toString();
-
-        // Insert group members
-        for (const member of members) {
-            if (!member.user_id) {
-                throw new Error('Member user_id is missing');
-            }
-            const memberId = member.user_id;
-            await conn.query(
-                `INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?, ?, ?)`,
-                [groupId, memberId, '']
-            );
+        if (groupResult.length === 0) {
+            return res.status(404).json({ error: 'Group not found.' });
         }
 
+        const group_id = groupResult[0].id;
+
+        for (const member of members) {
+            const member_id = member.user_id;
+        await conn.query(
+            `INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?,?,'active')`,
+            [group_id,member_id]
+        );
+    }
         await conn.commit();
-        res.status(200).json({ message: 'Decision Circle Created successfully', groupId });
+        res.status(200).json({ message: 'Members added successfully to the decision circle', group_name });
     } catch (error) {
-        console.error('Error in creating Decision Circle:', error.message);
+        console.error('Error in adding members to Decision Circle:', error.message);
         if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const getAllGroups = async (req, res) => {
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        // Query to get all groups
+        const groupQuery = `
+            SELECT id, group_name
+            FROM techcoach_lite.techcoach_decision_group
+            WHERE user_id = ?  
+        `;
+
+        const groupResult = await conn.query(groupQuery, [req.user.id]);
+
+        await conn.commit();
+        res.status(200).json(groupResult);
+    } catch (error) {
+        console.error('Error fetching all groups:', error.message);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while fetching group details' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const getUsersForGroup = async (req, res) => {
+    const { groupId } = req.params; 
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        // Query to get group details
+        const groupQuery = `
+            SELECT id, group_name, user_id
+            FROM techcoach_lite.techcoach_decision_group
+            WHERE id = ?
+        `;
+
+        const groupResult = await conn.query(groupQuery, [groupId]);
+
+        if (groupResult.length === 0) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        // Query to get members of the group
+        const membersQuery = `
+            SELECT techcoach_lite.techcoach_users.user_id, techcoach_lite.techcoach_users.displayname, techcoach_lite.techcoach_users.email, techcoach_lite.techcoach_decision_group_member.status
+            FROM techcoach_lite.techcoach_decision_group_member
+            JOIN techcoach_lite.techcoach_users ON techcoach_lite.techcoach_decision_group_member.member_id = techcoach_lite.techcoach_users.user_id
+            WHERE techcoach_lite.techcoach_decision_group_member.group_id = ?
+        `;
+
+        const membersResult = await conn.query(membersQuery, [groupId]);
+
+        await conn.commit();
+        res.status(200).json({ group: groupResult, members: membersResult });
+    } catch (error) {
+        console.error('Error fetching users for the group', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while fetching group details' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const removeUsersFromGroup = async (req, res) => {
+    const { groupId, userId } = req.params; 
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const groupQuery = `
+            SELECT id
+            FROM techcoach_lite.techcoach_decision_group
+            WHERE id = ?
+        `;
+        const groupResult = await conn.query(groupQuery, [groupId]);
+
+        if (groupResult.length === 0) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        const memberCheckQuery = `
+            SELECT member_id
+            FROM techcoach_lite.techcoach_decision_group_member
+            WHERE group_id = ? AND member_id = ?
+        `;
+        const memberCheckResult = await conn.query(memberCheckQuery, [groupId, userId]);
+
+        if (memberCheckResult.length === 0) {
+            return res.status(404).json({ error: 'User is not a member of the group' });
+        }
+
+        const removeMemberQuery = `
+            DELETE FROM techcoach_lite.techcoach_decision_group_member
+            WHERE group_id = ? AND member_id = ?
+        `;
+        await conn.query(removeMemberQuery, [groupId, userId]);
+
+        await conn.commit();
+        res.status(200).json({ message: 'User removed from the group successfully' });
+    } catch (error) {
+        console.error('Error removing user from the group', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while removing the user from the group' });
     } finally {
         if (conn) conn.release();
     }
@@ -105,7 +218,7 @@ const checkDecisionCircleExists = async (req, res) => {
     }
 };
 
-const decisionCircleAddInvitation = async (req, res) => {
+const sendDecisionCircleInvitation = async (req, res) => {
     // console.log("Request body invitation:", req.user);
     // console.log("Request body invitation:", req.body);
 
@@ -322,29 +435,32 @@ const getAddMemberNameList = async (req, res) => {
     }
 }
 
-const addMemberInDecisionCircle = async(req, res) =>{
+const addMemberInDecisionCircle = async(req, res) => {
+    const { group_id, member_id, status } = req.body;
+    let conn;
 
-    // console.log("request body from add member list", req.body.data);
-    const {userId, groupId}  = req.body.data;
     try {
-        conn = await getConnection();
-        await conn.beginTransaction();
+        console.log('Received data:', { group_id, member_id, status });
 
-        const query = `
-        INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?, ?,?)
-    `;
+        if (!member_id) {
+            throw new Error('Member ID is required');
+        }
+        conn = await getConnection(); 
+        await conn.beginTransaction(); 
 
-    const result = await conn.query(query, [groupId, userId, '']);
-
-        //console.log("result from Add member query", result);
+        await conn.query(
+            'INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?, ?, ?)', 
+            [group_id, member_id, status]
+        );
 
         await conn.commit();
-        res.status(200).json({ message: 'Member added sucessfully'});
+        res.status(200).json({ message: 'Member added successfully' });
     } catch (error) {
-        console.error('Error in adding member to inner circle', error);
+        if (conn) await conn.rollback(); 
+        console.error('Error in adding member to decision group', error);
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
-        if (conn) conn.release();
+        if (conn) conn.release(); 
     }
 }
 
@@ -768,6 +884,9 @@ const deleteDecisionGroup = async (req, res) => {
 module.exports = {
     getUserList,
     decisionCircleCreation,
+    getAllGroups,
+    getUsersForGroup,
+    removeUsersFromGroup,
     checkDecisionCircleExists,
     getDecisionCircleDetails,
     removeMemberFromDecision,
@@ -778,7 +897,7 @@ module.exports = {
     getDecisionCircleAcceptNotification,
     acceptOrRejectDecisionCircle,
     decisionCircleInvitation,
-    decisionCircleAddInvitation,
+    sendDecisionCircleInvitation,
     // groupNames controller
     postdecisionGroup,
     getAlldecisionGroup,

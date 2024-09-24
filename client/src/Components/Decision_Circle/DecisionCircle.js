@@ -26,8 +26,8 @@ const DecisionCircle = () => {
   const handleSaveCircle = async () => {
     try {
       if (id) {
-        const updatedData = ( circleName);
-        const result = await putDecisionGroup(id,updatedData);
+        // const updatedData = ( circleName);
+        const result = await putDecisionGroup(id,{name:circleName});
         toast.success('Decision group updated successfully');
         console.log('Decision group updated successfully:', result);
       } else {
@@ -60,7 +60,7 @@ const DecisionCircle = () => {
                 className='btn-secondary me'
                 onClick={handleCreateCircle}
               >
-                Create circle Names          
+                Create Circle Names          
               </button>
             </div>
           </div>
@@ -84,7 +84,7 @@ const DecisionCircle = () => {
                 value={circleName}
                 onChange={handleCircleNameChange}
               />
-              <button className='bg-info rounded ml-2' onClick={handleSaveCircle}>
+              <button className='bg-secondary rounded border-0 outline-0 text-white ml-2' onClick={handleSaveCircle}>
                 {id ? 'Update' : 'Save'}
               </button>
             </div>

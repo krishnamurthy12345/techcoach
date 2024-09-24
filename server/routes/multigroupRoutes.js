@@ -10,15 +10,18 @@ router.use(createUserKey);
 
 router.get("/fetchUserList", multigroupController.getUserList);
 router.post("/decisionCircleCreation", multigroupController.decisionCircleCreation);
+router.get("/getAllGroups", multigroupController.getAllGroups);
+router.get("/getUsersForGroup/:groupId", multigroupController.getUsersForGroup);
+router.delete("/removeUsersFromGroup/:groupId/:userId", multigroupController.removeUsersFromGroup);
 router.get("/checkDecisionCircleExists", multigroupController.checkDecisionCircleExists);
 router.get("/getDecisionCircleDetails",multigroupController.getDecisionCircleDetails);
 router.delete("/removeMemberFromDecision",multigroupController.removeMemberFromDecision);
 router.post("/getAddMemberName",multigroupController.getAddMemberNameList);
-router.put("/addMemberInDecisionCircle",multigroupController.addMemberInDecisionCircle);
+router.post("/addMemberInDecisionCircle",multigroupController.addMemberInDecisionCircle);
 router.get("/getDecisionCircleAcceptNotification",multigroupController.getDecisionCircleAcceptNotification);
 router.put("/acceptOrRejectInnerCircle",multigroupController.acceptOrRejectDecisionCircle);
 router.post("/decisionCircleInvitation",multigroupController.decisionCircleInvitation);
-router.post("/decisionCircleAddInvitation",multigroupController.decisionCircleAddInvitation);
+router.post("/sendDecisionCircleInvitation",multigroupController.sendDecisionCircleInvitation);
 
 // groupname routes
 router.post('/decisiongroup',multigroupController.postdecisionGroup);

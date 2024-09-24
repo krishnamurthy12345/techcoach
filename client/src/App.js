@@ -29,6 +29,8 @@ import DecisionCircle from './Components/Decision_Circle/DecisionCircle.js';
 import GetGroup from './Components/Decision_Circle/GetGroup.js';
 import ListName from './Components/Decision_Circle/ListName.js';
 import DecisionGroup from './Components/Decision_Circle/DecisionGroup.js';
+import AcceptMessage from './Components/Decision_Circle/AcceptMessage.js';
+import ShowUsers from './Components/Decision_Circle/ShowUsers.js';
 
 function App() {
   console.log("one is working")
@@ -85,7 +87,10 @@ function App() {
         <Route path='/decisioncircle/:id' element={<DecisionCircle />} />
         <Route path='/getdecisioncircle' element={<GetGroup />} />
         <Route path='/decisiongroup' element={<DecisionGroup />} />
+        <Route path='/decisiongroup/:group_name' element={<DecisionGroup />} />
+        <Route path='/getdecisioncircle/:groupId' element={<ShowUsers />} />
         <Route path='/list-name' element={<ListName />}/>
+        <Route path='/acceptmessage' element={<AcceptMessage />}/>
 
 
         {/* Share Decision */}
