@@ -8,7 +8,8 @@
     justify-content: space-between;
     gap: 16px;
 }
-.nogroup{
+
+.nogroup {
     background-color: #ddd;
     padding: 10px;
     font-weight: 500;
@@ -18,16 +19,19 @@
     margin: 0 auto;
     font-size: 18px;
 }
-.nogroup-button{
+
+.nogroup-button {
     background-color: #c0b6b6;
     border-radius: 5px;
     border: none;
     padding: 5px 15px;
 
 }
-.nogroup-button:hover{
+
+.nogroup-button:hover {
     background-color: white;
 }
+
 .getGroupName {
     background: #fff;
     border: 1px solid #ddd;
@@ -58,66 +62,119 @@
     cursor: pointer;
 } */
 
-.editgroupname{
+.editgroupname {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
-.mdedit{
+
+.mdedit {
     font-size: 20px;
     cursor: pointer;
     display: flex;
     position: relative;
     gap: 10px;
 }
-.mdedit-icon{
-    background-color:  #a4a2a2;
-    border-radius: 5px;
-    padding: 2px;
-    font-size: 20px;
-}
-.mdedit-icon1{
+
+.mdedit-icon {
     background-color: #a4a2a2;
     border-radius: 5px;
     padding: 2px;
     font-size: 20px;
 }
+
+.mdedit-icon1 {
+    background-color: #a4a2a2;
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 20px;
+}
+
 .mdedit-icon:hover,
-.mdedit-icon1:hover{
+.mdedit-icon1:hover {
     background-color: #ddd;
 }
-.group-button{
+
+.group-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.group-add{
+
+.show-button {
+    background-color: rgb(82, 105, 123);
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 5px;
+    color: white;
+}
+
+.show-button:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+.group-add {
     background-color: rgb(82, 105, 123);
     border-radius: 5px;
-    width: 150px;
     padding: 5px;
     border: none;
     color: white;
 }
-.group-add:hover{
+
+.group-add:hover {
     background-color: rgb(16, 104, 16);
     border-radius: 5px;
-    width: 150px;
     padding: 5px;
 }
-.group-remove{
-    background-color:  rgb(82, 105, 123);
+
+.group-remove {
+    background-color: rgb(82, 105, 123);
     border-radius: 5px;
-    width: 150px;
     padding: 5px;
     border: none;
-    color:white;
+    color: white;
 }
-.group-remove:hover{
+
+.group-remove:hover {
     background-color: rgb(203, 23, 23);
     border-radius: 5px;
-    width: 150px;
     padding: 5px;
+}
+
+.getGroupp {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: rgb(249, 249, 249);
+    border-radius: 5px;
+    margin-top: 30px;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.group-details {
+    text-align: center;
+}
+
+.group-details .icon {
+    font-size: 50px;
+    background-color: rgb(222, 228, 234);
+    padding: 6px;
+    border-radius: 50%;
+}
+
+.group-details .icon:hover {
+    background-color: #c0b6b6;
+}
+
+.group-members {
+    margin-top: 10px;
+    text-decoration: none;
+    list-style: none;
+    text-align: center;
+    background-color: rgb(179, 209, 199);
+    border-radius: 5px;
 }
 
 @media (max-width: 768px) {
@@ -132,5 +189,13 @@
     .sub-getGroup {
         flex-direction: column;
         gap: 12px;
+    }
+    .group-button{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+        width: 80%;
+        text-align: center;    
     }
 }

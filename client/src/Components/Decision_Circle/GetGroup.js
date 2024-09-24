@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getAlldecisionGroup, deleteDecisionGroup, } from './Networkk_Call';
+import { getAlldecisionGroup, deleteDecisionGroup } from './Networkk_Call';
 import './GetGroup.css';
-import { MdEdit } from "react-icons/md";
-import { MdDeleteForever } from "react-icons/md";
+import { MdEdit ,MdDeleteForever} from "react-icons/md";
 import { useNavigate, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -46,6 +45,7 @@ const GetGroup = () => {
         fetchGroups();
     }, []);
 
+        
     return (
         <div className="getGroup">
             {loading ? (
@@ -69,9 +69,11 @@ const GetGroup = () => {
                                         {/* <button className='getgroup-delete' onClick={() => handleDeleteGroup(group.id)}>Delete</button> */}
                                     </div>
                                 </div>
+                                 
+                                <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><button className='show-button'>Show Persons</button></Link>
                                 <div className='group-button'>
-                                    <Link to='/decisiongroup'><button className='group-add'>Add Person</button></Link>
-                                    <button className='group-remove'>Remove Person</button>
+                                    <Link to={`/decisiongroup/${group.group_name}?id=${group.id}`}><button className='group-add'>Add Person</button></Link>
+                                    <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><button className='group-remove'>Remove Person</button></Link>
                                 </div>
                             </div>
                         </div>

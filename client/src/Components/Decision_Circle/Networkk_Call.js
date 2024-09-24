@@ -17,25 +17,57 @@ const getUserListForDecisionCircle = async () => {
     }
 };
 
-const decisionCircleCreation = async ( type_of_group = 'decision_circle') => {
-    const token = localStorage.getItem('token');
+const decisionCircleCreation = async (group_id, members) => {
+    const token = localStorage.getItem('token'); 
     try {
         const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-            {
-                type_of_group
-            },
+            `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`, 
+            { group_id, members },
             {
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`, 
                 }
             }
         );
         return response.data;
     } catch (error) {
-        console.log(error);
+        console.error('Error creating Decision Group with Members:', error.response?.data || error.message);
+
         return error.message;
+    }
+};
+
+const getUsersForGroup = async (groupId) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getUsersForGroup/${groupId}`,
+            {
+                headers : {
+                    Authorization : `Bearer ${token}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error ('Error fetching users for group:',error);
+        throw error
+    }
+}
+
+const removeUsersFromGroup = async (groupId,userId) =>{
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.delete(`${process.env.REACT_APP_API_URL}/group/removeUsersFromGroup/${groupId}/${userId}`,
+            {
+                headers : { 
+                    Authorization : `Bearer ${token}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error ('Error fetching users for Group:',error);
+        throw error
     }
 }
 
@@ -113,22 +145,21 @@ const getAddMemberNameListFetch = async (existingMemberIds) => {
     }
 }
 
-const addMemberInDecisionCircle = async (userId, groupId) => {
+const addMemberInDecisionCircle = async (group_id, member_id, status) => {
     const token = localStorage.getItem('token');
-    //console.log("request bodddddddddy", userId, groupId);
     try {
-        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/addMemberToDecisionCircle`,
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/addMemberInDecisionCircle`,
+            {
+                member_id,  
+                group_id,
+                status
+            },
             {
                 headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                data: {
-                    userId,
-                    groupId
+                    Authorization: `Bearer ${token}` 
                 }
             }
         );
-        //console.log("response from remove", response.data);
         return response.data;
     } catch (error) {
         console.log(error);
@@ -342,6 +373,8 @@ const deleteDecisionGroup = async (id) => {
 export {
     getUserListForDecisionCircle,
     decisionCircleCreation,
+    getUsersForGroup,
+    removeUsersFromGroup,
     checkDecisionCircleExists,
     getDecisionCircleDetails,
     removeMemberFromDecision,
