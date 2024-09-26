@@ -15,8 +15,12 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import withAuth from '../withAuth';
-import { getUserListForDecisionCircle } from './Networkk_Call';
+import { getUserListForDecisionCircle,sendDecisionCircleInvitation } from './Networkk_Call';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const DecisionGroup = () => {
   const [users, setUsers] = useState([]);
@@ -83,8 +87,19 @@ const DecisionGroup = () => {
       );
 
       console.log('Response:', response);
+      for (const user of selectedUsers) {
+        try {
+          await sendDecisionCircleInvitation(user.email);
+          toast.success(`Invitation sent to ${user.email} successfully`);
+          console.log(`Invitation sent to ${user.email}`);
+        } catch (invitationError) {
+          toast.error(`Failed to invite ${user.email}`);
+          console.error(`Error sending invitation to ${user.email}:`, invitationError);
+        }
+      }
       navigate('/getdecisioncircle');
     } catch (error) {
+      toast.error('Error creating decision circle');
       console.error('Error creating decision circle:', error.response ? error.response.data : error.message);
     }
   };
@@ -196,6 +211,7 @@ const DecisionGroup = () => {
           </Grid>
         </Grid>
       </Box>
+      <ToastContainer />
     </div>
   );
 };

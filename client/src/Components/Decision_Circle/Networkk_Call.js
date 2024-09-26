@@ -36,6 +36,23 @@ const decisionCircleCreation = async (group_id, members) => {
         return error.message;
     }
 };
+const getUserDecisionCircles = async () => {
+    const token = localStorage.getItem('token'); 
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/group/getUserDecisionCircles`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, 
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error creating Decision Group with Members:', error.response?.data || error.message);
+        return error.message;
+    }
+};
 
 const getUsersForGroup = async (groupId) =>{
     const token = localStorage.getItem('token');
@@ -373,6 +390,7 @@ const deleteDecisionGroup = async (id) => {
 export {
     getUserListForDecisionCircle,
     decisionCircleCreation,
+    getUserDecisionCircles,
     getUsersForGroup,
     removeUsersFromGroup,
     checkDecisionCircleExists,
