@@ -215,35 +215,6 @@ const removeUsersFromGroup = async (req, res) => {
     }
 };
 
-const checkDecisionCircleExists = async (req, res) => {
-    let conn;
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const query = `
-            SELECT COUNT(*) AS count 
-            FROM techcoach_lite.techcoach_decision_group
-            WHERE user_id = ?
-        `;
-        const userId = req.user.id;
-        const [result] = await conn.query(query, [userId]);
-
-        //console.log("count", result);
-
-        const count = result.count;
-        const exists = count > 0n ? true : false;
-
-        await conn.commit();
-        res.status(200).json({ message: 'Decision Circle fetched', exists });
-    } catch (error) {
-        console.error('Error in Decision Circle fetching', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
 const sendDecisionCircleInvitation = async (req, res) => {
     // console.log("Request body invitation:", req.user);
     // console.log("Request body invitation:", req.body);
@@ -321,7 +292,6 @@ const decisionshareDecisionCircle = async (req, res) => {
     
     let conn;
     try {
-      // Get connection and start a transaction
       conn = await getConnection();
       await conn.beginTransaction();
   
@@ -356,181 +326,204 @@ const decisionshareDecisionCircle = async (req, res) => {
     }
 };
 
+// const getdecisionSharedDecisionCircle = async (req, res) => {
+//     const userId = req.user.id;
+//     let conn;
+  
+//     const decryptText = (text, key) => {
+//         if (!text) return text; 
+//         try {
+//           const decipher = crypto.createDecipher('aes-256-cbc', key);
+//           let decryptedText = decipher.update(text, 'hex', 'utf8');
+//           decryptedText += decipher.final('utf8');
+//           return decryptedText;
+//         } catch (error) {
+//           console.error('Error decrypting text:', error);
+//           return null;
+//         }
+//       };
+
+//     const encryptText = (text, key) => {
+//         try {
+//             const cipher = crypto.createCipher('aes-256-cbc', key);
+//             let encryptedText = cipher.update(text, 'utf8', 'hex');
+//             encryptedText += cipher.final('hex');
+//             return encryptedText;
+//         } catch (error) {
+//             console.error('Error encrypting text:', error);
+//             return null;
+//         }
+//     };
+  
+//     try {
+//       conn = await getConnection();
+//       await conn.beginTransaction();
+  
+//       // Fetch all shared decisions for the user
+//       const sharedDecisionsQuery = `
+//         SELECT 
+//           tgsd.decision_id,
+//           td.decision_name,
+//           tdr.decision_reason_text AS decision_reason,
+//           td.user_statement,
+//           td.decision_taken_date,
+//           td.decision_due_date,
+//           tg.group_name,
+//           tg.type_of_group,
+//           tu.displayname,
+//           tu.email
+//         FROM techcoach_lite.techcoach_decision_group_share_decisions tgsd
+//         JOIN techcoach_lite.techcoach_decision td ON tgsd.decision_id = td.decision_id
+//         LEFT JOIN techcoach_lite.techcoach_decision_reason tdr ON td.decision_id = tdr.decision_id
+//         JOIN techcoach_lite.techcoach_decision_group tg ON tgsd.group_id = tg.id
+//         JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+//         WHERE tg.user_id = ?
+//       `;
+  
+//       const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId]);
+  
+//       if (sharedDecisions.length === 0) {
+//         res.status(200).json({ message: 'No shared decisions found', results: [], decisionCount: 0 });
+//         return;
+//       }
+  
+//       const decryptedDecisionData = sharedDecisions.map((decision) => {
+//         const keyData = decision.displayname + decision.email;
+//         console.log('Key Data:', keyData);
+      
+//         // Decrypt decision_name and user_statement
+//         const decryptedDecisionName = decryptText(decision.decision_name, req.user.key);
+//         const decryptedUserStatement = decryptText(decision.user_statement, req.user.key);
+//         const decryptedDecisionReason = decryptText(decision.decision_reason,req.user.key)
+      
+//         // Check if decryption was successful
+//         if (decryptedDecisionName === null || decryptedUserStatement === null) {
+//           console.error('Decryption failed for decision:', decision.decision_id);
+//           return { ...decision, decision_name: null, user_statement: null };
+//         }
+      
+//         return {
+//           ...decision,
+//           decision_name: decryptedDecisionName,
+//           user_statement: decryptedUserStatement,
+//           decision_reason:decryptedDecisionReason
+//         };
+//       });
+  
+//       // Commit the transaction
+//       await conn.commit();
+  
+//       // Return the results
+//       res.status(200).json({
+//         message: 'Shared Decisions Fetched Successfully',
+//         decryptedDecisionData,
+//         decisionCount: decryptedDecisionData.length
+//       });
+  
+//     } catch (error) {
+//       console.error('Error fetching shared decisions:', error);
+//       if (conn) await conn.rollback();
+//       res.status(500).json({ error: 'An error occurred while fetching shared decisions' });
+//     } finally {
+//       if (conn) conn.release();
+//     }
+// };
+
 const getdecisionSharedDecisionCircle = async (req, res) => {
-    const userId = req.user.id; // Assuming userId is fetched from req.user
-    const { group_id, decision_id } = req.body; // Extracting group_id and decision_id from request body
+    const userId = req.user.id;
     let conn;
-    
+  
+    const decryptText = (text, key) => {
+      if (!text) return text;
+      try {
+        const decipher = crypto.createDecipher('aes-256-cbc', key);
+        let decryptedText = decipher.update(text, 'hex', 'utf8');
+        decryptedText += decipher.final('utf8');
+        return decryptedText;
+      } catch (error) {
+        console.error('Error decrypting text:', error);
+        return null;
+      }
+    };
+  
     try {
       conn = await getConnection();
       await conn.beginTransaction();
   
-      // Fetch shared decisions for the user using the provided group_id and decision_id
+      // Fetch all shared decisions for the user
       const sharedDecisionsQuery = `
-        SELECT * FROM techcoach_lite.techcoach_decision_group_share_decisions 
-        WHERE group_id = ? AND decision_id = ?`;
-      const sharedDecisions = await conn.query(sharedDecisionsQuery, [group_id, decision_id]);
+        SELECT 
+          tgsd.decision_id,
+          td.decision_name,
+          td.user_statement,
+          td.decision_taken_date,
+          td.decision_due_date,
+          tg.group_name,
+          tg.type_of_group,
+          tu.displayname,
+          tu.email
+        FROM techcoach_lite.techcoach_decision_group_share_decisions tgsd
+        JOIN techcoach_lite.techcoach_decision td ON tgsd.decision_id = td.decision_id
+        JOIN techcoach_lite.techcoach_decision_group tg ON tgsd.group_id = tg.id
+        JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+        WHERE tg.user_id = ?
+      `;
   
-      if (sharedDecisions.length === 0) {
-        res.status(200).json({ message: 'No decisions fetched', results: [], decisionCount: 0 });
+      const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId]);
+  
+
+      if (!Array.isArray(sharedDecisions)) {
+        res.status(500).json({ error: 'Unexpected data format: sharedDecisions is not an array' });
         return;
       }
   
-      const decisionIds = sharedDecisions.map(d => d.decision_id); // Ensure you use the correct key
-      // Fetch decision details based on the fetched decisionIds
-      const decisionDetailsQuery = `
-        SELECT decision_id, user_id, decision_name, decision_reason, created_by, creation_date, 
-               decision_due_date, decision_taken_date, user_statement
-        FROM techcoach_lite.techcoach_decision
-        WHERE decision_id IN (?)
-      `;
-      
-      const decisionDetails = await conn.query(decisionDetailsQuery, [decisionIds]);
-  
-      // Check if any decision details were returned
-      if (decisionDetails.length === 0) {
-        return res.status(404).json({ message: 'No shared decisions found' });
+      if (sharedDecisions.length === 0) {
+        res.status(200).json({ message: 'No shared decisions found', results: [], decisionCount: 0 });
+        return;
       }
+  
+      // Decrypt decision_name and user_statement for each decision
+      const decryptedDecisionData = await Promise.all(sharedDecisions.map(async (decision) => {
+        const decryptedDecisionName = decryptText(decision.decision_name, req.user.key);
+        const decryptedUserStatement = decryptText(decision.user_statement, req.user.key);
+  
+        // Fetch decision reasons for each decision
+        const decisionReasons = await conn.query(`
+          SELECT decision_reason_text 
+          FROM techcoach_lite.techcoach_decision_reason 
+          WHERE decision_id = ?
+        `, [decision.decision_id]);
+  
+        // Decrypt each decision reason
+        const decryptedReasons = decisionReasons.map(reason => decryptText(reason.decision_reason_text, req.user.key));
+  
+        return {
+          ...decision,
+          decision_name: decryptedDecisionName,
+          user_statement: decryptedUserStatement,
+          decision_reason: decryptedReasons
+        };
+      }));
+  
+      // Commit the transaction
+      await conn.commit();
   
       // Return the results
       res.status(200).json({
         message: 'Shared Decisions Fetched Successfully',
-        sharedDecisions: decisionDetails
+        results: decryptedDecisionData,
+        decisionCount: decryptedDecisionData.length
       });
+  
     } catch (error) {
-      console.error('Error Fetching Shared Decisions:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Error fetching shared decisions:', error);
+      if (conn) await conn.rollback();
+      res.status(500).json({ error: 'An error occurred while fetching shared decisions' });
     } finally {
-      if (conn) await conn.release();
-    }
-  };
-
-const getDecisionCircleDetails = async (req, res) => {
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const userId = req.user.id;
-
-        const groupQuery = `
-            SELECT id, user_id, type_of_group, created_at
-            FROM techcoach_lite.techcoach_decision_group
-            WHERE user_id = ?
-        `;
-        
-        const [groupResult] = await conn.query(groupQuery, [userId]);
-
-        console.log("Group Result", groupResult);
-
-        if (groupResult === undefined) {
-            return res.status(200).json({ error: 'No groups found for this user' });
-        }
-
-        const groupId = groupResult.id;
-
-        const groupMemberQuery = `
-            SELECT member_id, status
-            FROM techcoach_lite.techcoach_decision_group_member
-            WHERE group_id = ?
-        `;
-
-        const groupMemberResult = await conn.query(groupMemberQuery, [groupId]);
-
-        console.log("Group Member Result", groupMemberResult);
-
-        if (groupMemberResult.length === 0) {
-            return res.status(200).json({ group: groupResult, error: 'No members found for this group' });
-        }
-
-        const memberDetailsQuery = `
-            SELECT user_id, displayname, email 
-            FROM techcoach_lite.techcoach_users 
-            WHERE user_id = ?
-        `;
-
-        const memberDetailsPromises = groupMemberResult.map(async (member) => {
-            const memberDetailsResult = await conn.query(memberDetailsQuery, [member.member_id]);
-            if (memberDetailsResult.length > 0) {
-                // Assuming only one result per user_id
-                const memberDetail = memberDetailsResult[0];
-                return { ...memberDetail, status: member.status };
-            }
-            return null;
-        });
-
-        const memberDetailsResult = (await Promise.all(memberDetailsPromises)).filter(Boolean);
-
-        console.log("Member Details Result", memberDetailsResult);
-
-        await conn.commit();
-        res.status(200).json({ group: groupResult, members: memberDetailsResult });
-    } catch (error) {
-        console.error('Error fetching Decision Circle details', error);
-        if (conn) {
-            await conn.rollback();
-        }
-        res.status(500).json({ error: 'An error occurred while fetching the group details' });
-    } finally {
-        if (conn) {
-            conn.release();
-        }
+      if (conn) conn.release();
     }
 };
-
-const shareDecisionInDecisionCircle = async (req, res) => {
-    const { decisionId, groupId, memberId } = req.body;
-    // console.log("req body frommmm share decisionnnnnnn", req.body);
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        await conn.query(`
-            INSERT INTO techcoach_lite.techcoach_decision_group_shared_decisions (groupId, groupMember, decisionId)
-            VALUES (?, ?, ?)
-        `, [groupId, memberId, decisionId]);    
-
-        await conn.commit();
-
-        res.status(200).json({ message: 'Decision shared successfully' });
-    } catch (error) {
-        console.error('Error sharing decision:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-const getSharedMemberss = async (req, res) => {
-    const { groupId, decisionId } = req.body;
-    // console.log("reqqqqqqqqqq body", req.body);
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const result = await conn.query(`
-            SELECT groupMember FROM techcoach_lite.techcoach_decision_group_shared_decisions WHERE groupId = ? AND decisionId = ?
-        `, [groupId, decisionId]);
-
-        await conn.commit();
-
-        console.log("result from fetched members", result);
-
-        res.status(200).json({ message: 'Shared Members Fetched Successfully', result });
-    } catch (error) {
-        console.error('Error fetching shared members:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-
+   
 const decisionCircleInvitation = async (req, res) => {
   const { email } = req.body;
   const { email: senderEmail } = req.user;
@@ -591,7 +584,6 @@ const decisionCircleInvitation = async (req, res) => {
       if (conn) conn.release();
   }
 };
-
 
 
 
@@ -762,11 +754,7 @@ module.exports = {
     getUsersForGroup,
     removeUsersFromGroup,
     decisionshareDecisionCircle,
-    checkDecisionCircleExists,
-    getDecisionCircleDetails,
-    shareDecisionInDecisionCircle,
     getdecisionSharedDecisionCircle,
-    getSharedMemberss,
     decisionCircleInvitation,
     sendDecisionCircleInvitation,
     // groupNames controller
