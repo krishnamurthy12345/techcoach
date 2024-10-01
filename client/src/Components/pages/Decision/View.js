@@ -43,7 +43,7 @@ const View = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                console.log("responseeeee from detailssssssssss", response.data.decisionData[0]);
+                // console.log("responseeeee from detailssssssssss", response.data.decisionData[0]);
                 const responseData = response.data;
                 console.log("responseeeee from afterrrrrrrrrrrrrrrrrr", responseData);
                 if (responseData && responseData.decisionData && responseData.decisionData.length > 0) {
@@ -173,7 +173,7 @@ const View = () => {
         }
     };
 
-    console.log("shared comments", sharedComments);
+    // console.log("shared comments", sharedComments);
 
     const memberComments = sharedComments.filter(comment => comment.type_of_member === "member");
     const authorComments = sharedComments.filter(comment => comment.type_of_member === "author");

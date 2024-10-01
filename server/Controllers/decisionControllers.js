@@ -235,7 +235,7 @@ const getInfo_Referred = async (req, res) => {
 
     const decryptedDecisionData = decisionData.map(decision => {
 
-      console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
+      // console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
 
       const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags; 
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;

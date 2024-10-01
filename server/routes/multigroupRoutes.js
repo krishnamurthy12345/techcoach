@@ -16,8 +16,6 @@ router.get("/getUsersForGroup/:groupId", multigroupController.getUsersForGroup);
 router.delete("/removeUsersFromGroup/:groupId/:userId", multigroupController.removeUsersFromGroup);
 router.post("/decisionshareDecisionCircle",multigroupController.decisionshareDecisionCircle);
 router.get("/getdecisionSharedDecisionCircle",multigroupController.getdecisionSharedDecisionCircle);
-router.get("/checkDecisionCircleExists", multigroupController.checkDecisionCircleExists);
-router.get("/getDecisionCircleDetails",multigroupController.getDecisionCircleDetails);
 router.post("/decisionCircleInvitation",multigroupController.decisionCircleInvitation);
 router.post("/sendDecisionCircleInvitation",multigroupController.sendDecisionCircleInvitation);
 
