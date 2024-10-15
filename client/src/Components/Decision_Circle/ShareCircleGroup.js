@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams,useNavigate } from 'react-router-dom';
-import { getAlldecisionGroup, getUserDecisionCircles,decisionshareDecisionCircle } from './Networkk_Call';
-import { Box, Typography } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getAlldecisionGroup, getUserDecisionCircles } from './Networkk_Call';
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import { IoClose } from "react-icons/io5";
 import axios from 'axios';
-import './ShareCircleGroup.css'; 
+import './ShareCircleGroup.css';
 
 const ShareCircleGroup = () => {
     const [circleIcon, setCircleIcon] = useState(false);
     const [loading, setLoading] = useState(false);
     const [groups, setGroups] = useState([]);
     // const [userCircles, setUserCircles] = useState([]);
+    const [selectedGroup, setSelectedGroup] = useState('');
     const [error, setError] = useState('');
     const [decision, setDecision] = useState({});
     const { id } = useParams();
@@ -79,29 +80,12 @@ const ShareCircleGroup = () => {
         fetchGroups();
     }, [id]);
 
-    // useEffect(() => {
-    //     const loadUserCircles = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const data = await getUserDecisionCircles();
-    //             setUserCircles(data.decisionCircles || []);
-    //             console.log('assa', data.decisionCircles || []);
-    //         } catch (error) {
-    //             setError('Failed to fetch user decision circles.');
-    //             console.error('Error fetching user decision circles:', error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     loadUserCircles();
-    // }, [id]);
-
     const handleShareDecision = async (group_id) => {
         setLoading(true);
         try {
-            const decision_id = id; 
+            const decision_id = id;
             const token = localStorage.getItem('token');
-            
+
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionshareDecisionCircle`, {
                 group_id,
                 decision_id,
@@ -110,7 +94,7 @@ const ShareCircleGroup = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             console.log(response.data, 'Shared Decision Data');
             toast.success('Decision shared successfully!');
         } catch (error) {
@@ -120,11 +104,14 @@ const ShareCircleGroup = () => {
             setLoading(false);
         }
     };
-    
+
+const handleGroupSelect = (event)=>{
+    setSelectedGroup(event.target.value);
+}
 
 
     return (
-        <div className="share-circle-group">
+        <div className="share-circle-group mt-5 rounded">
             <div className="icon-close-card">
                 <h4>
                     Share Decision
@@ -132,28 +119,40 @@ const ShareCircleGroup = () => {
                 <IoClose onClick={handleCloseCircle} />
             </div>
             <div className="circle-group-details">
-                <h6>Decision Circle Group Details</h6>
-                <div className="group-container">
-                    {groups.map(group => (
-                        <div key={group.id} className="group-item">
-                            <input type='checkbox' onClick={() => handleShareDecision(group.id)} />
-                            <h5>{group.group_name}</h5>
-                        </div>
-                    ))}
-                </div>
-                {/* <div>
-                    <h6 className="others-group">Decision Circle Created By Others</h6>
-                    <div className="circles">
-                        {userCircles.map(circle => (
-                            <div key={circle.id} className="circle-item">
-                                <input type='checkbox' />
-                                <h5 className="circle-name">{circle.group_name}</h5>
+                <h5>Decision Circle Group Details</h5>
+                <FormControl fullWidth>
+                    <InputLabel id='group-select-label'>Select a Group</InputLabel>
+                    <Select
+                        labelId='group-select-label'
+                        value={selectedGroup}
+                        onChange={handleGroupSelect}
+                        label='select a group'
+                    >
+                        {groups.map(group => (
+                            <MenuItem key={group.id} value={group.id}>
+                                {group.group_name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                {selectedGroup && (
+                    <div className="group-container mt-3">
+                        <h6>Select Decision Circle</h6>
+                        <div className='group-items'>
+                        {groups
+                        .filter(group=> group.id === selectedGroup)
+                        .map(group => (
+                            <div key={group.id} className="group-item">
+                                <input type='checkbox' onClick={() => handleShareDecision(group.id)} />
+                                <h5>{group.group_name}</h5>
                             </div>
                         ))}
+                        </div>
                     </div>
-                </div> */}
+                )}
+               
             </div>
-            <div><h5>Decision Details</h5></div>
+            <div><h5 className='mt-2'>Decision Details</h5></div>
             <div>
                 <Box sx={{
                     padding: "1rem", backgroundColor: "lightblue", margin: { xs: "1rem", md: "2rem" }, borderRadius: "0.5rem"
