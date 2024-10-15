@@ -18,14 +18,14 @@ const getUserListForDecisionCircle = async () => {
 };
 
 const decisionCircleCreation = async (group_id, members) => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     try {
         const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`, 
+            `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
             { group_id, members },
             {
                 headers: {
-                    Authorization: `Bearer ${token}`, 
+                    Authorization: `Bearer ${token}`,
                 }
             }
         );
@@ -38,13 +38,13 @@ const decisionCircleCreation = async (group_id, members) => {
 };
 
 const getUserDecisionCircles = async () => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     try {
         const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/group/getUserDecisionCircles`,
             {
                 headers: {
-                    Authorization: `Bearer ${token}`, 
+                    Authorization: `Bearer ${token}`,
                 }
             }
         );
@@ -55,36 +55,36 @@ const getUserDecisionCircles = async () => {
     }
 };
 
-const getUsersForGroup = async (groupId) =>{
+const getUsersForGroup = async (groupId) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getUsersForGroup/${groupId}`,
             {
-                headers : {
-                    Authorization : `Bearer ${token}`,
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 }
             }
         );
         return response.data;
     } catch (error) {
-        console.error ('Error fetching users for group:',error);
+        console.error('Error fetching users for group:', error);
         throw error
     }
 }
 
-const removeUsersFromGroup = async (groupId,userId) =>{
+const removeUsersFromGroup = async (groupId, userId) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.delete(`${process.env.REACT_APP_API_URL}/group/removeUsersFromGroup/${groupId}/${userId}`,
             {
-                headers : { 
-                    Authorization : `Bearer ${token}`,
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 }
             }
         );
         return response.data;
     } catch (error) {
-        console.error ('Error fetching users for Group:',error);
+        console.error('Error fetching users for Group:', error);
         throw error
     }
 }
@@ -125,37 +125,65 @@ const sendDecisionCircleInvitation = async (email) => {
 //   }
 // }
 
-const getdecisionSharedDecisionCircle = async () =>{
+const getdecisionSharedDecisionCircle = async (groupId) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getdecisionSharedDecisionCircle`,
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getdecisionSharedDecisionCircle/${groupId}`,
             {
-                headers : {
-                    Authorization : `Bearer ${token}`
-                }
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                params: { group_id: groupId },
             }
         )
         return response.data.results;
     } catch (error) {
-        console.error('Error Fetching Decision Get Circles:',error);
+        console.error('Error Fetching Decision Get Circles:', error);
         throw error
     }
 }
 
-const decisionCircleAddInvitation = async (email) => {
+const getMemberSharedDecisions = async (groupId) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCircleAddInvitation`,
-            { email },
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getMemberSharedDecisions/${groupId}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
-                }
-            });
-        console.log("response for Decision Circle Invitation", response);
+                },
+                params: { group_id: groupId },
+            }
+        )
+        return response.data.results;
+    } catch (error) {
+        console.error('Error Fetching Decision Get Circles:', error);
+        throw error
+    }
+}
+
+const mailToDecisionCirclePostComment = async (decision, memberId, comment) => {
+    const token = localStorage.getItem('token');
+
+    // Validation check for commentText
+    if (!comment || comment.trim() === '') {
+        console.error('Comment text is missing');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`, {
+            decision, 
+            memberId, 
+            comment
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log('Response for added comments', response);
         return response.data;
     } catch (error) {
-        console.error("Error Inviting the person to the Decision App", error);
+        console.error('Error fetching added comments', error);
         throw error;
     }
 }
@@ -219,7 +247,7 @@ const getDecisionGroup = async (id) => {
     }
 };
 
-const putDecisionGroup = async (id,group_name,type_of_group = 'decision_circle') => {
+const putDecisionGroup = async (id, group_name, type_of_group = 'decision_circle') => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.put(
@@ -259,6 +287,214 @@ const deleteDecisionGroup = async (id) => {
     }
 };
 
+// Decision-Circle Networkk_calls
+// const postComment = async (comment, MemberID,groupId, decision_id) => {
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await axios.put(
+//             `${process.env.REACT_APP_API_URL}/group/postcomment`,
+//             {
+//                 comment,
+//                 MemberID,
+//                 groupId,
+//                 decision_id 
+//             },
+//             {
+//                 headers: {
+//                     Authorization: `Bearer ${token}`
+//                 }
+//             }
+//         );
+//         console.log("Response for comments", response);
+//         return response.data;
+//     } catch (error) {
+//         console.error("Error posting comment", error);
+//         throw error;
+//     }
+// };
+
+// const getComment = async(id) =>{
+//     const token = localStorage.getItem('token');
+//     try{
+//         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getcomment/${id}`,{
+//             headers:{
+//                 Authorization:`Bearer ${token}`
+//             }
+//         });
+//         console.log(response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching comments:',error);
+//         throw error
+//     }
+// }
+
+// const getShareDecisionComment = async (id) => {
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/getShareDecisionComment`, {
+//             decision_id: id
+//         }, {
+//             headers: {
+//                 Authorization: `Bearer ${token}`
+//             }
+//         });
+//         console.log("response for comments", response);
+//         return response.data; 
+//     } catch (error) {
+//         console.error("Error fetching shared comments", error);
+//         throw error;
+//     }
+// };
+
+// const postReplyDecisionComment = async(commentId, reply,groupId, decisionId) =>{
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/postReplyDecisionComment`,
+//             { commentId, reply,groupId, decisionId },{
+//             headers:{
+//                 Authorization: `Bearer ${token}`
+//             }
+//         })
+//         console.log(response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error Posting reply:',error);
+//         throw error;
+//     }
+// }
+
+// const editComments = async (commentId, editedContent) => {
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/editComments`, 
+//             { 
+//                 commentId, 
+//                 editedContent 
+//             }, {
+//             headers: {
+//                 Authorization: `Bearer ${token}`
+//             }
+//         });
+//         console.log("response for edit comments", response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error editing comment:', error);
+//         throw error;
+//     }
+// };
+
+const postComment = async (comment, groupId, decisionId, memberId) => {
+    const token = localStorage.getItem('token');
+
+    // Logging the payload to be sent
+    console.log("Posting comment with data:", {
+        comment,
+        group_id: groupId,
+        decision_id: decisionId,
+        member_id: memberId,
+    });
+
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`, 
+            {
+                comment,
+                group_id: groupId,
+                decision_id: decisionId,
+                member_id: memberId,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        );
+
+        console.log("Response for comments", response);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error("Error posting comment:", error.response.data);
+            throw error.response.data; // Propagate error for further handling
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            throw new Error('No response received from the server');
+        } else {
+            console.error("Error", error.message);
+            throw new Error('An error occurred while posting the comment');
+        }
+    }
+};
+
+const getComments = async ( groupId,decisionId ) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${groupId}/${decisionId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw new Error('Failed to fetch comments');
+    }
+}
+
+const updateComment = async (commentId, updatedComment) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/comments/${commentId}`, updatedComment, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+
+        console.log("Updated comment response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating comment:', error.response ? error.response.data : error.message);
+        throw error.response ? error.response.data : new Error("Error updating comment"); // Return the error message
+    }
+};
+
+const replyToComment = async (data) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments/reply`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+
+        console.log("Response for comments", response);
+        return response.data;
+    } catch (error) {
+        console.error("Error posting comment:", error.response.data);
+        throw error.response.data;
+    }
+};
+
+const deleteComment = async (commentId) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await axios.delete(`${process.env.REACT_APP_API_URL}/group/comments/${commentId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+
+        console.log("Response for comments", response);
+        return response.data;
+    } catch (error) {
+        console.error("Error posting comment:", error.response.data);
+        throw error.response.data;
+    }
+};
+
 export {
     getUserListForDecisionCircle,
     decisionCircleCreation,
@@ -268,11 +504,28 @@ export {
     sendDecisionCircleInvitation,
     // decisionshareDecisionCircle,
     getdecisionSharedDecisionCircle,
-    decisionCircleAddInvitation,
+    getMemberSharedDecisions,
+    mailToDecisionCirclePostComment,
+
     // group namess
     postdecisionGroup,
     getAlldecisionGroup,
     getDecisionGroup,
     putDecisionGroup,
-    deleteDecisionGroup
+    deleteDecisionGroup,
+
+    // Decision-Circle Networkk_Call
+    //  postComment,
+    //  getComment,
+    //  getShareDecisionComment,
+    //  postReplyDecisionComment,
+    //  editComments,
+
+
+    // Decision-Circle Networkk_Call
+    postComment,
+    getComments,
+    updateComment,
+    replyToComment,
+    deleteComment,
 };

@@ -32,7 +32,7 @@
     background-color: white;
 }
 
-.getGroupName {
+/* .getGroupName {
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -40,12 +40,21 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.2s ease-in-out;
-}
+} */
 
-.getGroupName:hover {
+/* .getGroupName:hover {
     transform: scale(1.01);
-}
+} */
 
+.circle-items {
+    flex: 0 0 calc(25% - 20px); 
+    margin: 10px; 
+    background: #fff;
+    border-radius:10px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
 .getGroupName h3 {
     margin-top: 0;
     font-size: 1.25rem;
@@ -101,7 +110,7 @@
     align-items: center;
 }
 
-.show-button {
+/* .show-button {
     background-color: rgb(82, 105, 123);
     border: none;
     outline: none;
@@ -113,9 +122,9 @@
 .show-button:hover {
     background-color: #ddd;
     color: black;
-}
+} */
 
-.group-add {
+/* .group-add {
     background-color: rgb(82, 105, 123);
     border-radius: 5px;
     padding: 5px;
@@ -127,9 +136,21 @@
     background-color: rgb(16, 104, 16);
     border-radius: 5px;
     padding: 5px;
-}
+} */
 
-.group-remove {
+.add-icon , .remove-icon{
+    font-size: 30px;
+}
+.show-icon{
+    font-size: 40px;
+}
+.add-icon:hover{
+    color: green;
+}
+.remove-icon:hover{
+    color: red;
+}
+/* .group-remove {
     background-color: rgb(82, 105, 123);
     border-radius: 5px;
     padding: 5px;
@@ -141,10 +162,10 @@
     background-color: rgb(203, 23, 23);
     border-radius: 5px;
     padding: 5px;
-}
+} */
 
 .getGroupp {
-    max-width: 900px;
+    max-width: 80%;
     margin: 0 auto;
     background-color: rgb(249, 249, 249);
     border-radius: 5px;
@@ -183,7 +204,6 @@
 }
 .circle-item {
     flex: 0 0 calc(33.333% - 20px); 
-    margin: 10px; 
     box-sizing: border-box;
     background: #fff;
     border-radius: 8px;
@@ -191,6 +211,33 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
+
+
+@media (max-width: 1024px) {
+    .circle-items {
+        flex: 0 0 calc(33.333% - 20px); /* 3 cards per row on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .circle-items {
+        flex: 0 0 calc(50% - 20px); /* 2 cards per row on tablets */
+    }
+
+    .group-button {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .circle-items {
+        flex: 0 0 100%; /* 1 card per row on mobile */
+    }
+}
+
 
 @media (max-width: 768px) {
     .circle-item {
