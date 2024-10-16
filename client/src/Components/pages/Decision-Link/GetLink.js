@@ -249,7 +249,12 @@ const GetLink = () => {
       <h3>Profiles</h3>
       <div className="swot-decision">
         {Object.values(groupedProfiles).map((group, index) => (
-          <div className="swot-decisions" key={index}>
+          <div
+            className={`swot-decisions ${
+              group.header_name === 'Opportunity' ? 'opportunity-card' : group.header_name === 'Threat' ? 'threat-card' : ''
+            }`}
+            key={index}
+          >
             <h5><strong>{group.header_name}</strong></h5>
             <h6><strong>SWOT values:</strong>{group.header_value}</h6>
             {group.decisions.map((decision, idx) => (

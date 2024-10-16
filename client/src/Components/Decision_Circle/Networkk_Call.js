@@ -92,7 +92,7 @@ const removeUsersFromGroup = async (groupId, userId) => {
 const sendDecisionCircleInvitation = async (email) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCircleInvitation`,
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/sendDecisionCircleInvitation`,
             { email },
             {
                 headers: {

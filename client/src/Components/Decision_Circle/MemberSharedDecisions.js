@@ -8,6 +8,7 @@ import { AiFillEdit } from "react-icons/ai";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import './GetGroup.css';
 import './CommentStyle.css';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
@@ -190,11 +191,17 @@ const MemberSharedDecisions = () => {
                                                             {comment.displayname[0]}
                                                         </Avatar>
                                                         <div style={{ flex: 1 }}>
-                                                            <Typography variant="body2" className="comment-username" style={{ fontWeight: '500' }}>
+                                                            {/* <Typography variant="body2" className="comment-username" style={{ fontWeight: '500' }}>
                                                                 {comment.displayname} ({comment.email})
                                                             </Typography>
                                                             <Typography variant="caption" className="comment-timestamp" style={{ color: 'gray' }}>
                                                                 {new Date(comment.created_at).toLocaleTimeString()}
+                                                            </Typography> */}
+                                                            <Typography variant='caption' color=''>
+                                                                {comment.displayname} | {comment.email} |
+                                                                {comment.created_at === comment.updated_at
+                                                                ? <span> {formatDistanceToNow(parseISO(comment.created_at), {addSuffix:true })}</span>
+                                                                : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), {addSuffix:true})}</span>}
                                                             </Typography>
                                                         </div>
                                                     </div>

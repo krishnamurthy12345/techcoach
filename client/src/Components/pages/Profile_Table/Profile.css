@@ -36,7 +36,8 @@ h3 {
 
 .user-details {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -53,7 +54,12 @@ h3 {
   object-fit: cover;
   margin-top: 10px;
 }
-
+.data-aroundd{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
 .details {
   display: flex;
   justify-content: space-between;
@@ -118,7 +124,7 @@ h3 {
 }
 .data-around{
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
   margin-top: 15px;
 }
@@ -147,12 +153,13 @@ h3 {
   background-color: #3975bf;
   border-radius: 7px;
   color: white;
-  max-width: 150px;
-  height: auto;
+  max-width: 130px;
+  max-height:min-content;
   text-align: center;
-  padding: 7px;
+  /* padding: 5px; */
   cursor: pointer;
   text-decoration: none;
+  border: none;
 }
 .linked-decisions:hover {
   text-decoration: none; 
