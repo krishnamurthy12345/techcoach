@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getAlldecisionGroup, deleteDecisionGroup, getUserDecisionCircles } from './Networkk_Call';
 import './GetGroup.css';
-import { MdEdit, MdDeleteForever, MdGroupAdd,MdGroupRemove } from "react-icons/md";
+import { MdEdit, MdDeleteForever, MdGroupAdd, MdGroupRemove } from "react-icons/md";
 import { FaUsersViewfinder } from "react-icons/fa6";
-import { useNavigate, Link,useParams } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -17,7 +17,7 @@ const GetGroup = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-   
+
 
     const fetchGroups = async () => {
         setLoading(true);
@@ -90,35 +90,34 @@ const GetGroup = () => {
                                     </div>
                                 </div>
 
-                                <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><FaUsersViewfinder className='show-icon'/>
+                                <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><FaUsersViewfinder className='show-icon' />
                                 </Link>
                                 <div className='group-button'>
-                                    <Link to={`/decisiongroup/${group.group_name}?id=${group.id}`}><MdGroupAdd className='add-icon'/>
+                                    <Link to={`/decisiongroup/${group.group_name}?id=${group.id}`}><MdGroupAdd className='add-icon' />
                                     </Link>
-                                    <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><MdGroupRemove className='remove-icon'/>
+                                    <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><MdGroupRemove className='remove-icon' />
                                     </Link>
                                 </div>
                             </div>
                         </div>
                     ))}
-
-                    <div>
-                        <h5 className='f-5'> Decision Circle Created By Others</h5>
-                        <div className='circles'>
-                            {userCircles.map(circle => (
-                                <div key={circle.id} className="circle-item">
-                                    <div className="getcircles">
-                                        <h5 className='f-5'>{circle.group_name}</h5>
-                                        <Link to={`/getmembershareddecisions/${circle.id}?group_name=${circle.group_name}`}>
-                                            <FaUsersViewfinder className='show-icon'/>
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
             )}
+            <div>
+                <h5 className='f-5'> Decision Circle Created By Others</h5>
+                <div className='circles'>
+                    {userCircles.map(circle => (
+                        <div key={circle.id} className="circle-item">
+                            <div className="getcircles">
+                                <h5 className='f-5'>{circle.group_name}</h5>
+                                <Link to={`/getmembershareddecisions/${circle.id}?group_name=${circle.group_name}`}>
+                                    <FaUsersViewfinder className='show-icon' />
+                                </Link>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
             <ToastContainer />
         </div>
     );

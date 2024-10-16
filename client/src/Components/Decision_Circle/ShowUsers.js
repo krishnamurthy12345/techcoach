@@ -206,6 +206,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { IoPersonAdd } from "react-icons/io5";
 import { IoMdRemoveCircle } from "react-icons/io";
 import { Card, CardContent, Typography, Grid, Avatar } from '@mui/material';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const ShowUsers = () => {
     const [groups, setGroups] = useState(null);
@@ -276,7 +277,8 @@ const ShowUsers = () => {
             setDecisions(data);
             data.forEach((decision) => fetchComments(groupId, decision.decision_id));
         } catch (error) {
-            toast.error('Failed to fetch decisions');
+            // toast.error('Failed to fetch decisions');
+            console.log('Failed to fetch decisions');
         }
     };
 
@@ -370,9 +372,9 @@ const ShowUsers = () => {
                                             <h6>Comments:</h6>
                                             {comments[decision.decision_id]?.length > 0 ? (
                                                 comments[decision.decision_id].map((comment) => (
-                                                    <div key={comment.id} className="comment-bubble" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                    <div key={comment.id} style={{ fontWeight: 'bold', flex: 1 }}>
                                                         {/* Display Comment */}
-                                                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-start', width: '60%', marginBottom: '16px', backgroundColor: '#fff' }}>
                                                             <div style={{ flex: 1 }}>
                                                                 <Typography>{comment.comment}</Typography>
                                                                 <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
@@ -380,11 +382,11 @@ const ShowUsers = () => {
                                                                         {comment.displayname[0]}
                                                                     </Avatar>
                                                                     <div style={{ flex: 1 }}>
-                                                                        <Typography variant="body2" className="comment-username" style={{ fontWeight: '500' }}>
-                                                                            {comment.displayname} ({comment.email})
-                                                                        </Typography>
-                                                                        <Typography variant="caption" className="comment-timestamp" style={{ color: 'gray' }}>
-                                                                            {new Date(comment.created_at).toLocaleTimeString()}
+                                                                        <Typography variant='caption' color=''>
+                                                                            {comment.displayname} | {comment.email} |
+                                                                            {comment.created_at === comment.updated_at
+                                                                                ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                                : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
                                                                         </Typography>
                                                                     </div>
                                                                 </div>
@@ -392,35 +394,36 @@ const ShowUsers = () => {
                                                         </div>
 
                                                         {/* Reply Comment Section */}
-                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-                                                            <div style={{ backgroundColor: '#edf6fc', padding: '8px', borderRadius: '8px', width: '70%' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'end', marginBottom: '16px' }}>
+                                                            <div style={{ backgroundColor: '#edf6fc', padding: '3px', borderRadius: '8px', width: '60%' }}>
                                                                 <input
                                                                     type='text'
                                                                     className='comment-input'
                                                                     placeholder='Write a reply comment'
                                                                     value={replyComment}
                                                                     onChange={(e) => setReplyComment(e.target.value)}
-                                                                    style={{ width: '60%', marginRight: '8px' }}
+                                                                    style={{ width: '40%', marginLeft: '80px', fontSize: '12px' }}
                                                                 />
-                                                                <button onClick={() => handleReplyComment(decision.decision_id, members[0]?.user_id, comment.id)}>
-                                                                    Reply Comment
+                                                                <button style={{ width: '50px', fontSize: '14px', marginLeft: '100px', borderRadius: '4px', backgroundColor: '#007BFF', color: 'White', border: 'none' }}
+                                                                    onClick={() => handleReplyComment(decision.decision_id, members[0]?.user_id, comment.id)}>
+                                                                    Reply
                                                                 </button>
                                                             </div>
+                                                            {comment.replies?.length > 0 && (
+                                                                <div style={{ display: 'flex', alignItems: 'right', flexDirection: 'column', marginTop: '8px' }}>
+                                                                    {comment.replies.map((reply) => (
+                                                                        <div key={reply.id} className="reply-comment" style={{ backgroundColor: '#edf6fc', padding: '8px', borderRadius: '8px', marginRight: 'auto', width: '30%', marginTop: '3px' }}>
+                                                                            <Typography variant='caption' color=''>
+                                                                                {comment.displayname} | {comment.email} |
+                                                                                {comment.created_at === comment.updated_at
+                                                                                    ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                                    : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                            </Typography>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        {comment.replies?.length > 0 && (
-                                                            <div style={{ display: 'flex-end',alignItems:'right', flexDirection: 'column', marginTop: '8px' }}>
-                                                                {comment.replies.map((reply) => (
-                                                                    <div key={reply.id} className="reply-comment" style={{ backgroundColor: '#edf6fc', padding: '8px', borderRadius: '8px', marginRight: 'auto', width: '50%', marginTop: '8px' }}>
-                                                                        <Typography variant="body2" style={{ fontWeight: '500' }}>
-                                                                            {reply.displayname}: {reply.comment}
-                                                                        </Typography>
-                                                                        <Typography variant="caption" style={{ color: 'gray' }}>
-                                                                            {new Date(reply.created_at).toLocaleTimeString()}
-                                                                        </Typography>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 ))
                                             ) : (

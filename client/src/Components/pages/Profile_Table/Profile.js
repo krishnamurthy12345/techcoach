@@ -195,7 +195,22 @@ const Profile = () => {
     <div className="card1">
       <div >
         <h3>Personal Details</h3>
-        <div className='user-details'>
+        <div className=''>
+          <div className='data-aroundd'>
+            <div>
+              {userData.profilePicture && (
+                <div>
+                  <img src={userData.profilePicture} alt="Profile" className="profile-picture" />
+                </div>
+              )}
+            </div>
+            <button className='linked-decisions'>
+              <Link to='/getall' className='linked-decisions'>
+                <p>View Linked Decisions</p>
+              </Link>
+            </button>
+          </div>
+          </div>
           <div>
             <strong>Username:</strong>
             <span>{userData.displayname}</span>
@@ -204,14 +219,6 @@ const Profile = () => {
             <strong>Email:</strong>
             <span>{userData.email}</span>
           </div>
-          <div>
-            {userData.profilePicture && (
-              <div>
-                <img src={userData.profilePicture} alt="Profile" className="profile-picture" />
-              </div>
-            )}
-          </div>
-        </div>
         <div className='details'>
           <Link to='/profiletab'>
             <button className='profiletab'>Add Personal Detail</button>
@@ -270,9 +277,6 @@ const Profile = () => {
         <div className='download-profile'>
           <p onClick={handleDownloadProfile}>Download Profile data</p>
         </div>
-        <Link to='/getall' className='linked-decisions'>
-            <p>View Linked Decisions</p>
-        </Link>
         <ToastContainer />
       </div>
       <center>

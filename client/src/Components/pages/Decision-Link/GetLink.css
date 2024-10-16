@@ -30,4 +30,11 @@ h3{
     background-color: lightgreen;
     padding: 10px;
 }
+.opportunity-card {
+    background-color: lightgreen; 
+  }
+  
+  .threat-card {
+    background-color: lightcoral;
+  }
   
