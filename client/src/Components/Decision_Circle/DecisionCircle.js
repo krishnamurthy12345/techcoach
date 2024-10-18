@@ -26,8 +26,8 @@ const DecisionCircle = () => {
   const handleSaveCircle = async () => {
     try {
       if (id) {
-        // const updatedData = ( circleName);
-        const result = await putDecisionGroup(id,{name:circleName});
+        const updatedData = ( circleName);
+        const result = await putDecisionGroup(id,updatedData);
         toast.success('Decision group updated successfully');
         console.log('Decision group updated successfully:', result);
       } else {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getAlldecisionGroup, getUserDecisionCircles } from './Networkk_Call';
-import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { getdecisionCirclesByUserAndMember } from './Networkk_Call';
+import { Box, Typography } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import { IoClose } from "react-icons/io5";
 import axios from 'axios';
@@ -11,17 +11,15 @@ const ShareCircleGroup = () => {
     const [circleIcon, setCircleIcon] = useState(false);
     const [loading, setLoading] = useState(false);
     const [groups, setGroups] = useState([]);
-    // const [userCircles, setUserCircles] = useState([]);
     const [selectedGroup, setSelectedGroup] = useState('');
-    const [error, setError] = useState('');
     const [decision, setDecision] = useState({});
+    const [searchTerm, setSearchTerm] = useState(''); 
     const { id } = useParams();
     const navigate = useNavigate();
 
     const handleCloseCircle = () => {
         setCircleIcon(true);
-        navigate(-1)
-
+        navigate(-1);
     }
 
     useEffect(() => {
@@ -67,8 +65,8 @@ const ShareCircleGroup = () => {
         const fetchGroups = async () => {
             setLoading(true);
             try {
-                const data = await getAlldecisionGroup();
-                setGroups(data);
+                const data = await getdecisionCirclesByUserAndMember();
+                setGroups(data.groups || []);
             } catch (error) {
                 toast.error('Failed to fetch groups');
                 console.log('Fetching error:', error);
@@ -86,7 +84,7 @@ const ShareCircleGroup = () => {
             const decision_id = id;
             const token = localStorage.getItem('token');
 
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionshareDecisionCircle`, {
+            await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionshareDecisionCircle`, {
                 group_id,
                 decision_id,
             }, {
@@ -95,7 +93,6 @@ const ShareCircleGroup = () => {
                 }
             });
 
-            console.log(response.data, 'Shared Decision Data');
             toast.success('Decision shared successfully!');
         } catch (error) {
             console.error('Error sharing decision:', error);
@@ -105,52 +102,58 @@ const ShareCircleGroup = () => {
         }
     };
 
-const handleGroupSelect = (event)=>{
-    setSelectedGroup(event.target.value);
-}
+    const handleGroupSelect = (event) => {
+        setSelectedGroup(event.target.value);
+    }
 
+    const filteredGroups = groups.filter(group => 
+        group.group_name && group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="share-circle-group mt-5 rounded">
             <div className="icon-close-card">
-                <h4>
-                    Share Decision
-                </h4>
+                <h4>Share Decision</h4>
                 <IoClose onClick={handleCloseCircle} />
             </div>
             <div className="circle-group-details">
                 <h5>Decision Circle Group Details</h5>
-                <FormControl fullWidth>
-                    <InputLabel id='group-select-label'>Select a Group</InputLabel>
-                    <Select
-                        labelId='group-select-label'
+                <div className=''>
+                    <label htmlFor="group-select">Select a Group</label>
+                    <select
+                        id="group-select"
                         value={selectedGroup}
                         onChange={handleGroupSelect}
-                        label='select a group'
                     >
-                        {groups.map(group => (
-                            <MenuItem key={group.id} value={group.id}>
+                        <option value="" disabled>Select a group</option>
+                        {filteredGroups.map(group => (
+                            <option key={group.group_id} value={group.group_id}>
                                 {group.group_name}
-                            </MenuItem>
+                            </option>
                         ))}
-                    </Select>
-                </FormControl>
+                    </select>
+                    <input type='text'
+                    className='selectgroup'
+                    placeholder='search circle name'
+                    value={searchTerm}
+                    onChange={(e)=> setSearchTerm(e.target.value)}
+                     />
+                </div>
                 {selectedGroup && (
                     <div className="group-container mt-3">
                         <h6>Select Decision Circle</h6>
                         <div className='group-items'>
-                        {groups
-                        .filter(group=> group.id === selectedGroup)
-                        .map(group => (
-                            <div key={group.id} className="group-item">
-                                <input type='checkbox' onClick={() => handleShareDecision(group.id)} />
-                                <h5>{group.group_name}</h5>
-                            </div>
-                        ))}
+                            {groups
+                                .filter(group => group.group_id === Number(selectedGroup))
+                                .map(group => (
+                                    <div key={group.group_id} className="group-item">
+                                        <input type='checkbox' onClick={() => handleShareDecision(group.group_id)} />
+                                        <h5>{group.group_name}</h5>
+                                    </div>
+                                ))}
                         </div>
                     </div>
                 )}
-               
             </div>
             <div><h5 className='mt-2'>Decision Details</h5></div>
             <div>
