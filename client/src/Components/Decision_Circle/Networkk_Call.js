@@ -55,6 +55,41 @@ const getUserDecisionCircles = async () => {
     }
 };
 
+const getdecisionCirclesByUser = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/group/getdecisionCirclesByUser`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error creating Decision Group with Members:', error.response?.data || error.message);
+        return error.message;
+    }
+};
+const getdecisionCirclesByUserAndMember = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/group/getdecisionCirclesByUserAndMember`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error creating Decision Group with Members:', error.response?.data || error.message);
+        return error.message;
+    }
+};
+
 const getUsersForGroup = async (groupId) => {
     const token = localStorage.getItem('token');
     try {
@@ -161,7 +196,7 @@ const getMemberSharedDecisions = async (groupId) => {
     }
 }
 
-const mailToDecisionCirclePostComment = async (decision, memberId, comment) => {
+const mailToDecisionCirclePostComment = async (decision, memberId, comment,email) => {
     const token = localStorage.getItem('token');
 
     // Validation check for commentText
@@ -174,7 +209,8 @@ const mailToDecisionCirclePostComment = async (decision, memberId, comment) => {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`, {
             decision, 
             memberId, 
-            comment
+            comment,
+            email
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -499,6 +535,8 @@ export {
     getUserListForDecisionCircle,
     decisionCircleCreation,
     getUserDecisionCircles,
+    getdecisionCirclesByUser,
+    getdecisionCirclesByUserAndMember,
     getUsersForGroup,
     removeUsersFromGroup,
     sendDecisionCircleInvitation,

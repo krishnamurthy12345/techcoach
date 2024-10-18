@@ -1,7 +1,7 @@
 .share-circle-group {
     padding: 1rem;
     background-color: #fff;
-    max-width: 700px;
+    max-width: 60%;
     margin: 0 auto;
 }
 
@@ -19,6 +19,22 @@
     gap: 1rem;
 }
 
+.selectgroup {
+    background-color: #a7cdf5;
+    width: 30%; 
+    margin: 10px 0; 
+    font-size: 16px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    outline: none; 
+    transition: border-color 0.3s ease; 
+  }
+  
+  .selectgroup:focus {
+    border-color: #007bff; 
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
+  }
+  
 .group-item {
     display: flex;
     align-items: center;

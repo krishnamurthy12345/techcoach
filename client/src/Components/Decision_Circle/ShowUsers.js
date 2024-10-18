@@ -342,7 +342,7 @@ const ShowUsers = () => {
             )}
 
             <div>
-                <h4>Shared Decisions</h4>
+                <h4>Shared by Decisions</h4>
                 <Grid container spacing={3}>
                     {Array.isArray(decisions) && decisions.length > 0 ? (
                         decisions.map(decision => (
@@ -367,13 +367,13 @@ const ShowUsers = () => {
                                         <Typography variant="body2">
                                             <b>Selected Tags:</b> {decision.tags && decision.tags.map(tag => tag.tag_name).join(', ')}
                                         </Typography>
+                                        <Typography variant='h6'>shared by :{decision.shared_by}</Typography>
 
+                                        <h6 className='mt-3'>Comments:</h6>
                                         <div className='comments-section'>
-                                            <h6>Comments:</h6>
                                             {comments[decision.decision_id]?.length > 0 ? (
                                                 comments[decision.decision_id].map((comment) => (
                                                     <div key={comment.id} style={{ fontWeight: 'bold', flex: 1 }}>
-                                                        {/* Display Comment */}
                                                         <div style={{ display: 'flex', justifyContent: 'flex-start', width: '60%', marginBottom: '16px', backgroundColor: '#fff' }}>
                                                             <div style={{ flex: 1 }}>
                                                                 <Typography>{comment.comment}</Typography>
@@ -393,7 +393,6 @@ const ShowUsers = () => {
                                                             </div>
                                                         </div>
 
-                                                        {/* Reply Comment Section */}
                                                         <div style={{ display: 'flex', justifyContent: 'end', marginBottom: '16px' }}>
                                                             <div style={{ backgroundColor: '#edf6fc', padding: '3px', borderRadius: '8px', width: '60%' }}>
                                                                 <input
@@ -429,8 +428,7 @@ const ShowUsers = () => {
                                             ) : (
                                                 <Typography>No comments available.</Typography>
                                             )}
-
-                                        </div>
+                                        </div>   
                                     </CardContent>
                                 </Card>
                             </Grid>
