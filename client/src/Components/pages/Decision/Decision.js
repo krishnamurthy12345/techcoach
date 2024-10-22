@@ -38,10 +38,9 @@ const Decision = () => {
       })
         .then((resp) => {
           console.log(resp.data); // Log the entire response
-
           const { decisionData } = resp.data;
           if (decisionData && decisionData.length > 0) {
-            const decision = decisionData[0]; // Extract the first decision object
+            const decision = decisionData[0];
             const { decision_name, decision_due_date, decision_taken_date, user_statement, user_id, tags, decision_reason } = decision;
 
             const formatDate = (dateString) => dateString ? dateString.split('T')[0] : '';
