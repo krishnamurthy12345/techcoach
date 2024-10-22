@@ -26,25 +26,4 @@ router.get("/getSharedDecisionCircleDetails",multigroupController.getSharedDecis
 router.post("/decisionCirclePostComment",multigroupController.decisionCirclePostComment);
 
 
-//   Group Conversations Routes
-
-// router.put('/postcomment',multigroupController.postComment);
-// router.get('/getComment/:id',multigroupController.getComment);
-// router.post('/getShareDecisionComment',multigroupController.getShareDecisionComment);
-// router.post('/postReplyDecisionComment',multigroupController.postReplyDecisionComment);
-// router.put('/editComments',multigroupController.editComments);
-
-router.post('/comments',multigroupController.postComment);
-router.get('/comments/:group_id/:decision_id',multigroupController.getComments); 
-router.put('/comments/update', multigroupController.updateComment);
-router.post('/comments/reply', multigroupController.replyToComment);
-router.delete('/comments/:commentId', multigroupController.deleteComment);
-
-
-// GroupName Routes
-router.post('/decisiongroup',multigroupController.postdecisionGroup);
-router.get('/decisiongroup',multigroupController.getAlldecisionGroup);
-router.get('/decisiongroup/:id',multigroupController.getDecisionGroup);
-router.put('/decisiongroup/:id',multigroupController.putDecisionGroup);
-router.delete('/decisiongroup/:id',multigroupController.deleteDecisionGroup);
 module.exports = router;
