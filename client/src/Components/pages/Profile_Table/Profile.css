@@ -47,6 +47,20 @@ h3 {
   text-align: center;
 }
 
+.addition-one{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.analysis{
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  background-color: #52697b;
+  margin-top: -30px;
+  color:white;
+}
+
 .profile-picture {
   width: 100px;
   height: 100px;
@@ -81,6 +95,8 @@ h3 {
   color: #fff;
   text-decoration: none;
   text-align: center;
+  border: none;
+  outline: none;
 }
 
 .profiletab:hover {
