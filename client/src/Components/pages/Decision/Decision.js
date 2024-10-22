@@ -37,6 +37,7 @@ const Decision = () => {
         },
       })
         .then((resp) => {
+
           console.log(resp.data); // Log the entire response
           const { decisionData } = resp.data;
           if (decisionData && decisionData.length > 0) {
