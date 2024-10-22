@@ -198,7 +198,7 @@ const Profile = () => {
   return (
     <div className="card1">
       <div >
-        <h3>Personal Details</h3>
+        <h3>Profile</h3>
         <div className=''>
           <div className='data-aroundd'>
             <div>
@@ -214,18 +214,18 @@ const Profile = () => {
               </Link>
             </button>
           </div>
-          </div>
-          <div>
-            <strong>Username:</strong>
-            <span>{userData.displayname}</span>
-          </div>
-          <div>
-            <strong>Email:</strong>
-            <span>{userData.email}</span>
-          </div>
+        </div>
+        <div>
+          <strong>Username:</strong>
+          <span>{userData.displayname}</span>
+        </div>
+        <div>
+          <strong>Email:</strong>
+          <span>{userData.email}</span>
+        </div>
         <div className='details'>
           <Link to='/profiletab'>
-            <button className='profiletab'>Add Personal Detail</button>
+            <button className='profiletab'>Edit Detail</button>
           </Link>
           <div>
             <Link to='/profiletab'>
@@ -239,6 +239,12 @@ const Profile = () => {
               <strong>Gender: </strong>
               <span>{formData.gender}</span>
             </div> */}
+            <div className='addition-one'>
+              <p><b>Desc:</b> Your ability to take better decisions is influenced by your Self Awareness. Profile section enables you to add more details about yourself that can be aligned with your decisions.</p>
+              <button onClick={() => window.location.href = 'https://academy.greenestep.com/courses/swot-analysis/'} className='analysis'>
+                SWOT Analysis
+              </button>
+            </div>
             {formData.attitude && (
               <div className="sub-card">
                 <strong>Attitude: </strong>
