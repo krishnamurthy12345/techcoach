@@ -25,6 +25,13 @@ import Skillget from './Components/pages/Soft_Skill/Skillget.js';
 import EditSkill from './Components/pages/Soft_Skill/EditSkill.js';
 import AddLink from './Components/pages/Decision-Link/AddLink.js';
 import GetLink from './Components/pages/Decision-Link/GetLink.js';
+import DecisionCircle from './Components/Decision_Circle/DecisionCircle.js';
+import GetGroup from './Components/Decision_Circle/GetGroup.js';
+import ShareCircle from './Components/Decision_Circle/ShareCircle.js';
+import DecisionGroup from './Components/Decision_Circle/DecisionGroup.js';
+import ShowUsers from './Components/Decision_Circle/ShowUsers.js';
+import ShareCircleGroup from './Components/Decision_Circle/ShareCircleGroup.js';
+import MemberSharedDecisions from './Components/Decision_Circle/MemberSharedDecisions.js';
 
 function App() {
   console.log("one is working")
@@ -46,9 +53,10 @@ function App() {
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
         <Route path='/dashboard' element={<DashboardRedirect />} />
+        <Route path='/decision' element={<Decision />} />
+        <Route path='/decisioncircle' element={<DecisionCircle />} />
         <Route path='/innerCircle' element={<InnerCircle />} />
         <Route path='/profile' element={<Profile />} />
-        <Route path='/decision' element={<Decision />} />
         <Route path='/softskill' element={<SoftSkill />} />
 
         {/* Profile Routes */}
@@ -76,11 +84,27 @@ function App() {
         <Route path='/readd' element={<Readd />} />
         <Route path='/views/:id' element={<View />} />
 
+        {/* Create Decision Circle Routes */}
+        <Route path='/decisioncircle/:id' element={<DecisionCircle />} />
+        <Route path='/getdecisioncircle' element={<GetGroup />} />
+        <Route path='/decisiongroup' element={<DecisionGroup />} />
+        <Route path='/decisiongroup/:group_name' element={<DecisionGroup />} />
+        <Route path='/getdecisioncircle/:groupId' element={<ShowUsers />} />
+        <Route path='/sharecircle/:id' element={<ShareCircle />}/>
+        <Route path='/shareCircleDisplay/:id' element={<ShareCircleGroup />} />
+        <Route path="/getmembershareddecisions/:groupId" element={<MemberSharedDecisions />} />
+
+
         {/* Share Decision */}
         <Route path='/sharedDecisions' element={<SharedDecision />} />
         <Route path='/sharedByMe' element={<ShareWithMe />} />
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
+<<<<<<< HEAD
         {/* Create Group Routes */}
+=======
+
+        {/* Create InnerCircle Routes */}
+>>>>>>> test
         <Route path='/group' element={<MultipleMemberGroup />} />
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
         <Route path='/shareAcceptOrNot' element={<AcceptOrNot />} />

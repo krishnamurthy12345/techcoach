@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box, CircularProgress, Button } from '@mui/material';
 import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
 import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+import { getSharedDecisionDetails } from '../../Group/Network_Call';
 import './Nav.css';
 import withAuth from '../../withAuth';
-import { getSharedDecisionDetails } from '../../Group/Network_Call';
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -16,7 +16,6 @@ const Nav = () => {
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
   const [receivedDecisionsCount, setReceivedDecisionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  let loggedInUserId;
 
   const [sharedDecisionDetails, setSharedDecisionDetails] = useState(null);
 
@@ -24,7 +23,6 @@ const Nav = () => {
     const fetchSharedDecisionsDetails = async () => {
       try {
         const details = await getSharedDecisionDetails();
-
         setSharedDecisionDetails(details);
         setLoading(false);
       } catch (error) {
@@ -35,8 +33,9 @@ const Nav = () => {
     fetchSharedDecisionsDetails();
   }, []);
 
+  console.log("shareDecision details", sharedDecisionDetails);
   const sharedDecisionCount = Array.isArray(sharedDecisionDetails?.sharedDecisions) ? sharedDecisionDetails.sharedDecisions.length : 0;
-  // console.log("shhhhhhhhhhhh", sharedDecisionCount);
+  console.log("shareDecision count", sharedDecisionCount);
 
   useEffect(() => {
     const loadData = async () => {
@@ -63,24 +62,22 @@ const Nav = () => {
 
   useEffect(() => {
     const pendingDecisions = data.filter(decision => {
-      return decision.user_id === loggedInUserId && !decision.decision_taken_date;
+      return !decision.decision_taken_date;
     });
-    console.log("pending decisions", pendingDecisions);
     setPendingDecisionsData(pendingDecisions);
-  }, [data, loggedInUserId]);
+  }, [data]);
 
   useEffect(() => {
     const sharedDecisionCount = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisions`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisionsCount`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const sharedDecisions = response.data.decisionCount;
-        // console.log("countttt", sharedDecisions);
 
+        const sharedDecisions = response.data.decisionCount;
         setReceivedDecisionsCount(sharedDecisions);
         setLoading(false);
       } catch (error) {
@@ -92,25 +89,15 @@ const Nav = () => {
     sharedDecisionCount();
   }, []);
 
-  // const filteredData = data.filter(decision => {
-  //   return (
-  //     decision.user_id === loggedInUserId &&
-  //     ((decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-  //       (decision.tagsArray && decision.tagsArray.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-  //       (!decision.decision_taken_date))
-  //   );
-  // });
-
   const filteredData = data.filter(decision => {
     const decisionNameMatch = decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase());
     const tagMatch = Array.isArray(decision.tags) && decision.tags.some(tag => 
       tag.tag_name && tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     const isPending = !decision.decision_taken_date;
-    return decision.user_id === loggedInUserId && (decisionNameMatch || tagMatch || isPending);
+    return decisionNameMatch || tagMatch || isPending;
   });
 
-  
   const liveDecisionsCount = filteredData.length;
   const pendingDecisionsCount = pendingDecisionsData.length;
 

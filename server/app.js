@@ -10,6 +10,8 @@ const decisionRoutes = require('./routes/decisionRoutes');
 const groupRoutes = require('./routes/group.routes');
 const skillRoutes = require('./routes/skillRoutes');
 const linkRoutes = require('./routes/linkRoutes');
+const multigroupRoutes = require('./routes/multigroupRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 require('dotenv').config();
 
@@ -33,6 +35,9 @@ app.use('/api', decisionRoutes);
 app.use('/group', groupRoutes);
 app.use('/skill',skillRoutes);
 app.use('/api',linkRoutes);
+app.use('/group',multigroupRoutes);
+app.use('/group',commentRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

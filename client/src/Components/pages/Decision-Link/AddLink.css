@@ -6,6 +6,8 @@
   align-items: center;
   margin-top: 20px;
   padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .message{
@@ -16,9 +18,13 @@
   background-color: rgb(65, 67, 73);
   color: white;
   border-radius: 5px;
-  padding: 10px;
+  padding: 8px;
   border: none;
   cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+  margin-left: 5px;
 }
 
 .savebtn {
@@ -30,13 +36,7 @@
   max-width: 600px; 
 }
 
-input[type='textt'] {
-  width: 100%; 
-  max-width: 300px; 
-  margin-bottom: 10px;
-}
-
-input[type='checkboxx'] {
+input[type='checkbox'] {
   margin-right: 10px;
 }
 
@@ -48,11 +48,47 @@ button {
 .getpage{
   border-radius: 5px;
   padding: 3px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 10px;
 }
 .getpage:hover{
   border-radius: 5px;
   background-color: rgb(166, 209, 247);
   padding: 3px;
+}
+
+@media (max-width: 768px) {
+  .addlink {
+    padding: 15px;
+    margin-top: 15px;
+  }
+
+  .swot, .soft-skill, .savebtn, .getpage {
+    padding: 6px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    width: auto;
+    margin-left: 5px; 
+  }
+
+  .options-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .swot-list h5 {
+    font-size: 16px;
+  }
+
+  input[type='checkbox'] {
+    margin-right: 8px;
+  }
+
+  button {
+    max-width: 100%;
+  }
 }
 
 @media (min-width: 768px) {
@@ -65,12 +101,12 @@ button {
     width: 600px; 
   }
 
-  input[type='textt'] {
-    width: 200px; 
-  }
-
   button {
     width: auto; 
     max-width: none; 
+  }
+
+  .swot, .soft-skill, .savebtn, .getpage {
+    width: auto;
   }
 }

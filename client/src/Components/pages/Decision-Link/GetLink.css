@@ -5,6 +5,10 @@
     justify-content: center;
     margin-top: 20px;
 }
+h3{
+    font-size:x-large;
+    font-weight: 500;
+}
 .getlink{
   margin-left: 20px;
   margin-top: 50px;
@@ -26,4 +30,11 @@
     background-color: lightgreen;
     padding: 10px;
 }
+.opportunity-card {
+    background-color: lightgreen; 
+  }
+  
+  .threat-card {
+    background-color: lightcoral;
+  }
   

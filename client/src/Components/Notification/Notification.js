@@ -10,15 +10,17 @@ const Notification = () => {
 
     const getNotification = async () => {
         try {
-            const response = await getInnerCircleAcceptNotification();
-            console.log("response from notification", response);
-            setNotifications(response.notAcceptedMembers.filter(notification => response.groupDetails[notification.group_id].userDetails));
-            setResponse(response); 
+            const innerCircleResponse = await getInnerCircleAcceptNotification();
+            console.log("Inner Circle Notifications:", innerCircleResponse);
+            setNotifications(innerCircleResponse.notAcceptedMembers.filter(notification => innerCircleResponse.groupDetails[notification.group_id].userDetails));
+            setResponse(innerCircleResponse); 
         } catch (error) {
             console.error('Error in fetching the notifications:', error);
             toast('An error occurred while fetching the notifications');
         }
     };
+
+    
 
     const handleAction = async (groupId, status) => {
         try {
@@ -42,9 +44,11 @@ const Notification = () => {
 
     return (
         <div>
+            <h3>Inner Circle Notifications</h3>
+                {/* Inner Circle Notifications */}
             {notifications.length === 0 ? (
                 <Typography variant="h5" style={{ textAlign: "center", marginTop: "1rem", backgroundColor: "aliceblue", padding: "1rem" }}>
-                    No notifications
+                    No Inner Circle notifications
                 </Typography>
             ) : (
                 notifications.map(notification => (

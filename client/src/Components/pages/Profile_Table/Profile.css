@@ -36,7 +36,8 @@ h3 {
 
 .user-details {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -46,6 +47,20 @@ h3 {
   text-align: center;
 }
 
+.addition-one{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.analysis{
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  background-color: #52697b;
+  margin-top: -30px;
+  color:white;
+}
+
 .profile-picture {
   width: 100px;
   height: 100px;
@@ -53,7 +68,12 @@ h3 {
   object-fit: cover;
   margin-top: 10px;
 }
-
+.data-aroundd{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
 .details {
   display: flex;
   justify-content: space-between;
@@ -75,6 +95,8 @@ h3 {
   color: #fff;
   text-decoration: none;
   text-align: center;
+  border: none;
+  outline: none;
 }
 
 .profiletab:hover {
@@ -118,7 +140,7 @@ h3 {
 }
 .data-around{
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
   margin-top: 15px;
 }
@@ -142,6 +164,22 @@ h3 {
   text-align: center;
   padding: 7px;
   cursor: pointer;
+}
+.linked-decisions{
+  background-color: #3975bf;
+  border-radius: 7px;
+  color: white;
+  max-width: 130px;
+  max-height:min-content;
+  text-align: center;
+  /* padding: 5px; */
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+}
+.linked-decisions:hover {
+  text-decoration: none; 
+  color: white;
 }
 .delete-account{
   background-color: red;
@@ -200,7 +238,7 @@ h3 {
     align-items: center;
   }
 
-  .delete-account, .download-data, .download-profile {
+  .delete-account, .download-data, .download-profile, .linked-decisions {
     margin-top: 10px;
     width: 80%;
     text-align: center;

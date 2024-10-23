@@ -9,6 +9,8 @@ import withAuth from '../../withAuth';
 
 const EditSkill = () => {
     const [skill, setSkill] = useState(null);
+    const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -21,7 +23,8 @@ const EditSkill = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setSkill(response.data.skills[0]); // Assuming response returns an array with one skill
+                setSkill(response.data.skill[0]);
+                console.log('updating skills:', response.data.skill[0])
             } catch (err) {
                 console.log('Error fetching skill data:', err);
                 toast.error('Error fetching skill data');
@@ -41,9 +44,12 @@ const EditSkill = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setIsSaveButtonDisabled(true); // Disable the Save button initially
+        setLoading(true);
+        
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, { skills: [skill] }, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, skill, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -55,6 +61,9 @@ const EditSkill = () => {
         } catch (err) {
             console.log('Error updating skill data:', err);
             toast.error('Error updating skill data');
+            setIsSaveButtonDisabled(false); // Re-enable the Save button if there's an error
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -71,56 +80,60 @@ const EditSkill = () => {
 
     return (
         <div>
-            <h3 className='center'>Edit Skill</h3>
-            <form className='form' onSubmit={handleSubmit}>
-                <table className='table'>
-                    <thead>
-                        <tr>
-                            <th>S.no</th>
-                            <th>Skill Name</th>
-                            <th>Rating (1-10)</th>
-                            <th>Our Comments</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1.</td>
-                            <td>
-                                <div className='skill-container'>
-                                    <span>{skill.skill_name}</span>
-                                    <MdDescription
-                                        className='show-description-icon'
-                                        onClick={toggleDescription}
+            <h3 className='center'>Edit Soft-Skills</h3>
+            <form className='formm' onSubmit={handleSubmit}>
+                <center>
+                    <table className='table'>
+                        <thead>
+                            <tr>
+                                <th>S.no</th>
+                                <th>Skill Name</th>
+                                <th>Rating (1-10)</th>
+                                <th>Our Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1.</td>
+                                <td>
+                                    <div className='skill-container'>
+                                        <span>{skill.skill_name}</span>
+                                        <MdDescription
+                                            className='show-description-icon'
+                                            onClick={toggleDescription}
+                                        />
+                                        {skill.showDescription && (
+                                            <p className='description'>
+                                                Description: {skill.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                </td>
+                                <td>
+                                    <input
+                                        type='number'
+                                        min='1'
+                                        max='10'
+                                        name='rating'
+                                        value={skill.rating}
+                                        onChange={handleChange}
                                     />
-                                    {skill.showDescription && (
-                                        <p className='description'>
-                                            Description: {skill.description}
-                                        </p>
-                                    )}
-                                </div>
-                            </td>
-                            <td>
-                                <input
-                                    type='number'
-                                    min='1'
-                                    max='10'
-                                    name='rating'
-                                    value={skill.rating}
-                                    onChange={handleChange}
-                                />
-                            </td>
-                            <td>
-                                <textarea
-                                    className='textarea'
-                                    name='comments'
-                                    value={skill.comments}
-                                    onChange={handleChange}
-                                ></textarea>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type='submit' className='btn btn-primary bg-secondary'>Update</button>
+                                </td>
+                                <td>
+                                    <textarea
+                                        className='textarea'
+                                        name='comments'
+                                        value={skill.comments}
+                                        onChange={handleChange}
+                                    ></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </center>
+                <button type='submit'
+                    disabled={loading || isSaveButtonDisabled}
+                    className='btn btn-primary bg-secondary'>Update</button>
             </form>
             <ToastContainer />
         </div>

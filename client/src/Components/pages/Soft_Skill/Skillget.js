@@ -3,7 +3,8 @@ import axios from 'axios';
 import './Skillget.css';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; 
+import 'react-toastify/dist/ReactToastify.css';
+import { MdDescription } from 'react-icons/md';
 import withAuth from '../../withAuth';
 
 const Skillget = () => {
@@ -12,12 +13,13 @@ const Skillget = () => {
   const fetchSkills = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/skill`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/skill/get`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setSkills(response.data.skills);
+      console.log('getting skills:', response.data.skills);
     } catch (err) {
       console.log('Error fetching skill data:', err);
       toast.error('Error fetching skill data');
@@ -56,48 +58,65 @@ const Skillget = () => {
     }
   };
 
+  const toggleDescription = (index) => {
+    const values = [...skills];
+    values[index].showDescription = !values[index].showDescription;
+    setSkills(values);
+  };
+
   useEffect(() => {
     fetchSkills();
   }, []);
 
+  const filteredSkills = skills.filter(skill => skill.rating !== null && skill.comments !== null);
+
   return (
-    <div>
+    <div className='skillget'>
       <h3 className="center mt-5">Soft Skills - Self Assessment</h3>
       <div>
-        {skills.length === 0 && (
-          <Link to="/softskill">
-            <button className='softskill-head'>Add Skills</button>
-          </Link>
-        )}
+        <Link to="/softskill">
+          <button className='softskill-head'>Add Skills</button>
+        </Link>
       </div>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Skill Name</th>
-            <th>Rating</th>
-            <th>Assessment Notes and Action Plan</th>
-            <th>Improvement</th>
-          </tr>
-        </thead>
-        <tbody>
-          {skills.map(skill => (
-            <tr key={skill.id}>
-              <td>{skill.skill_name}</td>
-              <td>{skill.rating}</td>
-              <td>{skill.comments}</td>
-              <td className='action'>
-                <Link to={`/editskill/${skill.id}`}>
-                  <button className='edit'>Edit</button>
-                </Link>
-                <button className='delete' onClick={() => handleDelete(skill.id)}>Delete</button>
-              </td>
+      <div className='table-main'>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Skill Name</th>
+              <th>Rating</th>
+              <th>Assessment Notes and Action Plan</th>
+              <th>Improvement</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {skills.length > 0 && (
-        <button className='deleteall' onClick={handleDeleteAll}>Delete All</button>
-      )}
+          </thead>
+          <tbody>
+            {filteredSkills.map((skill, index) => (
+              <tr key={skill.id}>
+                <td>{skill.skill_name}
+                  <MdDescription
+                    className='show-description-icon'
+                    onClick={() => toggleDescription(index)}
+                  />
+                  {skill.showDescription && (
+                    <p className='description'>
+                      Description: {skill.description}
+                    </p>
+                  )}
+                </td>
+                <td>{skill.rating}</td>
+                <td>{skill.comments}</td>
+                <td className='action'>
+                  <Link to={`/editskill/${skill.id}`}>
+                    <button className='edit'>Edit</button>
+                  </Link>
+                  <button className='delete' onClick={() => handleDelete(skill.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button className='deleteall' onClick={handleDeleteAll}>Delete All</button>
+
       <ToastContainer />
     </div>
   );

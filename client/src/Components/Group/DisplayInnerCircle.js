@@ -109,6 +109,11 @@ const DisplayInnerCircle = () => {
         setSearchQuery(e.target.value);
     };
 
+    const isValidGmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleAddMember = async (userId) => {
         setLoadingAdd(true);
         try {
@@ -129,8 +134,9 @@ const DisplayInnerCircle = () => {
 
     const filteredMembers = potentialMembers.filter(member => member.email === searchQuery);
     const existingMemberEmails = innerCircleDetails?.members?.map(member => member.email) || [];
-    console.log("emaillllllllllllllll", existingMemberEmails);
-    const isValidGmail = searchQuery.endsWith('@gmail.com');
+    console.log("emaill", existingMemberEmails);
+    // const isValidGmail = searchQuery.endsWith('@gmail.com') || searchQuery.endsWith('@greenestep.com');
+    
 
     const inviteButtonStyle = {
         color: "black",
@@ -141,10 +147,14 @@ const DisplayInnerCircle = () => {
         width: windowWidth >= 768 ? '30%' : '100%'
     };
 
-    const handleInvite = async (searchQuery) => {
+    const handleInvite = async (email) => {
+        if (!isValidGmail(email)) {
+            toast.error('Please enter a valid email address');
+            return;
+        }
         setLoadingInvite(true); 
         try {
-            const response = await innerCircleInvitation(searchQuery);
+            const response = await innerCircleInvitation(email);
 
             console.log("ressssss", response);
 
@@ -236,7 +246,7 @@ const DisplayInnerCircle = () => {
                                     onChange={handleSearchInputChange}
                                     style={{ marginBottom: '1rem' }}
                                 />
-                                {isValidGmail && (
+                                {isValidGmail(searchQuery) && (
                                     <ListGroup>
                                         {filteredMembers.map(member => (
                                             <ListGroup.Item key={member.user_id}>

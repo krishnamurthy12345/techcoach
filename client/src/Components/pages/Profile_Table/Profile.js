@@ -28,6 +28,7 @@ const Profile = () => {
           }
         });
         const user = userResp.data.tasks && userResp.data.tasks.length ? userResp.data.tasks[0] : {};
+        console.log('asas', userResp);
         setUserData(user);
 
         const formResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
@@ -95,7 +96,7 @@ const Profile = () => {
       'Decision Taken Date': decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--',
       'Decision Details': decision.user_statement,
       'Tags': decision.tags ? decision.tags.map(tag => tag.tag_name).join(', ') : '',
-    'Decision Reasons': decision.decision_reason ? decision.decision_reason.map(reason => reason.decision_reason_text).join(', ') : ''
+      'Decision Reasons': decision.decision_reason ? decision.decision_reason.map(reason => reason.decision_reason_text).join(', ') : ''
     }));
 
     const worksheetDecisions = XLSX.utils.json_to_sheet(decisionData);
@@ -114,42 +115,42 @@ const Profile = () => {
 
   const handleDownloadProfile = () => {
     const doc = new jsPDF();
-  
+
     doc.setFontSize(20);
     doc.text('Profile Data:', 20, 20);
-  
+
     const extractData = (data) => {
       if (Array.isArray(data)) {
-        return data.map(item => (item.value ? item.value.trim() : '')).join('\n\n'); 
+        return data.map(item => (item.value ? item.value.trim() : '')).join('\n\n');
       }
       return data ? data.trim() : 'N/A';
     };
-  
+
     const profileData = [
       { category: 'Strength', details: extractData(formData.strength), color: [13, 97, 16] },
       { category: 'Weakness', details: extractData(formData.weakness), color: [41, 128, 185] },
       { category: 'Opportunity', details: extractData(formData.opportunity), color: [153, 77, 28] },
       { category: 'Threat', details: extractData(formData.threat), color: [165, 42, 42] }
     ];
-  
+
     let yPos = 40;
-    const cellWidth = (doc.internal.pageSize.width - 60) / 2; 
+    const cellWidth = (doc.internal.pageSize.width - 60) / 2;
     const cellHeight = 50; // Adjust cell height as needed
     const rowSpacing = 80; // Adjust vertical spacing between rows
     const colSpacing = 10; // Adjust horizontal spacing between columns
-  
+
     profileData.forEach((item, index) => {
       const rowIndex = Math.floor(index / 2);
       const colIndex = index % 2;
-  
-      const xPos = 20 + (colIndex * (cellWidth + colSpacing)); 
-  
+
+      const xPos = 20 + (colIndex * (cellWidth + colSpacing));
+
       // Set cell properties
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(item.color[0], item.color[1], item.color[2]);
       doc.text(item.category, xPos, yPos + (rowIndex * (cellHeight + rowSpacing)) - 10);
-  
+
       // Create autoTable for each cell
       doc.autoTable({
         startY: yPos + (rowIndex * (cellHeight + rowSpacing)),
@@ -168,7 +169,7 @@ const Profile = () => {
           fontSize: 12,
           valign: 'middle',
           lineWidth: 0.1,
-          cellWidth: cellWidth - 10 
+          cellWidth: cellWidth - 10
         },
         alternateRowStyles: { fillColor: [240, 240, 240] },
         rowStyles: {
@@ -177,11 +178,11 @@ const Profile = () => {
         }
       });
     });
-  
+
     doc.save('profile_data.pdf');
     toast('Profile data downloaded successfully');
   };
-   
+
   if (loading) {
     return (
       <div className="loading-spinner">
@@ -193,27 +194,34 @@ const Profile = () => {
   return (
     <div className="card1">
       <div >
-        <h3>Personal Details</h3>
-        <div className='user-details'>
-          <div>
-            <strong>Username:</strong>
-            <span>{userData.displayname}</span>
+        <h3>Profile</h3>
+        <div className=''>
+          <div className='data-aroundd'>
+            <div>
+              {userData.profilePicture && (
+                <div>
+                  <img src={userData.profilePicture} alt="Profile" className="profile-picture" />
+                </div>
+              )}
+            </div>
+            <button className='linked-decisions'>
+              <Link to='/getall' className='linked-decisions'>
+                <p>View Linked Decisions</p>
+              </Link>
+            </button>
           </div>
-          <div>
-            <strong>Email:</strong>
-            <span>{userData.email}</span>
-          </div>
-          <div>
-            {userData.profilePicture && (
-              <div>
-                <img src={userData.profilePicture} alt="Profile" className="profile-picture" />
-              </div>
-            )}
-          </div>
+        </div>
+        <div>
+          <strong>Username:</strong>
+          <span>{userData.displayname}</span>
+        </div>
+        <div>
+          <strong>Email:</strong>
+          <span>{userData.email}</span>
         </div>
         <div className='details'>
           <Link to='/profiletab'>
-            <button className='profiletab'>Add Personal Detail</button>
+            <button className='profiletab'>Edit Detail</button>
           </Link>
           <div>
             <Link to='/profiletab'>
@@ -227,6 +235,12 @@ const Profile = () => {
               <strong>Gender: </strong>
               <span>{formData.gender}</span>
             </div> */}
+            <div className='addition-one'>
+              <p><b>Desc:</b> Your ability to take better decisions is influenced by your Self Awareness. Profile section enables you to add more details about yourself that can be aligned with your decisions.</p>
+              <button onClick={() => window.location.href = 'https://academy.greenestep.com/courses/swot-analysis/'} className='analysis'>
+                SWOT Analysis
+              </button>
+            </div>
             {formData.attitude && (
               <div className="sub-card">
                 <strong>Attitude: </strong>

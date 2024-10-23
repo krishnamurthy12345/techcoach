@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Pagination, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress, Select, MenuItem } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { MdDelete, MdModeEdit, MdLink } from 'react-icons/md';
+import { FaShareAlt } from "react-icons/fa";
 import { GrFormView } from 'react-icons/gr';
 import { DataGrid } from '@mui/x-data-grid';
 import 'react-toastify/dist/ReactToastify.css';
@@ -185,6 +186,13 @@ const Readd = () => {
                     style={{ color: '#526D82' }}
                   >
                     <GrFormView />
+                  </IconButton>
+                  <IconButton
+                    component={Link}
+                    to={`/sharecircle/${decision.decision_id}`}
+                    style={{ color: '#526D82' }}
+                  >
+                    <FaShareAlt className='fs-5' />
                   </IconButton>
                   <IconButton
                     component={Link}
@@ -483,7 +491,11 @@ const Readd = () => {
     const filteredDecisions = data
       .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
       .filter(decision => {
+<<<<<<< HEAD
         if (selectedTag === 'Advanced Tags') {
+=======
+      if (selectedTag === 'Advanced Tags') {
+>>>>>>> test
           return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
         } 
       if (selectedTag === 'Sharpen the Saw') {
@@ -504,13 +516,24 @@ const Readd = () => {
       if (selectedTag === 'Decision Maturity') {
         return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
       } 
+<<<<<<< HEAD
       else if (selectedTag !== '' && selectedTag !== 'All Tags') {
+=======
+      if (selectedTag !== '' && selectedTag !== 'All Tags') {
+>>>>>>> test
         return decision.tags.some(tag => tag.tag_name === selectedTag);
       }
       return true;
     });
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
+<<<<<<< HEAD
       const month = new Date(decision.decision_creation_date).toLocaleString('default', { month: 'long', year: 'numeric' });
+=======
+      const decisionDate = decision.decision_taken_date 
+      ? new Date(decision.decision_taken_date)
+      : new Date(decision.decision_due_date);
+      const month = decisionDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+>>>>>>> test
 
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
@@ -520,7 +543,11 @@ const Readd = () => {
     const sortedMonths = Object.keys(decisionsByMonth).sort((a, b) => {
       const [monthA, yearA] = a.split(' ');
       const [monthB, yearB] = b.split(' ');
+<<<<<<< HEAD
       return new Date(`${yearA}-${new Date(a).getMonth() + 1}-01`) - new Date(`${yearB}-${new Date(b).getMonth() + 1}-01`);
+=======
+      return new Date(`${yearB}-${new Date(`${monthB} 1, ${yearB}`).getMonth() + 1}-01`) - new Date(`${yearA}-${new Date(`${monthA} 1, ${yearA}`).getMonth() + 1}-01`);
+>>>>>>> test
     });
   
     return (

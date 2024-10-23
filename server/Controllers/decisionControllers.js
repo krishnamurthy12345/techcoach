@@ -54,7 +54,7 @@ const postInfo = async (req, res) => {
         if (tagRows.length > 0) {
           const tagId = tagRows[0].id;
           await conn.query(
-            "INSERT INTO techcoach_lite.techcoach_decision_tags (decision_id, tag_id) VALUES (?, ?)",
+            "INSERT INTO techcoach_lite.techcoach_decision_tag_linked_info (decision_id, tag_id) VALUES (?, ?)",
             [decisionId, tagId]
           );
         } else {
@@ -65,7 +65,7 @@ const postInfo = async (req, res) => {
 
     for (const encryptedReasonText of encryptedReasonTexts) {
       await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+        "INSERT INTO techcoach_lite.techcoach_decision_reason (decision_id, decision_reason_text) VALUES (?, ?)",
         [decisionId, encryptedReasonText]
       );
     }
@@ -85,7 +85,6 @@ const postInfo = async (req, res) => {
     }
   }
 };
-
 
 const getInfo = async (req, res) => {
   const { id } = req.params;
@@ -113,11 +112,11 @@ const getInfo = async (req, res) => {
       FROM 
         techcoach_lite.techcoach_decision d
       LEFT JOIN 
-        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+        techcoach_lite.techcoach_decision_tag_linked_info dt ON d.decision_id = dt.decision_id
       LEFT JOIN 
         techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
       LEFT JOIN 
-        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+        techcoach_lite.techcoach_decision_reason r ON d.decision_id = r.decision_id
       WHERE
         d.decision_id = ?
       GROUP BY
@@ -177,7 +176,6 @@ const getInfo = async (req, res) => {
   }
 };
 
-
 const getInfo_Referred = async (req, res) => {
   const { id } = req.params;
   let conn;
@@ -204,11 +202,11 @@ const getInfo_Referred = async (req, res) => {
       FROM 
         techcoach_lite.techcoach_decision d
       LEFT JOIN 
-        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+        techcoach_lite.techcoach_decision_tag_linked_info dt ON d.decision_id = dt.decision_id
       LEFT JOIN 
         techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
       LEFT JOIN 
-        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+        techcoach_lite.techcoach_decision_reason r ON d.decision_id = r.decision_id
       WHERE
         d.decision_id = ?
       GROUP BY
@@ -237,7 +235,7 @@ const getInfo_Referred = async (req, res) => {
 
     const decryptedDecisionData = decisionData.map(decision => {
 
-      console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
+      // console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
 
       const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags; 
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
@@ -309,11 +307,11 @@ const getallInfo = async (req, res) => {
       FROM 
         techcoach_lite.techcoach_decision d
       LEFT JOIN 
-        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+        techcoach_lite.techcoach_decision_tag_linked_info dt ON d.decision_id = dt.decision_id
       LEFT JOIN 
         techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
       LEFT JOIN 
-        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+        techcoach_lite.techcoach_decision_reason r ON d.decision_id = r.decision_id
       GROUP BY
         d.decision_id
       `
@@ -365,7 +363,6 @@ const getallInfo = async (req, res) => {
   }
 };
 
-
 const putInfo = async (req, res) => {
   const { id } = req.params;
   const { decision_name, user_statement, tags, decision_reason, decision_due_date, decision_taken_date } = req.body;
@@ -403,7 +400,7 @@ const putInfo = async (req, res) => {
     // Retrieve existing tags
     const existingTagRows = await conn.query(
       `SELECT t.tag_name
-       FROM techcoach_lite.techcoach_decision_tags dt
+       FROM techcoach_lite.techcoach_decision_tag_linked_info dt
        JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
        WHERE dt.decision_id = ?`,
       [id]
@@ -425,7 +422,7 @@ const putInfo = async (req, res) => {
       if (tagRows.length > 0) {
         const tagId = tagRows[0].id;
         await conn.query(
-          "DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id = ? AND tag_id = ?",
+          "DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id = ? AND tag_id = ?",
           [id, tagId]
         );
       }
@@ -442,7 +439,7 @@ const putInfo = async (req, res) => {
         if (tagRows.length > 0) {
           const tagId = tagRows[0].id;
           await conn.query(
-            "INSERT INTO techcoach_lite.techcoach_decision_tags (decision_id, tag_id) VALUES (?, ?)",
+            "INSERT INTO techcoach_lite.techcoach_decision_tag_linked_info (decision_id, tag_id) VALUES (?, ?)",
             [id, tagId]
           );
         } else {
@@ -453,7 +450,7 @@ const putInfo = async (req, res) => {
 
     // Remove existing reasons
     await conn.query(
-      `DELETE FROM techcoach_lite.techcoach_reason 
+      `DELETE FROM techcoach_lite.techcoach_decision_reason 
        WHERE decision_id = ?`,
       [id]
     );
@@ -461,7 +458,7 @@ const putInfo = async (req, res) => {
     // Add new reasons
     for (const encryptedReasonText of encryptedReasonTexts) {
       await conn.query(
-        "INSERT INTO techcoach_lite.techcoach_reason (decision_id, decision_reason_text) VALUES (?, ?)",
+        "INSERT INTO techcoach_lite.techcoach_decision_reason (decision_id, decision_reason_text) VALUES (?, ?)",
         [id, encryptedReasonText]
       );
     }
@@ -482,7 +479,6 @@ const putInfo = async (req, res) => {
   }
 };
 
-
 const deleteInfo = async (req, res) => {
   const { id } = req.params;
   let conn;
@@ -492,13 +488,24 @@ const deleteInfo = async (req, res) => {
     await conn.beginTransaction();
 
 
-    await conn.query(
-      "DELETE FROM techcoach_lite.techcoach_decision_tags WHERE decision_id = ?",
+     // Delete from dependent tables first
+     await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_skill_linked_info WHERE decision_id = ?",
       [id]
     );
 
     await conn.query(
-      "DELETE FROM techcoach_lite.techcoach_reason WHERE decision_id = ?",
+      "DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id = ?",
+      [id]
+    );
+    
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id = ?",
+      [id]
+    );
+
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_reason WHERE decision_id = ?",
       [id]
     );
 
@@ -558,11 +565,11 @@ const getall = async (req, res) => {
       FROM 
         techcoach_lite.techcoach_decision d
       LEFT JOIN 
-        techcoach_lite.techcoach_decision_tags dt ON d.decision_id = dt.decision_id
+        techcoach_lite.techcoach_decision_tag_linked_info dt ON d.decision_id = dt.decision_id
       LEFT JOIN 
         techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
       LEFT JOIN 
-        techcoach_lite.techcoach_reason r ON d.decision_id = r.decision_id
+        techcoach_lite.techcoach_decision_reason r ON d.decision_id = r.decision_id
       WHERE 
         d.user_id = ?
       GROUP BY 
@@ -596,7 +603,11 @@ const getall = async (req, res) => {
         decision_id: decision.decision_id,
         decision_name: decryptText(decision.decision_name, req.user.key),
         user_statement: decryptText(decision.user_statement, req.user.key),
+<<<<<<< HEAD
         decision_creation_date:decision.creation_date,
+=======
+        decision_creation_date : decision.creation_date,
+>>>>>>> test
         decision_due_date: decision.decision_due_date,
         decision_taken_date: decision.decision_taken_date,
         tags: tags.map(tag => ({

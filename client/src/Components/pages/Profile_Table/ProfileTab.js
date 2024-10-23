@@ -3,6 +3,7 @@ import './ProfileTab.css';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import withAuth from '../../withAuth';
 
 const ProfileTab = () => {
   const [formData, setFormData] = useState({
@@ -88,13 +89,13 @@ const ProfileTab = () => {
     });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     [name]: value
+  //   }));
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,7 +185,7 @@ const ProfileTab = () => {
             <button type="button" className='add-button' onClick={() => addField('threat')}>Add</button>
           </div>
           <br />
-          <input type='submit' value={isNewProfile ? "Save" : "Update"} disabled={loading} />
+          <input type='submit'className='submit-button' value={isNewProfile ? "Save" : "Update"} disabled={loading} />
         </center>
       </form>
       <ToastContainer/>
@@ -192,4 +193,4 @@ const ProfileTab = () => {
   );
 };
 
-export default ProfileTab;
+export default withAuth(ProfileTab);

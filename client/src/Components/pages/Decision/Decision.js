@@ -20,6 +20,9 @@ const Decision = () => {
     decision_reason: [''],
   });
   const [errors, setErrors] = useState({});
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(false);
+  const [isDataSaved, setIsDataSaved] = useState(false); // New state for tracking save status
+  const [loading,setLoading] = useState(false);
   const dropdownHeight = 200;
   const dropdownWidth = 650;
   const navigate = useNavigate();
@@ -191,11 +194,17 @@ const Decision = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { decision_name, decision_taken_date, decision_due_date, user_statement, decision_reason } = formData;
+
+
+    if (loading) return;
 
     if (!validateForm()) {
       return;
     }
+
+    setLoading(true); 
+
+    const { decision_name, decision_taken_date, decision_due_date, user_statement, decision_reason } = formData;
 
     const data = {
       decision_name,
@@ -212,10 +221,12 @@ const Decision = () => {
         await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
         toast.success("Decision added successfully");
         console.log("Decision added Successfully", formData);
+        setIsDataSaved(true); // Update state to indicate data has been saved
       } else {
         await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
         toast.success("Decision updated successfully");
         console.log("Decision updated Successfully", formData);
+        setIsDataSaved(true); // Update state to indicate data has been saved
       }
       setTimeout(() => {
         navigate('/readd');
@@ -223,6 +234,9 @@ const Decision = () => {
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while saving the decision");
+      setIsSaveButtonDisabled(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -437,8 +451,24 @@ const Decision = () => {
             )}
           </div>
           <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-            <input type='submit' value={id ? "Update" : "Save"} />
-            <input type='button' value="Cancel" onClick={handleCancel} className="cancel-button" />
+            {/* <input type='submit' value={id ? "Update" : "Save"} /> */}
+            <button
+              type="submit"
+              className='btnn4'
+              disabled={isSaveButtonDisabled || isDataSaved }
+            >
+              {loading ? 'Saving...' : (id ? 'Update' : 'Save')}
+              </button>
+
+            {/* <input type='button' value="Cancel" onClick={handleCancel} className="cancel-button" /> */}
+            <button
+              type="button"
+              className='cancel-button'
+              disabled={loading}
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>
