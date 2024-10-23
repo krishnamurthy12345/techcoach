@@ -574,24 +574,16 @@ const Readd = () => {
       if (selectedTag === 'Decision Maturity') {
         return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
       } 
-<<<<<<<<< Temporary merge branch 1
-      else if (selectedTag !== '' && selectedTag !== 'All Tags') {
-=========
       if (selectedTag !== '' && selectedTag !== 'All Tags') {
->>>>>>>>> Temporary merge branch 2
         return decision.tags.some(tag => tag.tag_name === selectedTag);
       }
       return true;
     });
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
-<<<<<<<<< Temporary merge branch 1
-      const month = new Date(decision.decision_creation_date).toLocaleString('default', { month: 'long', year: 'numeric' });
-=========
       const decisionDate = decision.decision_taken_date 
       ? new Date(decision.decision_taken_date)
       : new Date(decision.decision_due_date);
       const month = decisionDate.toLocaleString('default', { month: 'long', year: 'numeric' });
->>>>>>>>> Temporary merge branch 2
 
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
@@ -601,11 +593,7 @@ const Readd = () => {
     const sortedMonths = Object.keys(decisionsByMonth).sort((a, b) => {
       const [monthA, yearA] = a.split(' ');
       const [monthB, yearB] = b.split(' ');
-<<<<<<<<< Temporary merge branch 1
-      return new Date(`${yearA}-${new Date(a).getMonth() + 1}-01`) - new Date(`${yearB}-${new Date(b).getMonth() + 1}-01`);
-=========
       return new Date(`${yearB}-${new Date(`${monthB} 1, ${yearB}`).getMonth() + 1}-01`) - new Date(`${yearA}-${new Date(`${monthA} 1, ${yearA}`).getMonth() + 1}-01`);
->>>>>>>>> Temporary merge branch 2
     });
   
     return (
