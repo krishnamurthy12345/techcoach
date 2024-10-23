@@ -340,7 +340,7 @@ const AddLink = () => {
   };
 
   return (
-    <div className='addlink'>
+      <div className='addlink'>
       <center>
         <div className='bg-secondary text-white rounded p-2'>
           <h4>{decision_name}</h4>
@@ -356,7 +356,7 @@ const AddLink = () => {
         <div>
           <div className='d-flex gap-2' style={{maxWidth:'400px'}}>
             <IoIosInformationCircle className='fs-4' />
-            <p>To link your decisions to your Profile data like SWOT, please click "Get Profile Data"</p>
+            <p> To link your decisions to your Profile data like SWOT, please click "Get Profile Data" </p>
           </div>
           <button type="button" className='swot' onClick={handleSWOTClick}>Get Profile Data</button>
           {showProfileOptions && (
@@ -450,10 +450,9 @@ const AddLink = () => {
         <div>
           <div className='d-flex gap-2' style={{maxWidth:'400px'}}>
           <IoIosInformationCircle className='fs-4' />
-          <p>To link your decisions to your Soft Skills, please click Get Soft Skills Data"
-          </p>
+          <p> To link your decisions to your Soft Skills, please click Get Soft Skills Data" </p>
           </div>
-          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Soft-Skills Analysis</button>
+          <button type='button' className='soft-skill' onClick={handleSoftSkillClick}>Get Soft Skills Data</button>
           {showSkillOptions && (
             <div className='options-container ml-3'>
               {Array.isArray(skills) && skills.map((skill) => (
@@ -480,8 +479,7 @@ const AddLink = () => {
       <div>
         <div className='d-flex gap-2'style={{maxWidth:'400px'}}>
         <IoIosInformationCircle className='fs-4' />
-        <p>To link your decisions to your Profile data like SWOT, please click "Get Profile Data"
-        </p>
+        <p> To link your decisions to your Profile data like SWOT, please click "Get Profile Data" </p>
         </div>
         <Link to='/getall'>
           <button className='getpage'>
@@ -490,7 +488,7 @@ const AddLink = () => {
         </Link>
       </div>
       <ToastContainer />
-    </div>
+      </div>   
   );
 };
 

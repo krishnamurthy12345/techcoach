@@ -99,12 +99,8 @@ function App() {
         <Route path='/sharedDecisions' element={<SharedDecision />} />
         <Route path='/sharedByMe' element={<ShareWithMe />} />
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
-<<<<<<< HEAD
-        {/* Create Group Routes */}
-=======
 
-        {/* Create InnerCircle Routes */}
->>>>>>> test
+
         <Route path='/group' element={<MultipleMemberGroup />} />
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
         <Route path='/shareAcceptOrNot' element={<AcceptOrNot />} />

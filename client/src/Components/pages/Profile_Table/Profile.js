@@ -191,6 +191,10 @@ const Profile = () => {
     );
   }
 
+  const handleViewLinkedDecisions= () =>{
+
+  }
+
   return (
     <div className="card1">
       <div >
