@@ -1,4 +1,6 @@
 const getConnection = require('../Models/database');
+const { stringify } = require('bigint-json');
+
 
 const postComment = async (req, res) => {
     const { group_id, member_id, comment, decision_id, parentCommentId } = req.body;
@@ -95,6 +97,110 @@ const getComments = async (req, res) => {
         if (conn) {
             await conn.rollback();
         }
+        res.status(500).json({ message: 'Server error while fetching comments' });
+    } finally {
+        if (conn) {
+            conn.release();
+        }
+    }
+};
+
+// const getCommentsByDecisionId = async (req, res) => {
+//     const { decision_id } = req.params;
+//     let conn;
+
+//     try {
+//         conn = await getConnection();
+
+//         // Fetch comments
+//         const comments = await conn.query(`
+//             SELECT
+//                 td.id,
+//                 td.group_id,
+//                 td.member_id,
+//                 td.decision_id,
+//                 td.comment,
+//                 td.created_at,
+//                 td.parentCommentId,
+//                 td.updated_at,
+//                 tu.user_id,
+//                 tu.displayname,
+//                 tu.email
+//             FROM
+//                 techcoach_lite.techcoach_decision_conversations td 
+//             LEFT JOIN
+//                 techcoach_lite.techcoach_users tu ON td.member_id = tu.user_id
+//             WHERE 
+//                 td.decision_id = ?
+//         `, [decision_id]);
+
+//         // Fetch comment count
+//         const [{ count }] = await conn.query(`
+//             SELECT COUNT(*) as count
+//             FROM techcoach_lite.techcoach_decision_conversations
+//             WHERE decision_id = ?
+//         `, [decision_id]);
+
+//         // Return the sanitized comments and count
+//         res.status(200).send(stringify({ comments, count }));
+//     } catch (error) {
+//         console.error('Error fetching comments by decision ID:', error);
+//         if (conn) {
+//             await conn.rollback();
+//         }
+//         res.status(500).json({ message: 'Server error while fetching comments' });
+//     } finally {
+//         if (conn) {
+//             conn.release();
+//         }
+//     }
+// };
+
+const getCommentsByDecisionId = async (req, res) => {
+    const { decision_id } = req.params;
+    let conn;
+
+    try {
+        conn = await getConnection();
+
+        const comments = await conn.query(`
+            SELECT
+                td.id,
+                td.group_id,
+                td.member_id,
+                td.decision_id,
+                td.comment,
+                td.created_at,
+                td.parentCommentId,
+                td.updated_at,
+                tu.user_id,
+                tu.displayname,
+                tu.email,
+                COUNT(td.id) OVER () AS total_comments
+            FROM
+                techcoach_lite.techcoach_decision_conversations td
+            LEFT JOIN
+                techcoach_lite.techcoach_users tu ON td.member_id = tu.user_id
+            WHERE 
+                td.decision_id = ?;
+        `, [decision_id]);
+
+        if (comments.length > 0) {
+            const sanitizedComments = comments.map(comment => {
+                return {
+                    ...comment,
+                    id: comment.id.toString(), 
+                    total_comments: comment.total_comments.toString() 
+                };
+            });
+
+            const totalComments = sanitizedComments[0].total_comments;
+            res.status(200).json({ comments: sanitizedComments, count: totalComments });
+        } else {
+            res.status(404).json({ message: 'No comments found for this decision' });
+        }
+    } catch (error) {
+        console.error('Error fetching comments by decision ID:', error);
         res.status(500).json({ message: 'Server error while fetching comments' });
     } finally {
         if (conn) {
@@ -375,6 +481,7 @@ module.exports = {
     // Conversation Controllers
     postComment,
     getComments,
+    getCommentsByDecisionId,
     updateComment,
     replyToComment,
     deleteComment,
