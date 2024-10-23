@@ -72,6 +72,7 @@ const getdecisionCirclesByUser = async () => {
         return error.message;
     }
 };
+
 const getdecisionCirclesByUserAndMember = async () => {
     const token = localStorage.getItem('token');
     try {
@@ -477,6 +478,56 @@ const getComments = async ( groupId,decisionId ) => {
     }
 }
 
+// const getCommentsByDecisionId = async ( decisionId ) => {
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
+//             headers: {
+//                 Authorization: `Bearer ${token}`
+//             },
+//             params: {
+//                 decisionId: decisionId
+//             }
+//         });
+//         console.log(response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching comments:', error);
+//         throw new Error('Failed to fetch comments');
+//     }
+// }
+
+const getCommentsByDecisionId = async (decisionId) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            params: {
+                decisionId: decisionId
+            }
+        });
+
+        const { comments, count } = response.data;
+
+        console.log('Comments:', comments);
+        console.log('Total Count:', count);
+
+        return { comments, count };
+    } catch (error) {
+        // Check if error response status is 404
+        if (error.response && error.response.status === 404) {
+            console.log('No Decision Comments Found');
+            return { comments: [], count: 0 }; // Return empty data
+        } else {
+            console.error('Error fetching comments:', error);
+            throw new Error('Failed to fetch comments');
+        }
+    }
+};
+
+
 const updateComment = async (commentId, updatedComment) => {
     const token = localStorage.getItem('token');
 
@@ -563,6 +614,7 @@ export {
     // Decision-Circle Networkk_Call
     postComment,
     getComments,
+    getCommentsByDecisionId,
     updateComment,
     replyToComment,
     deleteComment,

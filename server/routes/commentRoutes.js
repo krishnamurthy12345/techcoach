@@ -10,6 +10,7 @@ router.use(createUserKey);
 // Conversation Routes
 router.post('/comments',commentController.postComment);
 router.get('/comments/:group_id/:decision_id',commentController.getComments); 
+router.get('/comments/:decision_id',commentController.getCommentsByDecisionId); 
 router.put('/comments/update', commentController.updateComment);
 router.post('/comments/reply', commentController.replyToComment);
 router.delete('/comments/:commentId', commentController.deleteComment);

@@ -10,6 +10,7 @@ import { GrFormView } from 'react-icons/gr';
 import { DataGrid } from '@mui/x-data-grid';
 import 'react-toastify/dist/ReactToastify.css';
 import Chip from '@mui/material/Chip';
+import { getCommentsByDecisionId } from '../../Decision_Circle/Networkk_Call';
 import './Readd.css';
 import withAuth from '../../withAuth';
 
@@ -19,6 +20,7 @@ const Readd = () => {
   const [recordsPerPage] = useState(10);
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [comments, setComments] = useState({});
+  const [decisionComments,setDecisionComments] = useState({});
   const [view, setView] = useState('table');
   const [expandedDecision, setExpandedDecision] = useState(null);
   const [selectedTag, setSelectedTag] = useState('');
@@ -41,6 +43,7 @@ const Readd = () => {
           setData(sortedData);
           sortedData.forEach(decision => {
             fetchComments(decision.decision_id);
+            fetchdecisionComments(decision.decision_id);
           });
         } else {
           console.error('Invalid response format:', responseData);
@@ -77,6 +80,49 @@ const Readd = () => {
     }
   };
 
+  // const fetchdecisionComments = async (decisionId) => {
+  //   try {
+  //     const response = await getCommentsByDecisionId(decisionId);
+  
+  //     console.log('Response:', response);
+  
+  //     if (response && response.data) {
+  //       const { comments, count } = response.data;
+  
+  //       // Check if comments is an array
+  //       if (Array.isArray(comments)) {
+  //         setDecisionComments(prevComments => ({
+  //           ...prevComments,
+  //           [decisionId]: {
+  //             comments,
+  //             count: !isNaN(Number(count)) ? Number(count) : 0
+  //           }
+  //         }));
+  //       } else {
+  //         console.error('Invalid comments data:', comments);
+  //       }
+  //     } else {
+  //       console.error('Unexpected response structure:', response);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error Fetching comments:', error);
+  //   }
+  // };
+ 
+  const fetchdecisionComments = async (decisionId) => {
+    try {
+      const { comments, count } = await getCommentsByDecisionId(decisionId);
+  
+      setDecisionComments(prevComments => ({
+        ...prevComments,
+        [decisionId]: { comments, count } 
+      }));
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+  
+  
   const handleSortByDueDate = () => {
     const sortedData = [...data].sort((a, b) => {
       const dateA = new Date(a.decision_due_date);
@@ -125,6 +171,7 @@ const Readd = () => {
             <TableCell sx={{ color: 'white' }}>Tags</TableCell>
             <TableCell sx={{ color: 'white' }}>Reasons</TableCell>
             <TableCell sx={{ color: 'white' }}>Comments</TableCell>
+            <TableCell sx={{ color: 'white' }}>Decision Circle Comments</TableCell>
             <TableCell sx={{ color: 'white' }}>Action</TableCell>
           </TableRow>
         </TableHead>
@@ -164,6 +211,21 @@ const Readd = () => {
                       </Box>
                     ) : (
                       'No Comments Found'
+                    )
+                  ) : (
+                    <CircularProgress size={24} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {decisionComments[decision.decision_id] ? (
+                    decisionComments[decision.decision_id].count > 0 ? (
+                      <Box sx={{ display: 'flex' }}>
+                        <Typography variant="body2">
+                          {decisionComments[decision.decision_id].count} comments
+                        </Typography>
+                      </Box>
+                    ) : (
+                      'No Decision Comments Found'
                     )
                   ) : (
                     <CircularProgress size={24} />
