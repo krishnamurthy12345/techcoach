@@ -603,11 +603,7 @@ const getall = async (req, res) => {
         decision_id: decision.decision_id,
         decision_name: decryptText(decision.decision_name, req.user.key),
         user_statement: decryptText(decision.user_statement, req.user.key),
-<<<<<<< HEAD
         decision_creation_date:decision.creation_date,
-=======
-        decision_creation_date : decision.creation_date,
->>>>>>> test
         decision_due_date: decision.decision_due_date,
         decision_taken_date: decision.decision_taken_date,
         tags: tags.map(tag => ({
