@@ -80,35 +80,7 @@ const Readd = () => {
     }
   };
 
-  // const fetchdecisionComments = async (decisionId) => {
-  //   try {
-  //     const response = await getCommentsByDecisionId(decisionId);
-  
-  //     console.log('Response:', response);
-  
-  //     if (response && response.data) {
-  //       const { comments, count } = response.data;
-  
-  //       // Check if comments is an array
-  //       if (Array.isArray(comments)) {
-  //         setDecisionComments(prevComments => ({
-  //           ...prevComments,
-  //           [decisionId]: {
-  //             comments,
-  //             count: !isNaN(Number(count)) ? Number(count) : 0
-  //           }
-  //         }));
-  //       } else {
-  //         console.error('Invalid comments data:', comments);
-  //       }
-  //     } else {
-  //       console.error('Unexpected response structure:', response);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error Fetching comments:', error);
-  //   }
-  // };
- 
+   
   const fetchdecisionComments = async (decisionId) => {
     try {
       const { comments, count } = await getCommentsByDecisionId(decisionId);
@@ -171,7 +143,6 @@ const Readd = () => {
             <TableCell sx={{ color: 'white' }}>Tags</TableCell>
             <TableCell sx={{ color: 'white' }}>Reasons</TableCell>
             <TableCell sx={{ color: 'white' }}>Comments</TableCell>
-            <TableCell sx={{ color: 'white' }}>Decision Circle Comments</TableCell>
             <TableCell sx={{ color: 'white' }}>Action</TableCell>
           </TableRow>
         </TableHead>
@@ -201,7 +172,9 @@ const Readd = () => {
                     </Typography>
                   )}
                 </TableCell>
+                <div>
                 <TableCell>
+                  <p><b>InnerCircle comments</b></p>
                   {comments[decision.decision_id] ? (
                     comments[decision.decision_id].length > 0 ? (
                       <Box sx={{ display: 'flex' }}>
@@ -215,8 +188,8 @@ const Readd = () => {
                   ) : (
                     <CircularProgress size={24} />
                   )}
-                </TableCell>
-                <TableCell>
+                
+                  <p><b>Decision circle comments</b></p>
                   {decisionComments[decision.decision_id] ? (
                     decisionComments[decision.decision_id].count > 0 ? (
                       <Box sx={{ display: 'flex' }}>
@@ -231,6 +204,7 @@ const Readd = () => {
                     <CircularProgress size={24} />
                   )}
                 </TableCell>
+                </div>
                 <TableCell>
                   <IconButton
                     component={Link}

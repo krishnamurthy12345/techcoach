@@ -17,7 +17,7 @@ const MemberSharedDecisions = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [comments, setComments] = useState({});
-    const [newComment, setNewComment] = useState('');
+    const [newComments, setNewComments] = useState({});
     const [buttonLoading, setButtonLoading] = useState({});
 
     const { groupId } = useParams();
@@ -70,7 +70,8 @@ const MemberSharedDecisions = () => {
         try {
             if (buttonLoading[decisionId]) return;
             setButtonLoading(prevState => ({ ...prevState, [decisionId]: true }));
-            if (!newComment.trim()) {
+            const comment = newComments[decisionId]?.trim();
+            if (!comment.trim()) {
                 return toast.error('Comment cannot be empty');
             }
 
@@ -79,8 +80,8 @@ const MemberSharedDecisions = () => {
                 return toast.error('Invalid member ID');
             }
 
-            await postComment(newComment, groupId, decisionId, memberId);
-            setNewComment('');
+            await postComment(comment, groupId, decisionId, memberId);
+            setNewComments(prevState => ({ ...prevState, [decisionId]: '' }));
             toast.success('Comment posted successfully');
 
             fetchComments(groupId, decisionId);
@@ -96,8 +97,8 @@ const MemberSharedDecisions = () => {
         try {
             setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: true }));
 
-            // Ensure a comment is present
-            if (!newComment.trim()) {
+            const comment = newComments[decisionId]?.trim();
+            if (!comment) {
                 return toast.error('Comment cannot be empty');
             }
 
@@ -107,7 +108,7 @@ const MemberSharedDecisions = () => {
 
             if (withEmail) {
                 const decisionDetails = decisions.find(d => d.decision_id === decisionId).decisionDetails;
-                const responseToPostComment = await mailToDecisionCirclePostComment(decisionDetails, memberId, newComment, email);
+                const responseToPostComment = await mailToDecisionCirclePostComment(decisionDetails, memberId, comment, email);
                 toast.success('Email sent successfully');
                 console.log('Response from email API:', responseToPostComment);
 
@@ -145,6 +146,13 @@ const MemberSharedDecisions = () => {
             console.error("Error deleting comment:", error.response?.data);
             toast.error('Error deleting comment');
         }
+    };
+
+    const handleCommentChange = (decisionId, value) => {
+        setNewComments(prevState => ({
+            ...prevState,
+            [decisionId]: value,
+        }));
     };
 
     if (loading) {
@@ -230,8 +238,8 @@ const MemberSharedDecisions = () => {
                                         <input
                                             type="text"
                                             className='comment-input'
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
+                                            value={newComments[decision.decision_id || '']}
+                                            onChange={(e) => handleCommentChange(decision.decision_id,e.target.value)}
                                             placeholder="Write a comment..."
                                         />
                                         <div>
