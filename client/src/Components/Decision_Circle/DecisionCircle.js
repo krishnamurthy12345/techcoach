@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './DecisionCircle.css';
 import withAuth from '../withAuth';
-import { IoClose } from "react-icons/io5";
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { postdecisionGroup, putDecisionGroup } from './Networkk_Call';
+import { postdecisionGroup, putDecisionGroup,getDecisionGroup } from './Networkk_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
 const DecisionCircle = () => {
-  const [circleCreated, setCircleCreated] = useState(false);
   const [circleName, setCircleName] = useState('');
   const navigate = useNavigate();
   const {id} = useParams();
 
-  const handleCreateCircle = () => {
-    setCircleCreated(true);
-    setCircleName('');
-  };
 
-  const handleCloseCircle = () => {
-    setCircleCreated(false);
-  };
+  const fetchDecisionGroup = async () =>{
+    try {
+      const existingGroup = await getDecisionGroup(id);
+      setCircleName(existingGroup.group_name)
+    } catch (error) {
+      console.error('Error fetching decision group:', error);
+    }
+  }
+
 
   const handleSaveCircle = async () => {
     try {
@@ -32,11 +32,9 @@ const DecisionCircle = () => {
         console.log('Decision group updated successfully:', result);
       } else {
         const result = await postdecisionGroup(circleName);
-        alert('Decision group created successfully')
+        toast.success('Decision group created successfully')
         console.log('Decision group created successfully:', result);
       }
-
-      handleCloseCircle();
       navigate('/getdecisioncircle');
     } catch (error) {
       console.error('Failed to create/update decision group:', error);
@@ -48,34 +46,16 @@ const DecisionCircle = () => {
     setCircleName(event.target.value);
   };
 
+  useEffect(()=>{
+    fetchDecisionGroup();
+  },[id]);
+
   return (
     <>
-      <div className={`main-container ${circleCreated ? 'blur-background' : ''}`}>
+      <div>
         <center>
           <div className='circle mt-4'>
             <h4>Decision Circle</h4>
-            <p>Decision Circle Creation Details</p>
-            <div>
-              <button
-                className='btn-secondary me'
-                onClick={handleCreateCircle}
-              >
-                Create Circle Names          
-              </button>
-            </div>
-          </div>
-          <Link to='/getdecisioncircle'>
-            <button className='creategroup'>
-              Get Circle Names
-            </button>
-          </Link>
-        </center>
-      </div>
-
-      {circleCreated && (
-        <div className='circles'>
-          <div className='created-circle-card'>
-            <IoClose onClick={handleCloseCircle} className='close-icon' />
             <div>
               <p>Enter Circle Name :</p>
               <input
@@ -89,8 +69,13 @@ const DecisionCircle = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
+          <Link to='/getdecisioncircle'>
+            <button className='creategroup'>
+              Get Circle Names
+            </button>
+          </Link>
+        </center>
+      </div>
       <ToastContainer />
     </>
   );

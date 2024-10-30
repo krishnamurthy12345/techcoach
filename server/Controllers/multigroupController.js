@@ -32,7 +32,6 @@ const getUserList = async (req, res) => {
 
 const decisionCircleCreation = async (req, res) => {
     const { group_name, members } = req.body;
-    const user_id = req.user.id;
 
     console.log('Request Body:', req.body);
 
@@ -47,8 +46,10 @@ const decisionCircleCreation = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
+        const created_by = req.user.id;
+
         const groupResult = await conn.query(
-            `SELECT id FROM techcoach_lite.techcoach_decision_group WHERE group_name = ?`,
+            `SELECT id FROM techcoach_lite.techcoach_groups WHERE group_name = ?`,
             [group_name]
         );
 
@@ -61,7 +62,7 @@ const decisionCircleCreation = async (req, res) => {
         for (const member of members) {
             const member_id = member.user_id;
             await conn.query(
-                `INSERT INTO techcoach_lite.techcoach_decision_group_member (group_id, member_id, status) VALUES (?,?,'active')`,
+                `INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) VALUES (?,?,'Accepted')`,
                 [group_id, member_id]
             );
         }
@@ -79,8 +80,8 @@ const decisionCircleCreation = async (req, res) => {
 };
 
 const getUserDecisionCircles = async (req, res) => {
-    const user_id = req.user.id;
-    console.log('Retrieved user_id:', user_id);
+    const created_by = req.user.id;
+    console.log('Retrieved user_id:', created_by);
 
     let conn;
 
@@ -88,10 +89,10 @@ const getUserDecisionCircles = async (req, res) => {
         conn = await getConnection();
         const circles = await conn.query(
             `SELECT g.group_name, g.id
-             FROM techcoach_lite.techcoach_decision_group g
-             JOIN techcoach_lite.techcoach_decision_group_member m ON g.id = m.group_id
-             WHERE m.member_id = ?`,
-            [user_id]
+             FROM techcoach_lite.techcoach_groups g
+             JOIN techcoach_lite.techcoach_group_members m ON g.id = m.group_id
+             WHERE m.member_id = ? AND g.type_of_group = 'decision_circle' `,
+            [created_by]
         );
 
         console.log('Query result:', circles);
@@ -103,6 +104,57 @@ const getUserDecisionCircles = async (req, res) => {
         if (conn) conn.release();
     }
 };
+
+// const getdecisionCircle = async (req, res) => {
+//     const { group_id } = req.params;
+
+//     if (!group_id) {
+//         return res.status(400).json({ error: 'Group ID is required.' });
+//     }
+
+//     let conn;
+
+//     try {
+//         conn = await getConnection();
+
+//         const decisionCircle = await conn.query(
+//             `SELECT 
+//     g.id AS group_id, 
+//     g.group_name, 
+//     g.type_of_group, 
+//     g.created_at, 
+//     g.created_by AS group_creator_id, 
+//     creator.displayname AS creator_displayname,  -- Creator's display name
+//     creator.email AS creator_email,              -- Creator's email
+//     m.member_id, 
+//     u.displayname AS member_displayname,         -- Member's display name
+//     m.status
+// FROM 
+//     techcoach_lite.techcoach_groups g
+// JOIN 
+//     techcoach_lite.techcoach_users creator ON g.created_by = creator.user_id  -- Join to get group creator details
+// JOIN 
+//     techcoach_lite.techcoach_group_members m ON g.id = m.group_id
+// JOIN 
+//     techcoach_lite.techcoach_users u ON m.member_id = u.user_id  -- Join to get group members' details
+// WHERE 
+//     g.id = ?;
+// `,
+//             [group_id]
+//         );
+
+//         if (decisionCircle.length === 0) {
+//             return res.status(404).json({ error: 'Decision circle not found.' });
+//         }
+
+//         res.status(200).json({ decisionCircle });
+//     } catch (error) {
+//         console.error('Error fetching decision circle:', error.message);
+//         res.status(500).json({ error: 'An error occurred while fetching the decision circle.' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
 
 const getdecisionCirclesByUser = async (req, res) => {
     const user_id = req.user.id;  
@@ -122,22 +174,22 @@ const getdecisionCirclesByUser = async (req, res) => {
                 g.group_name, 
                 g.type_of_group, 
                 g.created_at, 
-                g.user_id AS group_creator_id, 
+                g.created_by AS group_creator_id, 
                 creator.displayname AS creator_displayname,  -- Creator's display name
                 creator.email AS creator_email,              -- Creator's email
                 m.member_id, 
                 u.displayname AS member_displayname,         -- Member's display name
                 m.status
             FROM 
-                techcoach_lite.techcoach_decision_group g
+                techcoach_lite.techcoach_groups g
             JOIN 
-                techcoach_lite.techcoach_users creator ON g.user_id = creator.user_id  -- Join to get group creator details
+                techcoach_lite.techcoach_users creator ON g.created_by = creator.user_id  -- Join to get group creator details
             JOIN 
-                techcoach_lite.techcoach_decision_group_member m ON g.id = m.group_id
+                techcoach_lite.techcoach_group_members m ON g.id = m.group_id
             JOIN 
                 techcoach_lite.techcoach_users u ON m.member_id = u.user_id  -- Join to get group members' details
             WHERE 
-                g.user_id = ?;`,  
+                g.created_by = ? AND g.type_of_group = 'decision_circle' ;`,  
             [user_id]
         );
 
@@ -172,23 +224,24 @@ const getdecisionCirclesByUserAndMember = async (req, res) => {
                 g.group_name, 
                 g.type_of_group, 
                 g.created_at, 
-                g.user_id AS group_creator_id, 
+                g.created_by AS group_creator_id, 
                 creator.displayname AS creator_displayname,  -- Creator's display name
                 creator.email AS creator_email,              -- Creator's email
                 m.member_id, 
                 u.displayname AS member_displayname,         -- Member's display name
                 m.status
             FROM 
-                techcoach_lite.techcoach_decision_group g
+                techcoach_lite.techcoach_groups g
             LEFT JOIN 
-                techcoach_lite.techcoach_users creator ON g.user_id = creator.user_id  -- Join to get group creator details
+                techcoach_lite.techcoach_users creator ON g.created_by = creator.user_id  -- Join to get group creator details
             LEFT JOIN 
-                techcoach_lite.techcoach_decision_group_member m ON g.id = m.group_id  -- Include members
+                techcoach_lite.techcoach_group_members m ON g.id = m.group_id  -- Include members
             LEFT JOIN 
                 techcoach_lite.techcoach_users u ON m.member_id = u.user_id  -- Join to get group members' details
             WHERE 
-                g.user_id = ? OR m.member_id = ?`,  // Include groups where the user is a creator or a member
-            [user_id, user_id]  // Bind user_id to both the creator and member conditions
+                (g.created_by = ? OR m.member_id = ?)
+                 AND g.type_of_group = 'decision_circle' `,  
+            [user_id, user_id] 
         );
 
         if (groups.length === 0) {
@@ -204,85 +257,34 @@ const getdecisionCirclesByUserAndMember = async (req, res) => {
     }
 };
 
-const getdecisionCircle = async (req, res) => {
-    const { group_id } = req.params;
+// const getAllGroups = async (req, res) => {
+//     let conn;
 
-    if (!group_id) {
-        return res.status(400).json({ error: 'Group ID is required.' });
-    }
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
 
-    let conn;
+//         // Query to get all groups
+//         const groupQuery = `
+//             SELECT id, group_name
+//             FROM techcoach_lite.techcoach_groups
+//             WHERE created_by = ?  
+//         `;
 
-    try {
-        conn = await getConnection();
+//         const groupResult = await conn.query(groupQuery, [req.user.id]);
 
-        const decisionCircle = await conn.query(
-            `SELECT 
-    g.id AS group_id, 
-    g.group_name, 
-    g.type_of_group, 
-    g.created_at, 
-    g.user_id AS group_creator_id, 
-    creator.displayname AS creator_displayname,  -- Creator's display name
-    creator.email AS creator_email,              -- Creator's email
-    m.member_id, 
-    u.displayname AS member_displayname,         -- Member's display name
-    m.status
-FROM 
-    techcoach_lite.techcoach_decision_group g
-JOIN 
-    techcoach_lite.techcoach_users creator ON g.user_id = creator.user_id  -- Join to get group creator details
-JOIN 
-    techcoach_lite.techcoach_decision_group_member m ON g.id = m.group_id
-JOIN 
-    techcoach_lite.techcoach_users u ON m.member_id = u.user_id  -- Join to get group members' details
-WHERE 
-    g.id = ?;
-`,
-            [group_id]
-        );
-
-        if (decisionCircle.length === 0) {
-            return res.status(404).json({ error: 'Decision circle not found.' });
-        }
-
-        res.status(200).json({ decisionCircle });
-    } catch (error) {
-        console.error('Error fetching decision circle:', error.message);
-        res.status(500).json({ error: 'An error occurred while fetching the decision circle.' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-const getAllGroups = async (req, res) => {
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        // Query to get all groups
-        const groupQuery = `
-            SELECT id, group_name
-            FROM techcoach_lite.techcoach_decision_group
-            WHERE user_id = ?  
-        `;
-
-        const groupResult = await conn.query(groupQuery, [req.user.id]);
-
-        await conn.commit();
-        res.status(200).json(groupResult);
-    } catch (error) {
-        console.error('Error fetching all groups:', error.message);
-        if (conn) {
-            await conn.rollback();
-        }
-        res.status(500).json({ error: 'An error occurred while fetching group details' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
+//         await conn.commit();
+//         res.status(200).json(groupResult);
+//     } catch (error) {
+//         console.error('Error fetching all groups:', error.message);
+//         if (conn) {
+//             await conn.rollback();
+//         }
+//         res.status(500).json({ error: 'An error occurred while fetching group details' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
 
 const getUsersForGroup = async (req, res) => {
     const { groupId } = req.params;
@@ -295,8 +297,8 @@ const getUsersForGroup = async (req, res) => {
 
         // Query to get group details
         const groupQuery = `
-            SELECT id, group_name, user_id
-            FROM techcoach_lite.techcoach_decision_group
+            SELECT id, group_name, created_by
+            FROM techcoach_lite.techcoach_groups
             WHERE id = ?
         `;
 
@@ -308,10 +310,10 @@ const getUsersForGroup = async (req, res) => {
 
         // Query to get members of the group
         const membersQuery = `
-            SELECT techcoach_lite.techcoach_users.user_id, techcoach_lite.techcoach_users.displayname, techcoach_lite.techcoach_users.email, techcoach_lite.techcoach_decision_group_member.status
-            FROM techcoach_lite.techcoach_decision_group_member
-            JOIN techcoach_lite.techcoach_users ON techcoach_lite.techcoach_decision_group_member.member_id = techcoach_lite.techcoach_users.user_id
-            WHERE techcoach_lite.techcoach_decision_group_member.group_id = ?
+            SELECT techcoach_lite.techcoach_users.user_id, techcoach_lite.techcoach_users.displayname, techcoach_lite.techcoach_users.email, techcoach_lite.techcoach_group_members.status
+            FROM techcoach_lite.techcoach_group_members
+            JOIN techcoach_lite.techcoach_users ON techcoach_lite.techcoach_group_members.member_id = techcoach_lite.techcoach_users.user_id
+            WHERE techcoach_lite.techcoach_group_members.group_id = ?
         `;
 
         const membersResult = await conn.query(membersQuery, [groupId]);
@@ -337,7 +339,7 @@ const removeUsersFromGroup = async (req, res) => {
 
         const groupQuery = `
             SELECT id
-            FROM techcoach_lite.techcoach_decision_group
+            FROM techcoach_lite.techcoach_groups
             WHERE id = ?
         `;
         const groupResult = await conn.query(groupQuery, [groupId]);
@@ -348,7 +350,7 @@ const removeUsersFromGroup = async (req, res) => {
 
         const memberCheckQuery = `
             SELECT member_id
-            FROM techcoach_lite.techcoach_decision_group_member
+            FROM techcoach_lite.techcoach_group_members
             WHERE group_id = ? AND member_id = ?
         `;
         const memberCheckResult = await conn.query(memberCheckQuery, [groupId, userId]);
@@ -358,7 +360,7 @@ const removeUsersFromGroup = async (req, res) => {
         }
 
         const removeMemberQuery = `
-            DELETE FROM techcoach_lite.techcoach_decision_group_member
+            DELETE FROM techcoach_lite.techcoach_group_members
             WHERE group_id = ? AND member_id = ?
         `;
         await conn.query(removeMemberQuery, [groupId, userId]);
@@ -454,10 +456,10 @@ const decisionshareDecisionCircle = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const query = `INSERT INTO techcoach_lite.techcoach_decision_group_share_decisions (group_id, decision_id) VALUES (?, ?)`;
+        const query = `INSERT INTO techcoach_lite.techcoach_shared_decisions (groupId,decisionId) VALUES (?,  ?)`;
 
         // Execute the query
-        const result = await conn.query(query, [group_id, decision_id]);
+        const result = await conn.query(query, [group_id,decision_id]);
 
         console.log('Query Result:', result); // Log the result for debugging
 
@@ -469,7 +471,7 @@ const decisionshareDecisionCircle = async (req, res) => {
             message: 'Decision Shared Successfully',
             sharedDecision: {
                 group_id,
-                decision_id,
+                decision_id
             },
         });
     } catch (error) {
@@ -510,7 +512,7 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
 
         const sharedDecisionsQuery = `
         SELECT 
-          tgsd.decision_id,
+          tsd.decisionId AS decision_id,
           td.decision_name,
           td.user_statement,
           td.decision_taken_date,
@@ -519,11 +521,11 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
           tg.type_of_group,
           tu.displayname AS shared_by,
           tu.email AS shared_by_email
-        FROM techcoach_lite.techcoach_decision_group_share_decisions tgsd
-        JOIN techcoach_lite.techcoach_decision td ON tgsd.decision_id = td.decision_id
-        JOIN techcoach_lite.techcoach_decision_group tg ON tgsd.group_id = tg.id
+        FROM techcoach_lite.techcoach_shared_decisions tsd
+        JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+        JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
         JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
-        WHERE tg.user_id = ? AND tg.id = ?
+        WHERE tg.created_by = ? AND tg.id = ? AND tg.type_of_group = 'decision_circle'
       `;
 
         const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId, groupId]);
@@ -635,7 +637,7 @@ const getMemberSharedDecisions = async (req, res) => {
         // Fetch decisions shared with the group
         const decisionQuery = `
             SELECT 
-              tgsd.decision_id,
+              tsd.decisionId AS decision_id,
               td.decision_name,
               td.user_statement,
               td.decision_taken_date,
@@ -644,11 +646,11 @@ const getMemberSharedDecisions = async (req, res) => {
               tg.type_of_group,
               tu.displayname AS shared_by,
               tu.email AS shared_by_email
-            FROM techcoach_lite.techcoach_decision_group_share_decisions tgsd
-            JOIN techcoach_lite.techcoach_decision td ON tgsd.decision_id = td.decision_id
-            JOIN techcoach_lite.techcoach_decision_group tg ON tgsd.group_id = tg.id
+            FROM techcoach_lite.techcoach_shared_decisions tsd
+            JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+            JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
             JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
-            WHERE tg.id = ?`;
+            WHERE tg.id = ? AND tg.type_of_group='decision_circle'`;
 
         const getDecisions = await conn.query(decisionQuery, [groupId]);
         console.log('weee', getDecisions);
@@ -728,7 +730,6 @@ const getMemberSharedDecisions = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
 
 const getSharedDecisionCircleCount = async (req, res) => {
     const userId = req.user.id;
@@ -860,12 +861,83 @@ const getSharedDecisionCircleCount = async (req, res) => {
 //     }
 // };
 
+// const decisionCirclePostComment = async (req, res) => {
+//     // console.log("Request body:", req.body.decision);
+
+//     const { decision, groupMemberIds, comment, email } = req.body;
+
+//     console.log("hhhhhhhhhhhhhhhhhhhh", req.body)
+//     let conn;
+
+//     const truncateText = (text, maxLength) => {
+//         if (!text || text.length <= maxLength) return text;
+//         const firstPart = text.substring(0, 10);
+//         const lastPart = text.substring(text.length - 10);
+//         return `${firstPart}...${lastPart}`;
+//     };
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
+//         const groupMemberRows = await conn.query(groupMemberQuery, [groupMemberIds]);
+//         const groupMemberDetails = groupMemberRows[0];
+//         console.log("Group member details:", groupMemberDetails);
+
+//         const { decision_name, decision_due_date, creation_date } = decision;
+
+//         const truncatedCommentText = truncateText(comment, 20);
+
+//         const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+//             <p>Dear ${decision.user.displayname},</p>
+//             <p>A comment has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+//             <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+//             <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+//             <p><strong>Comment by ${groupMemberDetails.displayname}:</strong></p>
+//             <p><em>${truncatedCommentText}</em></p>
+//             <p>Regards,</p>
+//             <p>Team @ Decision Coach</p>
+//         </div>`;
+
+//         const emailPayload = {
+//             from: {
+//                 address: "Decision-Coach@www.careersheets.in"
+//             },
+//             to: [
+//                 {
+//                     email_address: {
+//                         address: email
+//                     }
+//                 }
+//             ],
+//             subject: "Comment Posted on Your Shared Decision Circle",
+//             htmlbody: htmlBody
+//         };
+
+//         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+//         const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+//         await axios.post(zeptoMailApiUrl, emailPayload, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+//             }
+//         });
+
+//         await conn.commit();
+//         res.status(200).json({ message: 'Mail Sent Successfully' });
+//     } catch (error) {
+//         console.error('Error in sending mail on Post comment to Decision circle:', error);
+//         if (conn) await conn.rollback();
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
+
 const decisionCirclePostComment = async (req, res) => {
-    // console.log("Request body:", req.body.decision);
-
-    const { decision, memberId, comment, email } = req.body;
-
-    console.log("hhhhhhhhhhhhhhhhhhhh", req.body)
+    const { decision, groupMemberIds, comment, email } = req.body;
     let conn;
 
     const truncateText = (text, maxLength) => {
@@ -879,55 +951,56 @@ const decisionCirclePostComment = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
-        const groupMemberRows = await conn.query(groupMemberQuery, [memberId]);
-        const groupMemberDetails = groupMemberRows[0];
-        console.log("Group member details:", groupMemberDetails);
+        // Fetch details for each group member
+        const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users WHERE user_id IN (${groupMemberIds.join(',')})`;
+        const groupMemberRows = await conn.query(groupMemberQuery);
 
         const { decision_name, decision_due_date, creation_date } = decision;
-
         const truncatedCommentText = truncateText(comment, 20);
 
-        const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-            <p>Dear ${decision.user.displayname},</p>
-            <p>A comment has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
-            <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
-            <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-            <p><strong>Comment by ${groupMemberDetails.displayname}:</strong></p>
-            <p><em>${truncatedCommentText}</em></p>
-            <p>Regards,</p>
-            <p>Team @ Decision Coach</p>
-        </div>`;
+        // Send email to each group member
+        for (const groupMember of groupMemberRows) {
+            const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+                <p>Dear ${groupMember.displayname},</p>
+                <p>A comment has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+                <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+                <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+                <p><strong>Comment by ${decision.user.displayname}:</strong></p>
+                <p><em>${truncatedCommentText}</em></p>
+                <p>Regards,</p>
+                <p>Team @ Decision Coach</p>
+            </div>`;
 
-        const emailPayload = {
-            from: {
-                address: "Decision-Coach@www.careersheets.in"
-            },
-            to: [
-                {
-                    email_address: {
-                        address: email
+            const emailPayload = {
+                from: {
+                    address: "Decision-Coach@www.careersheets.in"
+                },
+                to: [
+                    {
+                        email_address: {
+                            address: groupMember.email
+                        }
                     }
+                ],
+                subject: "Comment Posted on Your Shared Decision Circle",
+                htmlbody: htmlBody
+            };
+
+            const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+            const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+            await axios.post(zeptoMailApiUrl, emailPayload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
                 }
-            ],
-            subject: "Comment Posted on Your Shared Decision Circle",
-            htmlbody: htmlBody
-        };
-
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
-
-        await axios.post(zeptoMailApiUrl, emailPayload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
-            }
-        });
+            });
+        }
 
         await conn.commit();
-        res.status(200).json({ message: 'Mail Sent Successfully' });
+        res.status(200).json({ message: 'Emails Sent Successfully to Group Members' });
     } catch (error) {
-        console.error('Error in sending mail on Post comment to Decision circle:', error);
+        console.error('Error in sending email on Post comment to Decision circle:', error);
         if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
@@ -1045,207 +1118,14 @@ const getSharedDecisionCircleDetails = async (req, res) => {
 };
 
 
-
-// Decision-Circle comment Controller
-
-// const postComment = async (req, res) => {
-//     const { comment, groupId, decision_id, MemberID } = req.body; 
-//     console.log('Request Body:', req.body);
-
-
-//     let conn;
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         // Prepare the query
-//         const insertComment = `
-//         INSERT INTO techcoach_lite.techcoach_decision_conversations 
-//         (group_id, member_id, comment, decision_id, created_at) 
-//         VALUES (?, ?, ?, ?, NOW());
-//     `;
-
-//         // Pass member_id to the query parameters
-//         await conn.query(insertComment, [groupId, MemberID, comment, decision_id]);
-
-//         console.log('Insert the comment result:', commentResult);
-
-//         await conn.commit();
-//         res.status(200).json({ 
-//             message: 'Comment posted successfully', 
-//             commentId: commentResult.insertId 
-//         });
-//     } catch (error) {
-//         console.error('Error processing request:', error);
-//         if (conn) await conn.rollback();
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) conn.release();
-//     }
-// };
-
-// const getComment = async(req,res)=>{
-//     const { id } = req.params;
-//     let conn;
-//     try {
-//         conn = await getConnection();
-
-//         const commentQuery = `
-//        SELECT
-//             td.id,
-//             td.group_id,
-//             td.member_id,
-//             td.decision_id,
-//             td.comment,
-//             td.created_at,
-//             td.parentCommentId,
-//             td.updated_at,
-//             tu.user_id,
-//             tu.displayname,
-//             tu.email
-//         FROM
-//             techcoach_lite.techcoach_decision_conversations td 
-//         LEFT JOIN
-//             techcoach_lite.techcoach_users tu
-//         ON
-//             td.member_id = tu.user_id
-//         WHERE 
-//             td.decision_id = ?
-//         `;
-//         const comments = await conn.query(commentQuery,[id]);
-
-//         if (comments.length === 0) {
-//             return res.status(404).json({ message: 'No comments found for this decision' });
-//         }
-
-//         res.status(200).json(comments);
-//     } catch (error) {
-//         console.error('Error Fetching comments:',error);
-//         res.status(500).json({ error: 'An error occured while fetching comments'})
-//     } finally {
-//         if (conn) conn.release();
-//     }
-
-// }
-
-// const getShareDecisionComment = async(req,res)=>{
-//     const user_id = req.user.id;
-//     const { id } = req.params;
-//     let conn;
-//     try {
-//         conn = await getConnection();
-
-//         const commentQuery = `
-//        SELECT
-//             td.id,
-//             td.group_id,
-//             td.member_id,
-//             td.decision_id,
-//             td.comment,
-//             td.created_at,
-//             td.parentCommentId,
-//             td.updated_at,
-//             tu.user_id,
-//             tu.displayname,
-//             tu.email
-//         FROM
-//             techcoach_lite.techcoach_decision_conversations td 
-//         LEFT JOIN
-//             techcoach_lite.techcoach_users tu
-//         ON
-//             td.member_id = tu.user_id
-//         WHERE 
-//             td.decision_id = ?
-//         `;
-//         const comments = await conn.query(commentQuery,[id]);
-
-//         comments.forEach(comment =>{
-//             if (comment.member_id === user_id) {
-//                 comment.type_of_member = 'author';
-//             } else {
-//                 comment.type_of_member = 'member';
-//             }
-//         });
-
-//         res.status(200).json(comments);
-//     } catch (error) {
-//         console.error('Error Fetching comments:',error);
-//         res.status(500).json({ error: 'An error occured while fetching comments'})
-//     } finally {
-//         if (conn) conn.release();
-//     }
-
-// }
-
-// const postReplyDecisionComment = async (req, res) => {
-//     // console.log("request body from post reply", req.body);
-//     const {commentId, reply, groupId, decisionId} = req.body;
-
-//     const userId = req.user.id;
-
-//     let conn;
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         const query = await conn.query(
-//             `INSERT INTO techcoach_lite.techcoach_decision_conversations (group_id, member_id, comment, created_at, parentCommentId, decision_id) 
-//              VALUES (?, ?, ?, NOW(),?, ?)`,
-//             [groupId, userId, reply, commentId, decisionId]
-//         );
-
-//         console.log("putttttttttttttt", query);
-
-//         await conn.commit();
-//         res.status(200).json({ message: 'Shared Decision Fetched successfully' });
-//     } catch (error) {
-//         console.error('Error in fetching shared decisions', error);
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) conn.release();
-//     }
-// };
-
-// const editComments = async (req, res) => {
-//     // console.log("reqqqqqqqqqq body editt", req.body);
-
-//     const {commentId, editedContent} = req.body;
-
-//     let conn;
-
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         await conn.query(`
-//             UPDATE techcoach_lite.techcoach_decision_conversations
-//             SET comment = ?, updated_at = NOW()
-//             WHERE id = ?
-//         `, [editedContent, commentId]);
-
-//         await conn.commit();
-
-//         res.status(200).json({ message: 'Comments updated successfully' });
-//     } catch (error) {
-//         console.error('Error updating Comments:', error);
-//         await conn.rollback();
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) conn.release();
-//     }
-// };
-
-
-
-
 module.exports = {
     getUserList,
     decisionCircleCreation,
     getUserDecisionCircles,
     getdecisionCirclesByUser,
     getdecisionCirclesByUserAndMember,
-    getdecisionCircle,
-    getAllGroups,
+    // getdecisionCircle,
+    // getAllGroups,
     getUsersForGroup,
     removeUsersFromGroup,
     sendDecisionCircleInvitation,
@@ -1253,6 +1133,6 @@ module.exports = {
     getdecisionSharedDecisionCircle,
     getMemberSharedDecisions,
     getSharedDecisionCircleCount,
+    decisionCirclePostComment,
     getSharedDecisionCircleDetails,
-    decisionCirclePostComment
 };

@@ -197,19 +197,12 @@ const getMemberSharedDecisions = async (groupId) => {
     }
 }
 
-const mailToDecisionCirclePostComment = async (decision, memberId, comment,email) => {
+const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment,email) => {
     const token = localStorage.getItem('token');
-
-    // Validation check for commentText
-    if (!comment || comment.trim() === '') {
-        console.error('Comment text is missing');
-        return;
-    }
-
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`, {
             decision, 
-            memberId, 
+            groupMemberIds, 
             comment,
             email
         }, {
@@ -217,8 +210,8 @@ const mailToDecisionCirclePostComment = async (decision, memberId, comment,email
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log('Response for added comments', response);
-        return response.data;
+        console.log('Response for added comments', response.data.message);
+        return response.data.message;
     } catch (error) {
         console.error('Error fetching added comments', error);
         throw error;
@@ -324,121 +317,24 @@ const deleteDecisionGroup = async (id) => {
     }
 };
 
-// Decision-Circle Networkk_calls
-// const postComment = async (comment, MemberID,groupId, decision_id) => {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await axios.put(
-//             `${process.env.REACT_APP_API_URL}/group/postcomment`,
-//             {
-//                 comment,
-//                 MemberID,
-//                 groupId,
-//                 decision_id 
-//             },
-//             {
-//                 headers: {
-//                     Authorization: `Bearer ${token}`
-//                 }
-//             }
-//         );
-//         console.log("Response for comments", response);
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error posting comment", error);
-//         throw error;
-//     }
-// };
-
-// const getComment = async(id) =>{
-//     const token = localStorage.getItem('token');
-//     try{
-//         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getcomment/${id}`,{
-//             headers:{
-//                 Authorization:`Bearer ${token}`
-//             }
-//         });
-//         console.log(response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error fetching comments:',error);
-//         throw error
-//     }
-// }
-
-// const getShareDecisionComment = async (id) => {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/getShareDecisionComment`, {
-//             decision_id: id
-//         }, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             }
-//         });
-//         console.log("response for comments", response);
-//         return response.data; 
-//     } catch (error) {
-//         console.error("Error fetching shared comments", error);
-//         throw error;
-//     }
-// };
-
-// const postReplyDecisionComment = async(commentId, reply,groupId, decisionId) =>{
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/postReplyDecisionComment`,
-//             { commentId, reply,groupId, decisionId },{
-//             headers:{
-//                 Authorization: `Bearer ${token}`
-//             }
-//         })
-//         console.log(response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error Posting reply:',error);
-//         throw error;
-//     }
-// }
-
-// const editComments = async (commentId, editedContent) => {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/editComments`, 
-//             { 
-//                 commentId, 
-//                 editedContent 
-//             }, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             }
-//         });
-//         console.log("response for edit comments", response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error editing comment:', error);
-//         throw error;
-//     }
-// };
-
-const postComment = async (comment, groupId, decisionId, memberId) => {
+const postComment = async (groupId, groupMemberIds, commentText,decisionId) => {
     const token = localStorage.getItem('token');
 
     // Logging the payload to be sent
     console.log("Posting comment with data:", {
-        comment,
-        group_id: groupId,
-        decision_id: decisionId,
-        member_id: memberId,
+        groupId,
+        groupMemberIds,
+        commentText,
+        decisionId,
     });
 
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`, 
             {
-                comment,
-                group_id: groupId,
-                decision_id: decisionId,
-                member_id: memberId,
+                groupId,
+                groupMemberIds,
+                commentText,
+                decisionId,
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -470,63 +366,13 @@ const getComments = async ( groupId,decisionId ) => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data);
-        return response.data;
+        console.log(response.data.comments,"getcomments");
+        return response.data.comments;
     } catch (error) {
         console.error('Error fetching comments:', error);
         throw new Error('Failed to fetch comments');
     }
 }
-
-// const getCommentsByDecisionId = async ( decisionId ) => {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             },
-//             params: {
-//                 decisionId: decisionId
-//             }
-//         });
-//         console.log(response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error fetching comments:', error);
-//         throw new Error('Failed to fetch comments');
-//     }
-// }
-
-const getCommentsByDecisionId = async (decisionId) => {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            params: {
-                decisionId: decisionId
-            }
-        });
-
-        const { comments, count } = response.data;
-
-        console.log('Comments:', comments);
-        console.log('Total Count:', count);
-
-        return { comments, count };
-    } catch (error) {
-        // Check if error response status is 404
-        if (error.response && error.response.status === 404) {
-            console.log('No Decision Comments Found');
-            return { comments: [], count: 0 }; // Return empty data
-        } else {
-            console.error('Error fetching comments:', error);
-            throw new Error('Failed to fetch comments');
-        }
-    }
-};
-
 
 const updateComment = async (commentId, updatedComment) => {
     const token = localStorage.getItem('token');
@@ -604,17 +450,8 @@ export {
     deleteDecisionGroup,
 
     // Decision-Circle Networkk_Call
-    //  postComment,
-    //  getComment,
-    //  getShareDecisionComment,
-    //  postReplyDecisionComment,
-    //  editComments,
-
-
-    // Decision-Circle Networkk_Call
     postComment,
     getComments,
-    getCommentsByDecisionId,
     updateComment,
     replyToComment,
     deleteComment,

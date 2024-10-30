@@ -482,176 +482,6 @@ const acceptOrRejectInnerCircle = async (req, res) => {
 };
 
 
-// const getSharedDecisions = async (req, res) => {
-//     const userId = req.user.id;
-//     let conn;
-
-//     const decryptText = (text, key) => {
-//         try {
-//             const decipher = crypto.createDecipher('aes-256-cbc', key);
-//             let decryptedText = decipher.update(text, 'hex', 'utf8');
-//             decryptedText += decipher.final('utf8');
-//             return decryptedText;
-//         } catch (error) {
-//             console.error('Error decrypting text:', error);
-//             return null;
-//         }
-//     };
-
-//     const encryptText = (text, key) => {
-//         try {
-//             const cipher = crypto.createCipher('aes-256-cbc', key);
-//             let encryptedText = cipher.update(text, 'utf8', 'hex');
-//             encryptedText += cipher.final('hex');
-//             return encryptedText;
-//         } catch (error) {
-//             console.error('Error encrypting text:', error);
-//             return null;
-//         }
-//     };
-
-//     try {
-//         conn = await getConnection();
-//         await conn.beginTransaction();
-
-//         const sharedDecisions = await conn.query(`
-//             SELECT * FROM techcoach_lite.techcoach_shared_decisions 
-//             WHERE groupMember = ?
-//         `, [userId]);
-
-//         const results = [];
-//         let decisionCount = 0;
-
-//         for (const sharedDecision of sharedDecisions) {
-//             const { decisionId, groupId } = sharedDecision;
-
-//             const decisionDetailsQuery = await conn.query(`
-//                 SELECT decision_id,
-//                        user_id,
-//                        decision_name,
-//                        decision_reason,
-//                        created_by,
-//                        creation_date,
-//                        decision_due_date,
-//                        decision_taken_date,
-//                        user_statement
-//                 FROM techcoach_lite.techcoach_decision
-//                 WHERE decision_id = ?
-//             `, [decisionId]);
-
-//             if (decisionDetailsQuery.length === 0) {
-//                 continue;
-//             }
-
-//             const decisionDetails = decisionDetailsQuery[0];
-
-//             const userQuery = await conn.query(`
-//                 SELECT user_id, displayname, email 
-//                 FROM techcoach_lite.techcoach_users 
-//                 WHERE user_id = ?
-//             `, [decisionDetails.user_id]);
-
-//             if (userQuery.length > 0) {
-//                 decisionDetails.userDetails = userQuery[0];
-//             } else {
-//                 decisionDetails.userDetails = null;
-//             }
-
-//             const groupDetails = await conn.query(`
-//                 SELECT created_by 
-//                 FROM techcoach_lite.techcoach_groups 
-//                 WHERE id = ?
-//             `, [groupId]);
-
-//             if (groupDetails.length === 0) {
-//                 continue;
-//             }
-
-//             const groupUserDetailsQuery = await conn.query(`
-//                 SELECT user_id, displayname, email 
-//                 FROM techcoach_lite.techcoach_users 
-//                 WHERE user_id = ?
-//             `, [groupDetails[0].created_by]);
-
-//             if (groupUserDetailsQuery.length === 0) {
-//                 continue;
-//             }
-
-//             const groupUserDetails = groupUserDetailsQuery[0];
-//             const keyData = undefined + groupUserDetails.displayname + groupUserDetails.email;
-//             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
-
-//             decisionDetails.decision_name = decryptText(decisionDetails.decision_name, encryptedKey);
-//             decisionDetails.user_statement = decryptText(decisionDetails.user_statement, encryptedKey);
-
-//             const decisionReasonQuery = await conn.query(`
-//                 SELECT decision_reason_text 
-//                 FROM techcoach_lite.techcoach_decision_reason 
-//                 WHERE decision_id = ?
-//             `, [decisionId]);
-
-//             if (decisionReasonQuery.length > 0) {
-//                 decisionDetails.reasons = decisionReasonQuery.map(reasonEntry => 
-//                     decryptText(reasonEntry.decision_reason_text, encryptedKey)
-//                 );
-//             } else {
-//                 decisionDetails.reasons = [];
-//             }
-
-//             const sharedInfo = await conn.query(`
-//                 SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
-//                        t.user_id, t.displayname, t.email
-//                 FROM techcoach_lite.techcoach_conversations d
-//                 LEFT JOIN techcoach_lite.techcoach_users t
-//                 ON d.groupMember = t.user_id
-//                 WHERE groupId = ? AND decisionId = ? AND groupMember = ?
-//             `, [groupId, decisionId, userId]);
-
-//             const commentIds = sharedInfo.map(comment => comment.id);
-
-//             if (commentIds.length > 0) {
-//                 const replies = await conn.query(`
-//                     SELECT d.id, d.groupId, d.groupMember, d.decisionId, d.comment, d.created_at, d.parentCommentId, d.updated_at,
-//                            t.user_id, t.displayname, t.email
-//                     FROM techcoach_lite.techcoach_conversations d
-//                     LEFT JOIN techcoach_lite.techcoach_users t
-//                     ON d.groupMember = t.user_id
-//                     WHERE parentCommentId IN (?)
-//                 `, [commentIds]);
-
-//                 sharedInfo.forEach(comment => {
-//                     comment.replies = replies.filter(reply => reply.parentCommentId === comment.id);
-//                 });
-//             }
-
-//             results.push({
-//                 sharedDecision,
-//                 decisionDetails,
-//                 groupDetails: groupDetails[0],
-//                 groupUserDetails,
-//                 comments: sharedInfo
-//             });
-
-//             decisionCount++;
-//         }
-
-//         await conn.commit();
-
-//         if (decisionCount === 0) {
-//             res.status(200).json({ message: 'No decisions fetched', results: [], decisionCount });
-//         } else {
-//             res.status(200).json({ message: 'Shared Notification Fetched Successfully', results, decisionCount });
-//         }
-//     } catch (error) {
-//         console.error('Error fetching Shared Notification:', error);
-//         if (conn) await conn.rollback();
-//         res.status(500).json({ error: 'An error occurred while processing your request' });
-//     } finally {
-//         if (conn) conn.release();
-//     }
-// };
-
-
 const getSharedDecisions = async (req, res) => {
     const userId = req.user.id;
     let conn;
@@ -959,15 +789,16 @@ const getSharedComments = async (req, res) => {
             d.updated_at,
             t.user_id,
             t.displayname,
-            t.email
+            t.email,
+            g.type_of_group
         FROM 
             techcoach_lite.techcoach_conversations d
         LEFT JOIN 
-            techcoach_lite.techcoach_users t
-        ON 
-            d.groupMember = t.user_id
+            techcoach_lite.techcoach_users t ON d.groupMember = t.user_id
+        JOIN 
+            techcoach_lite.techcoach_groups g ON d.groupId = g.id    
         WHERE 
-            d.decisionId = ?`;
+            d.decisionId = ? AND g.type_of_group = 'inner_circle' `;
 
         const comments = await conn.query(commentsQuery, [decisionId]);
 
@@ -1158,10 +989,12 @@ const innerCirclePostComment = async (req, res) => {
 
 
 const innerCircleDecisionShare = async (req, res) => {
-    // console.log("Request body invitation:", req.body);
+    console.log("Request body invitation:", req.body);
 
     const { memberEmail, decisionSummary } = req.body;
     const memberId = req.user.id;
+
+    console.log("Request body invitation iddd", memberId);
 
     let conn;
 
@@ -1179,7 +1012,7 @@ const innerCircleDecisionShare = async (req, res) => {
         const memberNameQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE email = ?';
         const rows = await conn.query(memberNameQuery, [memberEmail]);
 
-        // console.log("ssssssssssss", rows)
+        console.log("ssssssssssss", rows)
         
         if (!rows || rows.length === 0) {
             throw new Error('Member not found');
@@ -1191,6 +1024,7 @@ const innerCircleDecisionShare = async (req, res) => {
         const subjectNameQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
         const subjectNameRows = await conn.query(subjectNameQuery, [memberId]);
 
+
         
         if (!subjectNameRows || subjectNameRows.length === 0) {
             throw new Error('Member not found');
@@ -1199,6 +1033,8 @@ const innerCircleDecisionShare = async (req, res) => {
         const subjectName = subjectNameRows[0].displayname;
 
         const truncatedDecisionText = truncateText(decisionSummary.decisionName, 20);
+
+        console.log("maillllllll",truncatedDecisionText, subjectName, memberEmail, memberName, decisionSummary)
 
         const emailPayload = {
             from: {

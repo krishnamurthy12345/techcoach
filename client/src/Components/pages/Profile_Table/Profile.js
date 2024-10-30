@@ -191,10 +191,6 @@ const Profile = () => {
     );
   }
 
-  const handleViewLinkedDecisions= () =>{
-
-  }
-
   return (
     <div className="card1">
       <div >
@@ -215,7 +211,7 @@ const Profile = () => {
             </button>
           </div>
         </div>
-        <div>
+        <div className='users-name'>
           <strong>Username:</strong>
           <span>{userData.displayname}</span>
         </div>
@@ -241,9 +237,9 @@ const Profile = () => {
             </div> */}
             <div className='addition-one'>
               <p><b>Desc:</b> Your ability to take better decisions is influenced by your Self Awareness. Profile section enables you to add more details about yourself that can be aligned with your decisions.</p>
-              <button onClick={() => window.location.href = 'https://academy.greenestep.com/courses/swot-analysis/'} className='analysis'>
+              <a href="https://academy.greenestep.com/courses/swot-analysis/" className='analysis' target="_blank" rel="noopener noreferrer">
                 SWOT Analysis
-              </button>
+              </a>
             </div>
             {formData.attitude && (
               <div className="sub-card">
