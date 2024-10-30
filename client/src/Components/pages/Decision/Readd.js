@@ -10,7 +10,6 @@ import { GrFormView } from 'react-icons/gr';
 import { DataGrid } from '@mui/x-data-grid';
 import 'react-toastify/dist/ReactToastify.css';
 import Chip from '@mui/material/Chip';
-import { getCommentsByDecisionId } from '../../Decision_Circle/Networkk_Call';
 import './Readd.css';
 import withAuth from '../../withAuth';
 
@@ -20,7 +19,6 @@ const Readd = () => {
   const [recordsPerPage] = useState(10);
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [comments, setComments] = useState({});
-  const [decisionComments,setDecisionComments] = useState({});
   const [view, setView] = useState('table');
   const [expandedDecision, setExpandedDecision] = useState(null);
   const [selectedTag, setSelectedTag] = useState('');
@@ -43,7 +41,6 @@ const Readd = () => {
           setData(sortedData);
           sortedData.forEach(decision => {
             fetchComments(decision.decision_id);
-            fetchdecisionComments(decision.decision_id);
           });
         } else {
           console.error('Invalid response format:', responseData);
@@ -80,20 +77,6 @@ const Readd = () => {
     }
   };
 
-   
-  const fetchdecisionComments = async (decisionId) => {
-    try {
-      const { comments, count } = await getCommentsByDecisionId(decisionId);
-  
-      setDecisionComments(prevComments => ({
-        ...prevComments,
-        [decisionId]: { comments, count } 
-      }));
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-    }
-  };
-  
   
   const handleSortByDueDate = () => {
     const sortedData = [...data].sort((a, b) => {
@@ -172,9 +155,7 @@ const Readd = () => {
                     </Typography>
                   )}
                 </TableCell>
-                <div>
                 <TableCell>
-                  <p><b>InnerCircle comments</b></p>
                   {comments[decision.decision_id] ? (
                     comments[decision.decision_id].length > 0 ? (
                       <Box sx={{ display: 'flex' }}>
@@ -188,23 +169,7 @@ const Readd = () => {
                   ) : (
                     <CircularProgress size={24} />
                   )}
-                
-                  <p><b>Decision circle comments</b></p>
-                  {decisionComments[decision.decision_id] ? (
-                    decisionComments[decision.decision_id].count > 0 ? (
-                      <Box sx={{ display: 'flex' }}>
-                        <Typography variant="body2">
-                          {decisionComments[decision.decision_id].count} comments
-                        </Typography>
-                      </Box>
-                    ) : (
-                      'No Decision Comments Found'
-                    )
-                  ) : (
-                    <CircularProgress size={24} />
-                  )}
                 </TableCell>
-                </div>
                 <TableCell>
                   <IconButton
                     component={Link}

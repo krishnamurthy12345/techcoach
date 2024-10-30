@@ -1,60 +1,55 @@
 const getConnection = require('../Models/database');
-const { stringify } = require('bigint-json');
 
 
 const postComment = async (req, res) => {
-    const { group_id, member_id, comment, decision_id, parentCommentId } = req.body;
+    const { groupId, groupMemberIds, commentText, decisionId } = req.body;
 
     console.log('Request Body:', req.body);
+    console.log("Decision ID:", req.params.decisionId); 
     let conn;
 
     try {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const group = await conn.query('SELECT id FROM techcoach_lite.techcoach_decision_group WHERE id = ?', [group_id]);
+        const group = await conn.query('SELECT id FROM techcoach_lite.techcoach_groups WHERE id = ?', [groupId]);
         if (group.length === 0) {
+            console.log("Invalid groupId:", groupId);
             return res.status(400).json({ message: 'Invalid group_id, group does not exist' });
         }
 
-        const decision = await conn.query('SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE decision_id = ?', [decision_id]);
+        const decision = await conn.query('SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE decision_id = ?', [decisionId]);
         if (decision.length === 0) {
+            console.log("Invalid decisionId:", decisionId);
             return res.status(400).json({ message: 'Invalid decision_id, decision does not exist' });
         }
 
-        const member = await conn.query('SELECT user_id FROM techcoach_lite.techcoach_users WHERE user_id = ?', [member_id]);
-        console.log('Fetched member check:', member);
-        if (member.length === 0) {
-            return res.status(400).json({ message: 'Invalid member_id, member does not exist' });
-        }
-
-
-        if (parentCommentId) {
-            const parentComment = await conn.query('SELECT id FROM techcoach_lite.techcoach_decision_conversations WHERE id = ?', [parentCommentId]);
-            if (parentComment.length === 0) {
-                return res.status(400).json({ message: 'Invalid parentCommentId, parent comment does not exist' });
+        for (const memberId of groupMemberIds) {
+            const member = await conn.query('SELECT user_id FROM techcoach_lite.techcoach_users WHERE user_id = ?', [memberId]);
+            if (member.length === 0) {
+                console.log("Invalid memberId:", memberId);
+                return res.status(400).json({ message: `Invalid member_id: ${memberId}, member does not exist` });
             }
+
+            const sql = `
+                INSERT INTO techcoach_lite.techcoach_conversations 
+                (groupId, groupMember, comment, decisionId, created_at)
+                VALUES (?, ?, ?, ?, NOW());
+            `;
+            const params = [groupId, memberId, commentText, decisionId];
+            await conn.query(sql, params);
         }
-
-        const sql = `
-        INSERT INTO techcoach_lite.techcoach_decision_conversations 
-        (group_id, member_id, comment, decision_id, parentCommentId, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW());
-      `;
-        const params = [group_id, member_id, comment, decision_id, parentCommentId || null];
-
-        await conn.query(sql, params);
 
         await conn.commit();
 
-        res.status(200).json({ message: 'Comment added successfully!' });
+        res.status(200).json({ message: 'Comments added successfully!' });
 
     } catch (error) {
         if (conn) {
             await conn.rollback();
         }
-        console.error('Error adding comment:', error);
-        res.status(500).json({ message: 'Server error while adding comment', error: error.message });
+        console.error('Error adding comments:', error);
+        res.status(500).json({ message: 'Server error while adding comments', error: error.message });
     } finally {
         if (conn) {
             conn.release();
@@ -63,7 +58,8 @@ const postComment = async (req, res) => {
 };
 
 const getComments = async (req, res) => {
-    const { group_id, decision_id } = req.params;
+    const { groupId, decisionId } = req.params;
+    const userId = req.user.id;
     let conn;
 
     try {
@@ -71,27 +67,36 @@ const getComments = async (req, res) => {
 
         const comments = await conn.query(`
         SELECT
-                td.id,
-                td.group_id,
-                td.member_id,
-                td.decision_id,
-                td.comment,
-                td.created_at,
-                td.parentCommentId,
-                td.updated_at,
+                tc.id,
+                tc.groupId,
+                tc.groupMember,
+                tc.decisionId,
+                tc.comment,
+                tc.created_at,
+                tc.parentCommentId,
+                tc.updated_at,
                 tu.user_id,
                 tu.displayname,
                 tu.email
             FROM
-                techcoach_lite.techcoach_decision_conversations td 
+                techcoach_lite.techcoach_conversations tc
             LEFT JOIN
-                techcoach_lite.techcoach_users tu ON td.member_id = tu.user_id
+                techcoach_lite.techcoach_users tu ON tc.groupMember = tu.user_id
             WHERE 
-                td.group_id = ? AND td.decision_id = ?
+                tc.groupId = ? AND tc.decisionId = ?
 
-      `, [group_id, decision_id]);
+      `, [groupId, decisionId]);
 
-        res.status(200).json(comments);
+
+        comments.forEach(comment =>{
+            if(comment.groupMember === userId){
+                comment.type_of_member = 'author';
+            } else {
+                comment.type_of_member = 'member';
+            }
+        })
+        res.status(200).json({comments});
+
     } catch (error) {
         console.error('Error fetching comments:', error);
         if (conn) {
@@ -105,119 +110,16 @@ const getComments = async (req, res) => {
     }
 };
 
-// const getCommentsByDecisionId = async (req, res) => {
-//     const { decision_id } = req.params;
-//     let conn;
-
-//     try {
-//         conn = await getConnection();
-
-//         // Fetch comments
-//         const comments = await conn.query(`
-//             SELECT
-//                 td.id,
-//                 td.group_id,
-//                 td.member_id,
-//                 td.decision_id,
-//                 td.comment,
-//                 td.created_at,
-//                 td.parentCommentId,
-//                 td.updated_at,
-//                 tu.user_id,
-//                 tu.displayname,
-//                 tu.email
-//             FROM
-//                 techcoach_lite.techcoach_decision_conversations td 
-//             LEFT JOIN
-//                 techcoach_lite.techcoach_users tu ON td.member_id = tu.user_id
-//             WHERE 
-//                 td.decision_id = ?
-//         `, [decision_id]);
-
-//         // Fetch comment count
-//         const [{ count }] = await conn.query(`
-//             SELECT COUNT(*) as count
-//             FROM techcoach_lite.techcoach_decision_conversations
-//             WHERE decision_id = ?
-//         `, [decision_id]);
-
-//         // Return the sanitized comments and count
-//         res.status(200).send(stringify({ comments, count }));
-//     } catch (error) {
-//         console.error('Error fetching comments by decision ID:', error);
-//         if (conn) {
-//             await conn.rollback();
-//         }
-//         res.status(500).json({ message: 'Server error while fetching comments' });
-//     } finally {
-//         if (conn) {
-//             conn.release();
-//         }
-//     }
-// };
-
-const getCommentsByDecisionId = async (req, res) => {
-    const { decision_id } = req.params;
-    let conn;
-
-    try {
-        conn = await getConnection();
-
-        const comments = await conn.query(`
-            SELECT
-                td.id,
-                td.group_id,
-                td.member_id,
-                td.decision_id,
-                td.comment,
-                td.created_at,
-                td.parentCommentId,
-                td.updated_at,
-                tu.user_id,
-                tu.displayname,
-                tu.email,
-                COUNT(td.id) OVER () AS total_comments
-            FROM
-                techcoach_lite.techcoach_decision_conversations td
-            LEFT JOIN
-                techcoach_lite.techcoach_users tu ON td.member_id = tu.user_id
-            WHERE 
-                td.decision_id = ?;
-        `, [decision_id]);
-
-        if (comments.length > 0) {
-            const sanitizedComments = comments.map(comment => {
-                return {
-                    ...comment,
-                    id: comment.id.toString(), 
-                    total_comments: comment.total_comments.toString() 
-                };
-            });
-
-            const totalComments = sanitizedComments[0].total_comments;
-            res.status(200).json({ comments: sanitizedComments, count: totalComments });
-        } else {
-            res.status(404).json({ message: 'No comments found for this decision' });
-        }
-    } catch (error) {
-        console.error('Error fetching comments by decision ID:', error);
-        res.status(500).json({ message: 'Server error while fetching comments' });
-    } finally {
-        if (conn) {
-            conn.release();
-        }
-    }
-};
-
 const updateComment = async (req, res) => {
-    const { commentId, comment } = req.body;
+    const commentId = req.params.commentId;
+    const { comment } = req.body;
     let conn;
 
     try {
         const conn = await getConnection();
 
         const sql = `
-        UPDATE techcoach_lite.techcoach_decision_conversations
+        UPDATE techcoach_lite.techcoach_conversations
         SET comment = ?, updated_at = NOW()
         WHERE id = ?
       `;
@@ -243,36 +145,51 @@ const updateComment = async (req, res) => {
 };
 
 const replyToComment = async (req, res) => {
-    const { group_id, member_id, comment, decision_id, parentCommentId } = req.body;
+    const { parentCommentId, groupId, groupMemberId, commentText, decisionId } = req.body;
     let conn;
 
-
     try {
-        const conn = await getConnection();
+        conn = await getConnection();
         await conn.beginTransaction();
 
-        // Validate the parent comment ID
-        const parentComment = await conn.query('SELECT id FROM techcoach_lite.techcoach_decision_conversations WHERE id = ?', [parentCommentId]);
-        if (!parentComment || parentComment.length === 0) {
-            return res.status(400).json({ message: 'Invalid parentCommentId, parent comment does not exist' });
+        // Check if the parent comment exists
+        const parentComment = await conn.query('SELECT id FROM techcoach_lite.techcoach_conversations WHERE id = ?', [parentCommentId]);
+        if (parentComment.length === 0) {
+            console.log("Invalid parentCommentId:", parentCommentId);
+            return res.status(400).json({ message: 'Invalid parent comment ID, comment does not exist' });
         }
 
+        // Check if the group exists
+        const group = await conn.query('SELECT id FROM techcoach_lite.techcoach_groups WHERE id = ?', [groupId]);
+        if (group.length === 0) {
+            console.log("Invalid groupId:", groupId);
+            return res.status(400).json({ message: 'Invalid group_id, group does not exist' });
+        }
+
+        // Check if the group member exists
+        const member = await conn.query('SELECT user_id FROM techcoach_lite.techcoach_users WHERE user_id = ?', [groupMemberId]);
+        if (member.length === 0) {
+            console.log("Invalid groupMemberId:", groupMemberId);
+            return res.status(400).json({ message: 'Invalid member_id, member does not exist' });
+        }
+
+        // Insert the reply comment
         const sql = `
-        INSERT INTO techcoach_lite.techcoach_decision_conversations (group_id, member_id, comment, decision_id, parentCommentId, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
-      `;
-        const params = [group_id, member_id, comment, decision_id, parentCommentId];
-
+            INSERT INTO techcoach_lite.techcoach_conversations 
+            (groupId, groupMember, comment, decisionId, parentCommentId, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW());
+        `;
+        const params = [groupId, groupMemberId, commentText, decisionId, parentCommentId];
         await conn.query(sql, params);
-        await conn.commit();
 
+        await conn.commit();
         res.status(200).json({ message: 'Reply added successfully!' });
     } catch (error) {
-        console.error('Error adding reply:', error);
         if (conn) {
             await conn.rollback();
         }
-        res.status(500).json({ message: 'Server error while adding reply' });
+        console.error('Error adding reply comment:', error);
+        res.status(500).json({ message: 'Server error while adding reply comment', error: error.message });
     } finally {
         if (conn) {
             conn.release();
@@ -287,7 +204,7 @@ const deleteComment = async (req, res) => {
     try {
         const conn = await getConnection();
 
-        const result = await conn.query('DELETE FROM techcoach_lite.techcoach_decision_conversations WHERE id = ?', [commentId]);
+        const result = await conn.query('DELETE FROM techcoach_lite.techcoach_conversations WHERE id = ?', [commentId]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Comment not found' });
@@ -317,12 +234,12 @@ const postdecisionGroup = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        const user_id = req.user.id;
+        const created_by = req.user.id;
 
         // Insert into the decision group table
         const groupResult = await conn.query(
-            `INSERT INTO techcoach_lite.techcoach_decision_group (user_id, type_of_group, created_at, group_name) VALUES (?, ?, NOW(), ?)`,
-            [user_id, type_of_group, group_name]
+            `INSERT INTO techcoach_lite.techcoach_groups (created_by, created_at, type_of_group, group_name) VALUES (?, NOW(), ?, ?)`,
+            [created_by, type_of_group, group_name]
         );
 
         console.log('Group Result:', groupResult);  // Log the result to inspect its structure
@@ -346,15 +263,16 @@ const postdecisionGroup = async (req, res) => {
 };
 
 const getAlldecisionGroup = async (req, res) => {
+    const {type_of_group ="decision_circle"} = req.query;
     let conn;
     try {
         conn = await getConnection();
 
-        const user_id = req.user.id;
+        const created_by = req.user.id;
 
         // Fetch group_name and type_of_group from the decision group table
-        const query = 'SELECT id, group_name, type_of_group, created_at FROM techcoach_lite.techcoach_decision_group WHERE user_id = ?';
-        const rows = await conn.query(query, [user_id]);
+        const query = 'SELECT id, group_name, type_of_group, created_at FROM techcoach_lite.techcoach_groups WHERE type_of_group = ? AND created_by = ?';
+        const rows = await conn.query(query, [type_of_group,created_by]);
 
         // Check if any rows are returned
         if (rows.length === 0) {
@@ -382,7 +300,7 @@ const getDecisionGroup = async (req, res) => {
         conn = await getConnection();
 
         const rows = await conn.query(
-            `SELECT id, group_name, type_of_group FROM techcoach_lite.techcoach_decision_group WHERE id = ?`,
+            `SELECT id, group_name, type_of_group FROM techcoach_lite.techcoach_groups WHERE id = ?`,
             [id]
         );
 
@@ -416,7 +334,7 @@ const putDecisionGroup = async (req, res) => {
 
 
         const existingGroup = await conn.query(
-            `SELECT * FROM techcoach_lite.techcoach_decision_group WHERE id = ?`,
+            `SELECT * FROM techcoach_lite.techcoach_groups WHERE id = ?`,
             [id]
         );
 
@@ -426,7 +344,7 @@ const putDecisionGroup = async (req, res) => {
 
         // Update the decision group data
         await conn.query(
-            `UPDATE techcoach_lite.techcoach_decision_group SET group_name = ? WHERE id = ?`,
+            `UPDATE techcoach_lite.techcoach_groups SET group_name = ? WHERE id = ?`,
             [group_name, id]
         );
 
@@ -451,7 +369,7 @@ const deleteDecisionGroup = async (req, res) => {
 
         // Check if the decision group exists before deleting
         const existingRows = await conn.query(
-            `SELECT * FROM techcoach_lite.techcoach_decision_group WHERE id = ?`,
+            `SELECT * FROM techcoach_lite.techcoach_groups WHERE id = ?`,
             [id]
         );
 
@@ -461,7 +379,7 @@ const deleteDecisionGroup = async (req, res) => {
 
         // Delete the decision group
         await conn.query(
-            `DELETE FROM techcoach_lite.techcoach_decision_group WHERE id = ?`,
+            `DELETE FROM techcoach_lite.techcoach_groups WHERE id = ?`,
             [id]
         );
 
@@ -481,7 +399,6 @@ module.exports = {
     // Conversation Controllers
     postComment,
     getComments,
-    getCommentsByDecisionId,
     updateComment,
     replyToComment,
     deleteComment,

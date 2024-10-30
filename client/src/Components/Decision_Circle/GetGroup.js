@@ -68,17 +68,17 @@ const GetGroup = () => {
 
     return (
         <div className="getGroup">
+         <Link to='/decisioncircle'><button  className='bg-secondary rounded border-0 outline-0 text-white p-1'>Add Decision Circle</button></Link>
             {loading ? (
                 <p>Loading groups...</p>
             ) : groups.length === 0 ? (
                 <div className='nogroup'>
-                    <p>Please create a group</p>
+                    <p>Please create a Decision Circle</p>
                     <Link to='/decisioncircle'><button className='nogroup-button'>Click me</button></Link>
                 </div>
-
             ) : (
                 <div className="row sub-getGroup">
-                    <h5 className='f-5'>Decision Circle Created by Me</h5>
+                    <h5 className='f-5 mt-3'>Decision Circle Created by Me</h5>
                     {groups.map(group => (
                         <div key={group.id} className="circle-items">
                             <div className="getGroupName">
