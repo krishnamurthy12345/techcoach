@@ -3,9 +3,10 @@ const getConnection = require('../Models/database');
 
 const postComment = async (req, res) => {
     const { groupId, groupMemberIds, commentText, decisionId } = req.body;
+    const userId = req.user.id;
 
     console.log('Request Body:', req.body);
-    console.log("Decision ID:", req.params.decisionId); 
+    console.log("Decision ID:", req.body.decisionId); 
     let conn;
 
     try {
@@ -88,13 +89,10 @@ const getComments = async (req, res) => {
       `, [groupId, decisionId]);
 
 
-        comments.forEach(comment =>{
-            if(comment.groupMember === userId){
-                comment.type_of_member = 'author';
-            } else {
-                comment.type_of_member = 'member';
-            }
-        })
+      comments.forEach(comment => {
+        comment.type_of_member = comment.groupMember === userId ? 'author' : 'member';
+    });
+
         res.status(200).json({comments});
 
     } catch (error) {
@@ -145,9 +143,12 @@ const updateComment = async (req, res) => {
 };
 
 const replyToComment = async (req, res) => {
-    const { parentCommentId, groupId, groupMemberId, commentText, decisionId } = req.body;
+    const { parentCommentId, groupId, commentText, decisionId } = req.body;
+    const userId = req.user.id;
     let conn;
 
+    console.log('Request bodyy:',req.body);
+    console.log('decision Id:',decisionId);
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -166,20 +167,13 @@ const replyToComment = async (req, res) => {
             return res.status(400).json({ message: 'Invalid group_id, group does not exist' });
         }
 
-        // Check if the group member exists
-        const member = await conn.query('SELECT user_id FROM techcoach_lite.techcoach_users WHERE user_id = ?', [groupMemberId]);
-        if (member.length === 0) {
-            console.log("Invalid groupMemberId:", groupMemberId);
-            return res.status(400).json({ message: 'Invalid member_id, member does not exist' });
-        }
-
         // Insert the reply comment
         const sql = `
             INSERT INTO techcoach_lite.techcoach_conversations 
             (groupId, groupMember, comment, decisionId, parentCommentId, created_at)
             VALUES (?, ?, ?, ?, ?, NOW());
         `;
-        const params = [groupId, groupMemberId, commentText, decisionId, parentCommentId];
+        const params = [groupId, userId, commentText, decisionId, parentCommentId];
         await conn.query(sql, params);
 
         await conn.commit();

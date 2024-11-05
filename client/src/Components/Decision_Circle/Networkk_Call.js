@@ -218,6 +218,31 @@ const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment
     }
 }
 
+
+const mailToDecisionCircleReplyComment = async (decision, groupMemberIds, reply, parentCommenterDisplayName) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCircleReplyComment`, {
+            decision, 
+            groupMemberIds, 
+            reply, 
+            parentCommenterDisplayName 
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        console.log('Response for added reply:', response.data.message); 
+        return response.data.message;
+    } catch (error) {
+        console.error('Error sending reply:', error.response ? error.response.data : error.message);
+        throw error; 
+    }
+}
+
+
 // group Name Networkk_calls  //
 const postdecisionGroup = async (group_name, type_of_group = 'decision_circle') => {
     const token = localStorage.getItem('token');
@@ -388,7 +413,7 @@ const updateComment = async (commentId, updatedComment) => {
         return response.data;
     } catch (error) {
         console.error('Error updating comment:', error.response ? error.response.data : error.message);
-        throw error.response ? error.response.data : new Error("Error updating comment"); // Return the error message
+        throw error.response ? error.response.data : new Error("Error updating comment"); 
     }
 };
 
@@ -441,6 +466,7 @@ export {
     getdecisionSharedDecisionCircle,
     getMemberSharedDecisions,
     mailToDecisionCirclePostComment,
+    mailToDecisionCircleReplyComment,
 
     // group namess
     postdecisionGroup,
