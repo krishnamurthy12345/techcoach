@@ -66,7 +66,14 @@ const ShareCircleGroup = () => {
             setLoading(true);
             try {
                 const data = await getdecisionCirclesByUserAndMember();
-                setGroups(data.groups || []);
+                // Remove duplicate group names
+                const uniqueGroups = data.groups.reduce((acc, current) => {
+                    if (!acc.some(group => group.group_name === current.group_name)) {
+                        acc.push(current);
+                    }
+                    return acc;
+                }, []);
+                setGroups(uniqueGroups);
             } catch (error) {
                 toast.error('Failed to fetch groups');
                 console.log('Fetching error:', error);

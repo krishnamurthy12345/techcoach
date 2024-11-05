@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import { getMemberSharedDecisions, mailToDecisionCirclePostComment, postComment, getComments, deleteComment } from './Networkk_Call';
-import { Card, CardContent, Typography, Grid, Avatar, CircularProgress,Box } from '@mui/material';
-import axios from 'axios';
+import { Card, CardContent, Typography, Grid, Avatar, CircularProgress, Box } from '@mui/material';
 import { AiFillEdit } from "react-icons/ai";
 import { MdOutlineDeleteForever } from "react-icons/md";
-import './GetGroup.css';
-import './CommentStyle.css';
+import './MemberSharedDecisions.css';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import axios from 'axios';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
@@ -57,7 +56,6 @@ const MemberSharedDecisions = () => {
             const data = await getMemberSharedDecisions(groupId);
             setDecisions(data || []);
             data.forEach((decision) => fetchComments(groupId, decision.decision_id));
-            console.log(data, 'ssssss');
         } catch (error) {
             setError('Failed to fetch shared decisions.');
             console.error(error);
@@ -67,60 +65,53 @@ const MemberSharedDecisions = () => {
     };
 
     const handlePostComment = async (decisionId, groupMemberIds) => {
-        console.log("Attempting to post comment with decisionId:", decisionId);
-       
-        try {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId]: true }));
-            const comment = newComments[decisionId];
-           const response = await postComment(groupId, groupMemberIds, comment, decisionId);
-            fetchSharedDecisions();
-            if (response.status === 200) {
-                return toast('Comment cannot be empty');
-            }
-            setNewComments(prevState => ({ ...prevState, [decisionId]: '' }));
-            toast.success('Comment posted successfully');
+        const comment = newComments[decisionId]?.trim();
+        if (!comment) {
+            return toast.error('Comment cannot be empty');
+        }
+        setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
 
+        try {
+            await postComment(groupId, groupMemberIds, comment, decisionId);
+            setNewComments((prevState) => ({ ...prevState, [decisionId]: '' }));
+            toast.success('Comment posted successfully');
             fetchComments(groupId, decisionId);
         } catch (error) {
             toast.error('Error posting comment');
             console.error('Error posting comment:', error);
         } finally {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId]: false }));
+            setButtonLoading((prevState) => ({ ...prevState, [decisionId]: false }));
         }
     };
 
-    const handlemailToPostComment = async (decisionId, groupMemberIds, email, withEmail = false) => {
-        try {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: true }));
+    const handleMailToPostComment = async (decisionId, groupMemberIds, email) => {
+        const comment = newComments[decisionId]?.trim();
+        if (!comment) {
+            return toast.error('Comment cannot be empty');
+        }
 
-            const comment = newComments[decisionId]?.trim();
-            if (!comment) {
-                return toast.error('Comment cannot be empty');
-            }
-            await handlePostComment(decisionId, groupMemberIds,comment,email);
-                const decisionDetails = decisions.find(d => d.decision_id === decisionId).decisionDetails;
-                console.log('Decision Details:', decisionDetails);
-                const responseToPostComment = await mailToDecisionCirclePostComment(decisionDetails, groupMemberIds, comment, email);
-                toast.success('Email sent successfully');
-                console.log('Response from email API:', responseToPostComment);
+        setButtonLoading((prevState) => ({ ...prevState, [decisionId + '_email']: true }));
+
+        try {
+            await postComment(groupId, groupMemberIds, comment, decisionId);
+
+            const decisionDetails = decisions.find((d) => d.decision_id === decisionId).decisionDetails;
+            await mailToDecisionCirclePostComment(decisionDetails, groupMemberIds, comment, email);
+
+            toast.success('Comment posted and email sent successfully');
             fetchComments(groupId, decisionId);
         } catch (error) {
-            if (withEmail) {
-                console.error('Error sending email:', error);
-                toast.error('Error sending email');
-            } else {
-                toast.error('Error posting comment');
-            }
-        }
-         finally {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: false }));
+            toast.error('Error sending email');
+            console.error('Error sending email:', error);
+        } finally {
+            setButtonLoading((prevState) => ({ ...prevState, [decisionId + '_email']: false }));
         }
     };
 
     const fetchComments = async (groupId, decisionId) => {
         try {
             const response = await getComments(groupId, decisionId);
-            setComments(prevComments => ({
+            setComments((prevComments) => ({
                 ...prevComments,
                 [decisionId]: response || [],
             }));
@@ -132,9 +123,9 @@ const MemberSharedDecisions = () => {
     const handleDeleteComment = async (commentId, decisionId) => {
         try {
             await deleteComment(commentId);
-            setComments(prevComments => ({
+            setComments((prevComments) => ({
                 ...prevComments,
-                [decisionId]: prevComments[decisionId].filter(comment => comment.id !== commentId),
+                [decisionId]: prevComments[decisionId].filter((comment) => comment.id !== commentId),
             }));
             toast.success('Comment deleted successfully');
         } catch (error) {
@@ -144,7 +135,7 @@ const MemberSharedDecisions = () => {
     };
 
     const handleCommentChange = (decisionId, value) => {
-        setNewComments(prevState => ({
+        setNewComments((prevState) => ({
             ...prevState,
             [decisionId]: value,
         }));
@@ -165,7 +156,7 @@ const MemberSharedDecisions = () => {
                     <h4>{groupName || groups.group_name}</h4>
                     {members.length > 0 ? (
                         <ul className="group-members">
-                            {members.map(member => (
+                            {members.map((member) => (
                                 <li key={member.user_id}>
                                     {member.displayname} ({member.email})
                                 </li>
@@ -181,7 +172,7 @@ const MemberSharedDecisions = () => {
             <Grid container spacing={3}>
                 {decisions.length > 0 ? (
                     decisions.map((decision) => {
-                        const groupMemberIds = members.map(member => member.user_id);
+                        const groupMemberIds = members.map((member) => member.user_id);
                         return (
                             <Grid item xs={12} key={decision.decision_id}>
                                 <Card>
@@ -192,76 +183,111 @@ const MemberSharedDecisions = () => {
                                         <Typography variant="body2"><b>Decision Details:</b> {decision.user_statement}</Typography>
                                         <Typography variant="body2"><b>Decision Reasons:</b> {decision.reasons ? decision.reasons.join(', ') : 'No reasons provided'}</Typography>
                                         <Typography variant="body2">
-                                            <b>Selected Tags:</b> {decision.tags && decision.tags.map(tag => tag.tag_name).join(', ')}
+                                            <b>Selected Tags:</b> {decision.tags && decision.tags.map((tag) => tag.tag_name).join(', ')}
                                         </Typography>
-                                        <Typography variant='h6'><b>Shared With:{decision.shared_by}</b></Typography>
+                                        <Typography variant='h6'><b>Shared With: {decision.shared_by}</b></Typography>
                                         <div className="comments-section">
                                             <h6>Comments:</h6>
                                             {comments[decision.decision_id]?.length > 0 ? (
-                                                comments[decision.decision_id].map((comment) => (
-                                                    <div key={comment.id} 
-                                                    className={`comment-bubble ${comment.type_of_member === 'author' ? 'author-comment' : 'member-comment'}`}
-                                                    style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '8px', backgroundColor: '#edf6fc' }}>
+                                                comments[decision.decision_id].filter(comment => comment.type_of_member === 'author').map((comment) => (
+                                                    <div key={comment.id} className={`comment-bubble ${comment.type_of_member === 'author' ? 'author-comment' : 'member-comment'}`}>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                             <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
                                                                 {comment.comment}
                                                             </Typography>
                                                             {comment.type_of_member === 'author' && (
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
-                                                                <MdOutlineDeleteForever
-                                                                    style={{ cursor: 'pointer' }}
-                                                                    onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
-                                                                />
-                                                            </div>
+                                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
+                                                                    <MdOutlineDeleteForever
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
+                                                                    />
+                                                                </div>
                                                             )}
                                                         </div>
                                                         <Box className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                            <Avatar sx={{ textAlign:'end',bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                            <Avatar sx={{ textAlign:'end', bgcolor: "#526D82", color: "white", marginRight: 2 }}>
                                                                 {comment.displayname[0]}
                                                             </Avatar>
                                                             <div style={{ flex: 1 }}>
-                                                                <Typography variant='caption' color=''>
+                                                                <Typography variant='caption'>
                                                                     {comment.displayname} | {comment.email} |
                                                                     {comment.created_at === comment.updated_at
                                                                         ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                        : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                        : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                                    }
                                                                 </Typography>
                                                             </div>
                                                         </Box>
                                                     </div>
                                                 ))
                                             ) : (
-                                                <Typography variant="body2" color="text.secondary">No comments yet.</Typography>
+                                                <p>No comments available for this decision.</p>
                                             )}
-                                        </div>
-                                        <div>
-                                            <input
-                                                type="text"
-                                                className='comment-input'
-                                                value={newComments[decision.decision_id || '']}
+                                            {/* {comments[decision.decision_id]?.length > 0 ? (
+                                                comments[decision.decision_id].map((comment) => (
+                                                    <div
+                                                        key={comment.id}
+                                                        className={`comment-bubble ${comment.type_of_member === 'author' ? 'author-comment' : 'member-comment'}`}
+                                                    >
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                                {comment.comment}
+                                                            </Typography>
+                                                            {comment.type_of_member === 'author' && (
+                                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
+                                                                    <MdOutlineDeleteForever
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <Box className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                                            <Avatar sx={{ textAlign: 'end', bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                                {comment.displayname[0]}
+                                                            </Avatar>
+                                                            <div style={{ flex: 1 }}>
+                                                                <Typography variant='caption'>
+                                                                    {comment.displayname} | {comment.email} |
+                                                                    {comment.created_at === comment.updated_at
+                                                                        ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                        : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </Box>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p>No comments available for this decision.</p>
+                                            )} */}
+                                            <textarea
+                                                value={newComments[decision.decision_id] || ''}
                                                 onChange={(e) => handleCommentChange(decision.decision_id, e.target.value)}
-                                                placeholder="Write a comment..."
+                                                placeholder="Add your comment..."
                                             />
-                                            <div>
-                                                <button
-                                                    className='comment-submit'
-                                                    onClick={() => handlePostComment(decision.decision_id, groupMemberIds)} disabled={buttonLoading[decision.decision_id]}>
-                                                    {buttonLoading[decision.decision_id] ? <CircularProgress size={20} /> : 'Post Comment'}
-                                                </button>
-                                                <button className="comment-submit"
-                                                    onClick={() => handlemailToPostComment(decision.decision_id, groupMemberIds)} disabled={buttonLoading[decision.decision_id]} >
-                                                    {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Save and Email'}
-                                                </button>
-                                            </div>
+                                            <button
+                                                onClick={() => handlePostComment(decision.decision_id, groupMemberIds)}
+                                                disabled={buttonLoading[decision.decision_id]}
+                                            >
+                                                {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds, 'user@example.com')}
+                                                disabled={buttonLoading[decision.decision_id + '_email']}
+                                            >
+                                                {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Send Email'}
+                                            </button>
                                         </div>
                                     </CardContent>
                                 </Card>
                             </Grid>
-                        )
+                        );
                     })
                 ) : (
-                    <Typography sx={{ mt: 2, ml: 3 }}>No decisions found for this group.</Typography>
+                    <p>No shared decisions available for this group.</p>
                 )}
             </Grid>
             <ToastContainer />
