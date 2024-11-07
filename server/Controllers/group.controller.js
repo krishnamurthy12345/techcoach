@@ -798,7 +798,7 @@ const getSharedComments = async (req, res) => {
         JOIN 
             techcoach_lite.techcoach_groups g ON d.groupId = g.id    
         WHERE 
-            d.decisionId = ?`;
+            d.decisionId = ? AND g.type_of_group='inner_circle'`;
 
         const comments = await conn.query(commentsQuery, [decisionId]);
 

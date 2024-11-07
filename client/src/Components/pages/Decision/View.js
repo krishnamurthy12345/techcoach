@@ -4,7 +4,10 @@ import axios from 'axios';
 import { Box, Typography, Button, Avatar, IconButton, Popover, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded } from '../../Group/Network_Call';
+import { getDecisionComments, replyToComment } from '../../Decision_Circle/Networkk_Call';
 import { useNavigate } from 'react-router-dom';
+import { AiFillEdit } from "react-icons/ai";
+
 import ShareModal from '../../Group/ShareModel';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
@@ -17,8 +20,12 @@ const View = () => {
     const [showModal, setShowModal] = useState(false);
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
     const [sharedComments, setSharedComments] = useState([]);
+    const [replyComment, setReplyComment] = useState({});
+    const [comments, setComments] = useState([]);
     const [replies, setReplies] = useState({});
     const navigate = useNavigate();
+    const { groupId } = useParams();
+
 
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editedCommentContent, setEditedCommentContent] = useState('');
@@ -103,8 +110,56 @@ const View = () => {
         }
     };
 
+    const fetchDecisionComments = async () => {
+        console.log("decision id", id);
+        try {
+            const response = await getDecisionComments(id);
+            console.log("response from decision comments", response);
+            setComments((prevComments) => ({
+                ...prevComments,
+                [id]: response || [],
+            }));
+        } catch (error) {
+            console.error("Failed to fetch shared comments", error);
+        }
+    };
+
+    const handleReplyComment = async (id,parentCommentId) => {
+        try {
+            const commentText = replyComment[id]?.[parentCommentId]?.trim();
+            if (!commentText) {
+                return toast.error('Comment cannot be empty');
+            }
+        
+            const data = {
+                groupId,
+                commentText,
+                id,
+                parentCommentId
+            };
+            await replyToComment(data);
+            setReplyComment(prev => ({ ...prev, [id]: {...prev[id],[parentCommentId]:''}}));
+            toast.success('Reply comment successfully posted');
+            fetchDecisionComments(groupId, id);
+        } catch (error) {
+            toast.error('Error posting reply comment');
+            console.error('Error posting comment:', error);
+        }
+    };
+
+    const handleReplyInputChange = (decisionId, parentCommentId, value) => {
+        setReplyComment(prev => ({
+            ...prev,
+            [decisionId]: {
+                ...prev[decisionId],
+                [parentCommentId]: value
+            }
+        }));
+    };
+
     useEffect(() => {
         fetchSharedComments();
+        fetchDecisionComments();
     }, [id]);
 
     const handleShow = () => setShowModal(true);
@@ -142,7 +197,7 @@ const View = () => {
         setIsPopoverOpen(true);
     };
 
-    const handleSaveEdit =  async(commentId, editedContent) => {
+    const handleSaveEdit = async (commentId, editedContent) => {
         console.log(`Save edited comment with id ${commentId} and content: ${editedContent}`);
         try {
             await EditCommentAdded(commentId, editedContent);
@@ -181,7 +236,8 @@ const View = () => {
     console.log("is open", isPopoverOpen);
 
     return (
-        <Box sx={{ padding: "1rem", backgroundColor: "white", margin: "2rem", borderRadius: "0.5rem",
+        <Box sx={{
+            padding: "1rem", backgroundColor: "white", margin: "2rem", borderRadius: "0.5rem",
             ...(isPopoverOpen && { filter: 'blur(2px)' })
         }}>
             <Box sx={{ mb: 2 }}>
@@ -196,17 +252,17 @@ const View = () => {
             <Box sx={{ mb: 2 }}>
                 <Typography variant="body1"><b>Decision Due Date:</b> {decision.decision_due_date}</Typography>
             </Box>
-            
-            { decision.decision_taken_date && (
-            <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography>
-            </Box>
+
+            {decision.decision_taken_date && (
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography>
+                </Box>
             )}
 
             <Box sx={{ mb: 2 }}>
-            <Typography variant="body1">
-                <b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}
-            </Typography>
+                <Typography variant="body1">
+                    <b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}
+                </Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
                 <Link to='/readd'>
@@ -229,76 +285,143 @@ const View = () => {
                 {memberComments.length > 0 ? (
                     memberComments.map(memberComment => (
                         <>
-                        <Box key={memberComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{memberComment.displayname[0]}</Avatar>
-                                <Box>
-                                    <Typography variant="body1">{memberComment.comment}</Typography>
-                                    <Typography variant="caption" color="textSecondary">
-                                        {memberComment.displayname} | {memberComment.email} | 
-                                        {memberComment.created_at === memberComment.updated_at
-                                                        ? <span> {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}</span>
-                                                        : <span> Edited at {formatDistanceToNow(parseISO(memberComment.updated_at), { addSuffix: true })}</span>}
-                                    </Typography>
+                            <Box key={memberComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{memberComment.displayname[0]}</Avatar>
+                                    <Box>
+                                        <Typography variant="body1">{memberComment.comment}</Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {memberComment.displayname} | {memberComment.email} |
+                                            {memberComment.created_at === memberComment.updated_at
+                                                ? <span> {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}</span>
+                                                : <span> Edited at {formatDistanceToNow(parseISO(memberComment.updated_at), { addSuffix: true })}</span>}
+                                        </Typography>
+                                    </Box>
                                 </Box>
                             </Box>
-                        </Box>
-                        <Box>
-                        {authorComments.map(authorComment => {
-                            if (authorComment.parentCommentId === memberComment.id) {
-                                return (
-                                    <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc" }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{authorComment.displayname[0]}</Avatar>
-                                            <Box sx={{ flex: 1 }}>
-                                                <Typography variant="body1">{authorComment.comment}</Typography>
-                                                <Typography variant="caption" color="textSecondary">
-                                                    {authorComment.displayname} | {authorComment.email} |  
-                                                    {authorComment.created_at === authorComment.updated_at
-                                                        ? <span> {formatDistanceToNow(parseISO(authorComment.created_at), { addSuffix: true })}</span>
-                                                        : <span> Edited at {formatDistanceToNow(parseISO(authorComment.updated_at), { addSuffix: true })}</span>}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
-                                                <IconButton onClick={(e) => { handleEdit(authorComment.id, authorComment.comment); setAnchorEl(e.currentTarget); }}>
-                                                    <EditIcon sx={{ color: "black" }} />
-                                                </IconButton>
-                                                {/* <IconButton onClick={() => handleDeleteReply(authorComment.id)}>
+                            <Box>
+                                {authorComments.map(authorComment => {
+                                    if (authorComment.parentCommentId === memberComment.id) {
+                                        return (
+                                            <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc" }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{authorComment.displayname[0]}</Avatar>
+                                                    <Box sx={{ flex: 1 }}>
+                                                        <Typography variant="body1">{authorComment.comment}</Typography>
+                                                        <Typography variant="caption" color="textSecondary">
+                                                            {authorComment.displayname} | {authorComment.email} |
+                                                            {authorComment.created_at === authorComment.updated_at
+                                                                ? <span> {formatDistanceToNow(parseISO(authorComment.created_at), { addSuffix: true })}</span>
+                                                                : <span> Edited at {formatDistanceToNow(parseISO(authorComment.updated_at), { addSuffix: true })}</span>}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
+                                                        <IconButton onClick={(e) => { handleEdit(authorComment.id, authorComment.comment); setAnchorEl(e.currentTarget); }}>
+                                                            <EditIcon sx={{ color: "black" }} />
+                                                        </IconButton>
+                                                        {/* <IconButton onClick={() => handleDeleteReply(authorComment.id)}>
                                                     <DeleteIcon sx={{ color: "red" }} />
                                                 </IconButton> */}
+                                                    </Box>
+                                                </Box>
                                             </Box>
-                                        </Box>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                {authorComments.some(authorComment => authorComment.parentCommentId === memberComment.id) ? null : (
+                                    <Box sx={{ display: 'flex', mt: 2, mb: 2 }}>
+                                        <input
+                                            label="Write a reply..."
+                                            variant="outlined"
+                                            fullWidth
+                                            value={replies[memberComment.id]}
+                                            onChange={handleReplyChange(memberComment.id)}
+                                            style={{
+                                                height: "3rem",
+                                                padding: "1rem",
+                                                width: "100%",
+                                                maxWidth: "100%",
+                                                marginRight: "0.5rem"
+                                            }}
+                                        />
+                                        <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
                                     </Box>
-                                );
-                            }
-                            return null;
-                        })}
-                        {authorComments.some(authorComment => authorComment.parentCommentId === memberComment.id) ? null : (
-                            <Box sx={{ display: 'flex', mt: 2, mb:2 }}>
-                                <input
-                                    label="Write a reply..."
-                                    variant="outlined"
-                                    fullWidth
-                                    value={replies[memberComment.id]}
-                                    onChange={handleReplyChange(memberComment.id)}
-                                    style={{
-                                        height: "3rem",
-                                        padding: "1rem",
-                                        width: "100%",
-                                        maxWidth: "100%",
-                                        marginRight: "0.5rem"
-                                    }}
-                                />
-                                <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
-                            </Box>
-                        )}
+                                )}
 
-                        </Box>
+                            </Box>
                         </>
                     ))
                 ) : (
                     <Typography variant="body2">No comments shared yet.</Typography>
                 )}
+                <div>
+                    {comments[id]?.length === 0 ? (
+                        <p>No comments available.</p>
+                    ) : (
+                        <ul>
+                            {comments[id]
+                                ?.sort((a, b) => (a.type_of_member === 'member' ? -1 : 1))
+                                .map(comment => (
+                                    <div
+                                        key={comment.id} // Added a unique key prop
+                                        className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
+                                        style={{
+                                            backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
+                                            textAlign: comment.parentCommentId ? 'right' : 'left',
+                                            padding: '8px',
+                                            borderRadius: '8px',
+                                            marginBottom: '16px',
+                                            position: 'relative',
+                                            border: '1px solid #ccc',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                {comment.comment}
+                                            </Typography>
+                                            {comment.type_of_member === 'author' && (
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                {comment.displayname[0]}
+                                            </Avatar>
+                                            <div>
+                                                <Typography variant="caption">
+                                                    {comment.displayname} | {comment.email} |
+                                                    {comment.created_at === comment.updated_at ? (
+                                                        <span>{formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                    ) : (
+                                                        <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                    )}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: comment.parentCommentId ? 'flex-end' : 'flex-start', marginTop: '8px', gap: '10px' }}>
+                                            <input
+                                                type="text"
+                                                className="comment-input"
+                                                placeholder="Reply to this comment..."
+                                                value={replyComment[decision.decision_id]?.[comment.id] || ''}
+                                                onChange={(e) => handleReplyInputChange(decision.decision_id, comment.id, e.target.value)}
+                                                style={{ width: '60%', fontSize: '12px', marginRight: '8px' }}
+                                            />
+                                            <button
+                                                className="reply-button"
+                                                onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                        </ul>
+                    )}
+                </div>
+
             </Box>
 
 

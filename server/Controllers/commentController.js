@@ -78,15 +78,71 @@ const getComments = async (req, res) => {
                 tc.updated_at,
                 tu.user_id,
                 tu.displayname,
-                tu.email
+                tu.email,
+                g.type_of_group
             FROM
                 techcoach_lite.techcoach_conversations tc
             LEFT JOIN
                 techcoach_lite.techcoach_users tu ON tc.groupMember = tu.user_id
+            JOIN 
+                techcoach_lite.techcoach_groups g ON tc.groupId = g.id    
             WHERE 
                 tc.groupId = ? AND tc.decisionId = ?
 
       `, [groupId, decisionId]);
+
+
+      comments.forEach(comment => {
+        comment.type_of_member = comment.groupMember === userId ? 'author' : 'member';
+    });
+
+        res.status(200).json({comments});
+
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        if (conn) {
+            await conn.rollback();
+        }
+        res.status(500).json({ message: 'Server error while fetching comments' });
+    } finally {
+        if (conn) {
+            conn.release();
+        }
+    }
+};
+
+const getDecisionComments = async (req, res) => {
+    const { decisionId } = req.params;
+    const userId = req.user.id;
+    let conn;
+
+    try {
+        const conn = await getConnection();
+
+        const comments = await conn.query(`
+        SELECT
+                tc.id,
+                tc.groupId,
+                tc.groupMember,
+                tc.decisionId,
+                tc.comment,
+                tc.created_at,
+                tc.parentCommentId,
+                tc.updated_at,
+                tu.user_id,
+                tu.displayname,
+                tu.email,
+                g.type_of_group
+            FROM
+                techcoach_lite.techcoach_conversations tc
+            LEFT JOIN
+                techcoach_lite.techcoach_users tu ON tc.groupMember = tu.user_id
+            JOIN 
+                techcoach_lite.techcoach_groups g ON tc.groupId = g.id    
+            WHERE 
+                tc.decisionId = ? AND g.type_of_group = 'decision_circle'
+
+      `, [decisionId]);
 
 
       comments.forEach(comment => {
@@ -393,6 +449,7 @@ module.exports = {
     // Conversation Controllers
     postComment,
     getComments,
+    getDecisionComments,
     updateComment,
     replyToComment,
     deleteComment,

@@ -88,8 +88,12 @@ const getUserDecisionCircles = async (req, res) => {
     try {
         conn = await getConnection();
         const circles = await conn.query(
-            `SELECT g.group_name, g.id
+            `SELECT
+             g.group_name,
+             g.id,
+             u.displayname AS created_by
              FROM techcoach_lite.techcoach_groups g
+             JOIN techcoach_lite.techcoach_users u ON g.created_by = u.user_id
              JOIN techcoach_lite.techcoach_group_members m ON g.id = m.group_id
              WHERE m.member_id = ? AND g.type_of_group = 'decision_circle' `,
             [created_by]
@@ -885,7 +889,7 @@ const getSharedDecisionCircleCount = async (req, res) => {
 };
 
 // const decisionCirclePostComment = async (req, res) => {
-//     const { decision, memberId, comment } = req.body;
+//     const { decision, groupMemberIds, comment ,email} = req.body;
 //     console.log('request body',req.body);
 //     let conn;
 
@@ -896,30 +900,19 @@ const getSharedDecisionCircleCount = async (req, res) => {
 //     return `${firstPart}...${lastPart}`;
 // };
 
-
 //     try {
 //         conn = await getConnection();
 //         await conn.beginTransaction();
 
 //         // Fetch the group member details
-//         const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
-//         const groupMemberRows = await conn.query(groupMemberQuery, [memberId]);
-//         const groupMemberDetails = groupMemberRows[0];
+//         const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id IN (?)';
+//         const usersResult = await conn.query(groupMemberQuery, [groupMemberIds]);
+//         const groupMemberDetails = usersResult[0];
 //         console.log('seseee',groupMemberDetails);
 
-//         const { decision_name, decision_due_date, creation_date } = decision;
+//         const { decision_name, decision_due_date, creation_date } = decision || {};
 //         const truncatedComment = truncateText(comment, 20);
 
-//         // Fetch users from the group
-//         const groupId = decision.group_id; // Assuming decision has group_id
-//         const usersQuery = `
-//             SELECT techcoach_users.email, techcoach_users.displayname
-//             FROM techcoach_lite.techcoach_decision_group_member
-//             JOIN techcoach_lite.techcoach_users ON techcoach_lite.techcoach_decision_group_member.member_id = techcoach_lite.techcoach_users.user_id
-//             WHERE techcoach_decision_group_member.group_id = ?
-//         `;
-//         const usersResult = await conn.query(usersQuery, [groupId]);
-//         console.log('awuerr',usersResult);
 
 //         // Loop through the users and send the email to each one
 //         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
@@ -1045,9 +1038,9 @@ const decisionCircleReplyComment = async (req, res) => {
     }
 };
 
-
 const decisionCirclePostComment = async (req, res) => {
     const { decision, groupMemberIds, comment, email } = req.body;
+     console.log('req.body',req.body);
     let conn;
 
     const truncateText = (text, maxLength) => {
@@ -1064,8 +1057,9 @@ const decisionCirclePostComment = async (req, res) => {
         // Fetch details for each group member
         const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users WHERE user_id IN (${groupMemberIds.join(',')})`;
         const groupMemberRows = await conn.query(groupMemberQuery);
+        const groupMemberDetails = groupMemberRows[0];
 
-        const { decision_name, decision_due_date, creation_date } = decision;
+        const { decision_name, decision_due_date, creation_date } = decision || {};
         const truncatedCommentText = truncateText(comment, 20);
 
         // Send email to each group member
@@ -1075,7 +1069,7 @@ const decisionCirclePostComment = async (req, res) => {
                 <p>A comment has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
                 <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
                 <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-                <p><strong>Comment by ${decision.user.displayname}:</strong></p>
+                <p><strong>Comment by ${groupMemberDetails.displayname}:</strong></p>
                 <p><em>${truncatedCommentText}</em></p>
                 <p>Regards,</p>
                 <p>Team @ Decision Coach</p>

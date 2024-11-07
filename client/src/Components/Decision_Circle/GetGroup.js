@@ -110,6 +110,7 @@ const GetGroup = () => {
                         <div key={circle.id} className="circle-item">
                             <div className="getcircles">
                                 <h5 className='f-5'>{circle.group_name}</h5>
+                                <p className='admin'>admin:{circle.created_by}</p>
                                 <Link to={`/getmembershareddecisions/${circle.id}?group_name=${circle.group_name}`}>
                                     <FaUsersViewfinder className='show-icon' />
                                 </Link>
