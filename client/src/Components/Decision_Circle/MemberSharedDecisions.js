@@ -89,16 +89,18 @@ const MemberSharedDecisions = () => {
         if (!comment) {
             return toast.error('Comment cannot be empty');
         }
-
         setButtonLoading((prevState) => ({ ...prevState, [decisionId + '_email']: true }));
-
         try {
             await postComment(groupId, groupMemberIds, comment, decisionId);
-
-            const decisionDetails = decisions.find((d) => d.decision_id === decisionId).decisionDetails;
-            await mailToDecisionCirclePostComment(decisionDetails, groupMemberIds, comment, email);
-
+            const decision = decisions.find(d => d.decision_id === decisionId);
+            if (!decision) {
+                throw new Error(`Decision with ID ${decisionId} not found`);
+            }
+            const responseToPostEmailComment = await mailToDecisionCirclePostComment(
+                decision, groupMemberIds, comment, email
+            );
             toast.success('Comment posted and email sent successfully');
+            console.log('Response to post email comment:', responseToPostEmailComment);
             fetchComments(groupId, decisionId);
         } catch (error) {
             toast.error('Error sending email');
@@ -108,6 +110,7 @@ const MemberSharedDecisions = () => {
         }
     };
 
+    
     const fetchComments = async (groupId, decisionId) => {
         try {
             const response = await getComments(groupId, decisionId);
@@ -228,7 +231,7 @@ const MemberSharedDecisions = () => {
                                                 comments[decision.decision_id].map((comment) => (
                                                     <div
                                                         key={comment.id}
-                                                        className={`comment-bubble ${comment.type_of_member === 'author' ? 'author-comment' : 'member-comment'}`}
+                                                        className={`comment-bubble author-comment`}
                                                     >
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                             <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
@@ -275,7 +278,7 @@ const MemberSharedDecisions = () => {
                                                 {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
                                             </button>
                                             <button
-                                                onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds, 'user@example.com')}
+                                                onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds)}
                                                 disabled={buttonLoading[decision.decision_id + '_email']}
                                             >
                                                 {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Send Email'}
@@ -287,7 +290,7 @@ const MemberSharedDecisions = () => {
                         );
                     })
                 ) : (
-                    <p>No shared decisions available for this group.</p>
+                    <Typography style={{marginTop:'10px',marginLeft:'20px',padding:'5px'}}>No shared decisions available for this group.</Typography>
                 )}
             </Grid>
             <ToastContainer />

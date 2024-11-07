@@ -220,6 +220,7 @@ const ShowUsers = () => {
                                                             borderRadius: '8px',
                                                             marginBottom: '16px',
                                                             position: 'relative',
+                                                            border: '1px solid #ccc',
                                                         }}
                                                     >
                                                         <Typography>{comment.comment}</Typography>
@@ -268,7 +269,7 @@ const ShowUsers = () => {
                             </Grid>
                         ))
                     ) : (
-                        <Typography variant="body2">No decisions available.</Typography>
+                        <Typography style={{marginTop:'15px',marginLeft:'25px',padding:'5px'}} variant="body2">No decisions available.</Typography>
                     )}
                 </Grid>
             </div>

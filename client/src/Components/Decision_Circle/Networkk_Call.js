@@ -399,6 +399,22 @@ const getComments = async ( groupId,decisionId ) => {
     }
 }
 
+const getDecisionComments = async ( decisionId ) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log(response.data.comments,"getcomments");
+        return response.data.comments;
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw new Error('Failed to fetch comments');
+    }
+}
+
 const updateComment = async (commentId, updatedComment) => {
     const token = localStorage.getItem('token');
 
@@ -478,6 +494,7 @@ export {
     // Decision-Circle Networkk_Call
     postComment,
     getComments,
+    getDecisionComments,
     updateComment,
     replyToComment,
     deleteComment,
