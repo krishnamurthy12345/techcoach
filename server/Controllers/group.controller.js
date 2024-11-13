@@ -3,26 +3,26 @@ const crypto = require('crypto');
 const axios = require('axios');
 
 const getUserList = async (req, res) => {
-  try {
+    try {
 
-    const userId = req.user.id;
-    // console.log("user id from get user list", userId);
-    conn = await getConnection();
-    await conn.beginTransaction();
+        const userId = req.user.id;
+        // console.log("user id from get user list", userId);
+        conn = await getConnection();
+        await conn.beginTransaction();
 
-    const tasks = await conn.query(`
+        const tasks = await conn.query(`
       SELECT * FROM techcoach_lite.techcoach_users WHERE user_id != ?;
     `, [userId]);
 
-    await conn.commit();
-    if (conn) conn.release();
-    res.status(200).json({ message: 'User List Fetched successfully', tasks });
+        await conn.commit();
+        if (conn) conn.release();
+        res.status(200).json({ message: 'User List Fetched successfully', tasks });
     } catch (error) {
         console.error('Error inserting data:', error);
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
         if (conn) {
-        conn.release();
+            conn.release();
         }
     }
 };
@@ -38,7 +38,7 @@ const innerCircleCreation = async (req, res) => {
     try {
         conn = await getConnection();
         await conn.beginTransaction();
-        
+
         const created_by = req.user.id;
         //console.log("user id from circle creation", created_by);
 
@@ -49,7 +49,7 @@ const innerCircleCreation = async (req, res) => {
 
         //console.log("Result from groups", groupResult);
 
-        const insertId = groupResult.insertId.toString(); 
+        const insertId = groupResult.insertId.toString();
         const numericPart = insertId.split('n')[0];
         const groupId = parseInt(numericPart);
 
@@ -57,7 +57,7 @@ const innerCircleCreation = async (req, res) => {
             const memberId = member.user_id;
             await conn.query(
                 `INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) VALUES (?, ?,?)`,
-                [groupId, memberId,'']
+                [groupId, memberId, '']
             );
         }
 
@@ -119,7 +119,7 @@ const getInnerCircleDetails = async (req, res) => {
             FROM techcoach_lite.techcoach_groups
             WHERE created_by = ?
         `;
-        
+
         const [groupResult] = await conn.query(groupQuery, [userId]);
 
         console.log("Group Result", groupResult);
@@ -257,10 +257,10 @@ const getAddMemberNameList = async (req, res) => {
 }
 
 
-const addMemberInInnerCircle = async(req, res) =>{
+const addMemberInInnerCircle = async (req, res) => {
 
     // console.log("request body from add member list", req.body.data);
-    const {userId, groupId}  = req.body.data;
+    const { userId, groupId } = req.body.data;
     try {
         conn = await getConnection();
         await conn.beginTransaction();
@@ -269,12 +269,12 @@ const addMemberInInnerCircle = async(req, res) =>{
         INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) VALUES (?, ?,?)
     `;
 
-    const result = await conn.query(query, [groupId, userId, '']);
+        const result = await conn.query(query, [groupId, userId, '']);
 
         //console.log("result from Add member query", result);
 
         await conn.commit();
-        res.status(200).json({ message: 'Member added sucessfully'});
+        res.status(200).json({ message: 'Member added sucessfully' });
     } catch (error) {
         console.error('Error in adding member to inner circle', error);
         res.status(500).json({ error: 'An error occurred while processing your request' });
@@ -296,7 +296,7 @@ const shareDecisionInInnerCircle = async (req, res) => {
         await conn.query(`
             INSERT INTO techcoach_lite.techcoach_shared_decisions (groupId, groupMember, decisionId)
             VALUES (?, ?, ?)
-        `, [groupId, memberId, decisionId]);    
+        `, [groupId, memberId, decisionId]);
 
         await conn.commit();
 
@@ -365,7 +365,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
                 FROM techcoach_lite.techcoach_group_members
                 WHERE group_id IN (?) AND status = 'Accepted'
             `;
-            
+
             const acceptedMembersResult = await conn.query(acceptedMembersQuery, [groupIds]);
 
             console.log("Accepted Members:", acceptedMembersResult);
@@ -393,7 +393,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
                         SELECT *
                         FROM techcoach_lite.techcoach_users
                         WHERE user_id = ?`;
-                    
+
                     const userResult = await conn.query(userQuery, [createdBy]);
                     groupDetailsMap[groupId] = {
                         createdBy,
@@ -455,7 +455,7 @@ const getInnerCircleAcceptNotification = async (req, res) => {
 const acceptOrRejectInnerCircle = async (req, res) => {
     // console.log("reqqqqqqqqqq body", req.body);
 
-    const { groupId, status } = req.body.data; 
+    const { groupId, status } = req.body.data;
     const userId = req.user.id;
     let conn;
 
@@ -595,7 +595,7 @@ const getSharedDecisions = async (req, res) => {
                 WHERE decision_id = ?
             `, [decisionId]);
 
-            decisionDetails.reasons = decisionReasonQuery.map(reasonEntry => 
+            decisionDetails.reasons = decisionReasonQuery.map(reasonEntry =>
                 decryptText(reasonEntry.decision_reason_text, encryptedKey)
             );
 
@@ -854,8 +854,8 @@ const removeCommentsAdded = async (req, res) => {
 
 
 const postReplyComment = async (req, res) => {
-    // console.log("request body from post reply", req.body);
-    const {commentId, reply, groupId, decisionId} = req.body;
+    console.log("request body from post reply", req.body);
+    const { commentId, reply, groupId, decisionId } = req.body;
 
     const userId = req.user.id;
 
@@ -886,7 +886,7 @@ const postReplyComment = async (req, res) => {
 const editCommentsAdded = async (req, res) => {
     // console.log("reqqqqqqqqqq body editt", req.body);
 
-    const {commentId, editedContent} = req.body.data;
+    const { commentId, editedContent } = req.body.data;
 
     let conn;
 
@@ -917,6 +917,7 @@ const innerCirclePostComment = async (req, res) => {
     // console.log("Request body:", req.body.decision);
 
     const { decision, groupMemberID, commentText, email } = req.body;
+    console.log('reqqq', req.body);
 
     let conn;
 
@@ -966,8 +967,8 @@ const innerCirclePostComment = async (req, res) => {
             htmlbody: htmlBody
         };
 
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1013,11 +1014,11 @@ const innerCircleDecisionShare = async (req, res) => {
         const rows = await conn.query(memberNameQuery, [memberEmail]);
 
         console.log("ssssssssssss", rows)
-        
+
         if (!rows || rows.length === 0) {
             throw new Error('Member not found');
         }
-        
+
         const memberName = rows[0].displayname;
 
 
@@ -1025,16 +1026,16 @@ const innerCircleDecisionShare = async (req, res) => {
         const subjectNameRows = await conn.query(subjectNameQuery, [memberId]);
 
 
-        
+
         if (!subjectNameRows || subjectNameRows.length === 0) {
             throw new Error('Member not found');
         }
-        
+
         const subjectName = subjectNameRows[0].displayname;
 
         const truncatedDecisionText = truncateText(decisionSummary.decisionName, 20);
 
-        console.log("maillllllll",truncatedDecisionText, subjectName, memberEmail, memberName, decisionSummary)
+        console.log("maillllllll", truncatedDecisionText, subjectName, memberEmail, memberName, decisionSummary)
 
         const emailPayload = {
             from: {
@@ -1066,8 +1067,8 @@ const innerCircleDecisionShare = async (req, res) => {
             </div>`
         };
 
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1086,6 +1087,320 @@ const innerCircleDecisionShare = async (req, res) => {
         if (conn) conn.release();
     }
 };
+
+
+const innerCirclePostReply = async (req, res) => {
+    console.log("Full request body from post reply:", JSON.stringify(req.body, null, 2));
+
+    let commentId, reply, groupId, decisionId;
+
+    if (typeof req.body.commentId === 'object') {
+        // Nested structure
+        commentId = req.body.commentId.commentId;
+        reply = req.body.commentId.replyText;
+        decisionId = req.body.commentId.id;
+        groupId = req.body.groupId ?? req.body.commentId.groupId;
+
+    } else {
+        // Flat structure
+        commentId = req.body.commentId;
+        reply = req.body.reply;
+        groupId = req.body.groupId;
+        decisionId = req.body.decisionId;
+    }
+
+    // Log extracted values for troubleshooting
+    console.log("Extracted commentId:", commentId);
+    console.log("Extracted groupId:", groupId);
+    console.log("Extracted reply:", reply);
+    console.log("Extracted decisionId:", decisionId);
+
+    // Validate required fields
+    if (!commentId || !groupId || !reply || !decisionId) {
+        console.error("Missing required fields in request body");
+        return res.status(400).json({ error: 'Missing required fields', details: { commentId, groupId, reply, decisionId } });
+    }
+
+    const userId = req.user.id;
+    let conn;
+
+    const truncateText = (text, maxLength) => {
+        if (text.length <= maxLength) return text;
+        const firstPart = text.substring(0, 10);
+        const lastPart = text.substring(text.length - 10);
+        return `${firstPart}...${lastPart}`;
+    };
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const query = await conn.query(
+            `INSERT INTO techcoach_lite.techcoach_conversations (groupId, groupMember, comment, created_at, parentCommentId, decisionId) 
+             VALUES (?, ?, ?, NOW(), ?, ?)`,
+            [groupId, userId, reply, commentId, decisionId]
+        );
+        console.log("Database insert result:", query);
+
+        await conn.commit();
+        // Queries adjusted to handle array structure
+        const decision = (await conn.query(`SELECT decision_name, creation_date, decision_due_date, user_id FROM techcoach_lite.techcoach_decision WHERE decision_id = ?`, [decisionId]))[0];
+        const groupMemberDetails = (await conn.query(`SELECT displayname FROM techcoach_lite.techcoach_users WHERE user_id = ?`, [userId]))[0];
+        const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
+            JOIN techcoach_lite.techcoach_conversations 
+            ON techcoach_users.user_id = techcoach_conversations.groupMember 
+            WHERE techcoach_conversations.id = ?`, [commentId]))[0];
+
+        // Log data for debugging
+        console.log("Decision data:", decision);
+        console.log("Group Member Details:", groupMemberDetails);
+        console.log("Decision Owner:", originalCommentPoster);
+
+        // Proceed to set up the email payload if data is valid
+        const truncatedReplyText = truncateText(reply, 20);
+        const htmlBody = `
+                          <div style="font-family: Arial, sans-serif; color: #333;">
+                           <p>Dear ${originalCommentPoster?.displayname || "User"},</p>
+                           <p>A reply has been posted on the decision titled "<strong>${decision?.decision_name || "Decision"}</strong>":</p>
+                           <p><strong>Creation Date:</strong> ${new Date(decision?.creation_date).toLocaleDateString()}</p>
+                           <p><strong>Due Date:</strong> ${new Date(decision?.decision_due_date).toLocaleDateString()}</p>
+                           <p><strong>Reply by ${groupMemberDetails?.displayname || "Anonymous"}:</strong></p>
+                           <p><em>${truncatedReplyText}</em></p>
+                           <p>Regards,</p>
+                           <p>Team @ Decision Coach</p>
+                          </div>
+                              `;
+        const emailPayload = {
+            from: { address: "Decision-Coach@www.careersheets.in" },
+            to: [{ email_address: { address: originalCommentPoster?.email } }],
+            subject: "Reply Posted on Your Shared Decision",
+            htmlbody: htmlBody
+        };
+
+        // Log email payload before sending
+        // console.log("Email payload:", JSON.stringify(emailPayload, null, 2));
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+        // Send the email using ZeptoMail
+        await axios.post(zeptoMailApiUrl, emailPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+            }
+        });
+
+        res.status(200).json({ message: 'Reply posted successfully' });
+    } catch (error) {
+        console.error('Error in posting reply', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while posting your reply' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
+// const innerCirclePostReply = async (req, res) => {
+//     console.log("Request body reply:", req.body);
+
+//     const { decision, groupMemberID, replyText, memberEmail } = req.body;
+//     const memberId = req.user.id;
+
+//     console.log('retrieve meber reply idd',memberId);
+
+//     let conn;
+
+//     // Function to truncate text for a cleaner email preview
+//     const truncateText = (text, maxLength) => {
+//         if (!text || text.length <= maxLength) return text;
+//         const firstPart = text.substring(0, 10);
+//         const lastPart = text.substring(text.length - 10);
+//         return `${firstPart}...${lastPart}`;
+//     };
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         // Fetch the group member details
+//         const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
+//         const groupMemberRows = await conn.query(groupMemberQuery, [memberId]);
+
+//         if (!groupMemberRows || groupMemberRows.length === 0) {
+//             throw new Error('Group member not found');
+//         }
+
+//         const groupMemberDetails = groupMemberRows[0];
+//         console.log("Group member details:", groupMemberDetails);
+
+//         const { decision_name, decision_due_date, creation_date } = decision;
+
+//         // Truncate reply text for email
+//         const truncatedReplyText = truncateText(replyText, 20);
+
+//         // Prepare the HTML content for the email
+//         const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+//             <p>Dear ${decision.userDetails.displayname},</p>
+//             <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+//             <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+//             <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+//             <p><strong>Reply by ${groupMemberDetails.displayname}:</strong></p>
+//             <p><em>${truncatedReplyText}</em></p>
+//             <p>Regards,</p>
+//             <p>Team @ Decision Coach</p>
+//         </div>`;
+
+//         // Set up email payload
+//         const emailPayload = {
+//             from: {
+//                 address: "Decision-Coach@www.careersheets.in"
+//             },
+//             to: [
+//                 {
+//                     email_address: {
+//                         address: memberEmail
+//                     }
+//                 }
+//             ],
+//             subject: "Reply Posted on Your Shared Decision",
+//             htmlbody: htmlBody
+//         };
+
+//         // Send the email using ZeptoMail API
+//         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+//         const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+//         await axios.post(zeptoMailApiUrl, emailPayload, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+//             }
+//         });
+
+//         // Commit transaction and send success response
+//         await conn.commit();
+//         res.status(200).json({ message: 'Reply mail sent successfully' });
+//     } catch (error) {
+//         console.error('Error in sending mail on reply to inner circle:', error);
+//         if (conn) await conn.rollback();
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
+
+
+// const innerCirclePostReply = async (req, res) => {
+//     const { decision, replyText,groupId,email} = req.body; 
+//     console.log("Request body replyii:", req.body);
+
+//     const memberId = req.user.id;
+//     console.log('Retrieve member reply ID:', memberId);
+//     // console.log("groupMemberID:", groupMemberID); 
+
+//     let conn;
+
+//     // Function to truncate text for a cleaner email preview
+//     const truncateText = (text, maxLength) => {
+//         if (!text || text.length <= maxLength) return text;
+//         const firstPart = text.substring(0, 10);
+//         const lastPart = text.substring(text.length - 10);
+//         return `${firstPart}...${lastPart}`;
+//     };
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         // Fetch the group member details who posted the reply
+//         const groupMemberQuery = 'SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?';
+//         const groupMemberRows = await conn.query(groupMemberQuery, [memberId]);
+//         const groupMemberDetails = groupMemberRows[0];
+//         console.log("Group member details:", groupMemberDetails);
+//         console.log('sssss',groupMemberRows);
+
+//         if (!groupMemberRows || groupMemberRows.length === 0) {
+//             throw new Error('Group member not found');
+//         }
+//         const { decision_name, decision_due_date, creation_date } = decision;
+
+//         // Truncate reply text for email
+//         const truncatedReplyText = truncateText(replyText, 20);
+
+//         // Fetch all group members' email addresses for this decision
+//         const groupMembersQuery = `
+//         SELECT email 
+//         FROM techcoach_lite.techcoach_users 
+//         WHERE user_id IN (
+//             SELECT member_id 
+//             FROM techcoach_lite.techcoach_group_members 
+//             WHERE group_id = ?
+//         )
+//         `;
+
+//         // Use groupId retrieved from req.body
+//         const groupMembersRows = await conn.query(groupMembersQuery, [groupId]);
+//         console.log("groupMemberId:", groupId); 
+
+//         if (!groupMembersRows || groupMembersRows.length === 0) {
+//             console.error('No group members found for groupId:', groupId);
+//             throw new Error('No group members found');
+//         }
+//         console.log('group Members',groupMemberRows);
+
+//         // Prepare the HTML content for the email
+//         const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+//             <p>Dear ${decision.userDetails.displayname},</p>
+//             <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+//             <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+//             <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+//             <p><strong>Reply by ${groupMemberDetails.displayname}:</strong></p>
+//             <p><em>${truncatedReplyText}</em></p>
+//             <p>Regards,</p>
+//             <p>Team @ Decision Coach</p>
+//         </div>`;
+
+//         // ZeptoMail API setup
+//         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+//         const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+//         // Send email to each group member
+//             const emailPayload = {
+//                 from: {
+//                     address: "Decision-Coach@www.careersheets.in"
+//                 },
+//                 to: [
+//                     {
+//                         email_address: {
+//                             address: email
+//                         }
+//                     }
+//                 ],
+//                 subject: "Reply Posted on Your Shared Decision",
+//                 htmlbody: htmlBody
+//             };
+
+//             // Send the email
+//             await axios.post(zeptoMailApiUrl, emailPayload, {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+//                 }
+//             });
+
+
+//         // Commit transaction and send success response
+//         await conn.commit();
+//         res.status(200).json({ message: 'Reply notifications sent successfully' });
+//     } catch (error) {
+//         console.error('Error in sending reply notifications to group members:', error);
+//         if (conn) await conn.rollback();
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
 
 
 const innerCircleInvitation = async (req, res) => {
@@ -1130,8 +1445,8 @@ const innerCircleInvitation = async (req, res) => {
             </div>`
         };
 
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1198,8 +1513,8 @@ const innerCircleAddInvitation = async (req, res) => {
             </div>`
         };
 
-        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email'; 
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X'; 
+        const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1286,14 +1601,14 @@ const getSharedDecisionDetails = async (req, res) => {
             [id]
         ))[0];
 
-       // console.log("ssssssssssssss", currentUser);
+        // console.log("ssssssssssssss", currentUser);
 
         const decisions = await conn.query(
             `SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id IN (?)`,
             [decisionIds]
         );
 
-        const keyData = undefined + currentUser.displayname + currentUser.email; 
+        const keyData = undefined + currentUser.displayname + currentUser.email;
         const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
         // Decrypt decision details
@@ -1348,8 +1663,9 @@ module.exports = {
     removeCommentsAdded,
     postReplyComment,
     editCommentsAdded,
-    innerCirclePostComment, 
+    innerCirclePostComment,
     innerCircleDecisionShare,
+    innerCirclePostReply,
     innerCircleInvitation,
     innerCircleAddInvitation,
     getSharedDecisionDetails,

@@ -3,8 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, Avatar, IconButton, Popover, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded } from '../../Group/Network_Call';
-import { getDecisionComments, replyToComment } from '../../Decision_Circle/Networkk_Call';
+import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded,innerCirclePostReplyComment } from '../../Group/Network_Call';
+import { getDecisionComments } from '../../Decision_Circle/Networkk_Call';
 import { useNavigate } from 'react-router-dom';
 import { AiFillEdit } from "react-icons/ai";
 
@@ -20,11 +20,9 @@ const View = () => {
     const [showModal, setShowModal] = useState(false);
     const [innerCircleDetails, setInnerCircleDetails] = useState(null);
     const [sharedComments, setSharedComments] = useState([]);
-    const [replyComment, setReplyComment] = useState({});
     const [comments, setComments] = useState([]);
     const [replies, setReplies] = useState({});
     const navigate = useNavigate();
-    const { groupId } = useParams();
 
 
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -124,39 +122,6 @@ const View = () => {
         }
     };
 
-    const handleReplyComment = async (id,parentCommentId) => {
-        try {
-            const commentText = replyComment[id]?.[parentCommentId]?.trim();
-            if (!commentText) {
-                return toast.error('Comment cannot be empty');
-            }
-        
-            const data = {
-                groupId,
-                commentText,
-                id,
-                parentCommentId
-            };
-            await replyToComment(data);
-            setReplyComment(prev => ({ ...prev, [id]: {...prev[id],[parentCommentId]:''}}));
-            toast.success('Reply comment successfully posted');
-            fetchDecisionComments(groupId, id);
-        } catch (error) {
-            toast.error('Error posting reply comment');
-            console.error('Error posting comment:', error);
-        }
-    };
-
-    const handleReplyInputChange = (decisionId, parentCommentId, value) => {
-        setReplyComment(prev => ({
-            ...prev,
-            [decisionId]: {
-                ...prev[decisionId],
-                [parentCommentId]: value
-            }
-        }));
-    };
-
     useEffect(() => {
         fetchSharedComments();
         fetchDecisionComments();
@@ -177,6 +142,7 @@ const View = () => {
     };
 
     const handleReplySubmit = async (commentId, groupId) => {
+        console.log("handleReplySubmit - commentId:", commentId, "groupId:", groupId); 
         try {
             const reply = await postReplyComment(commentId, replies[commentId], groupId, id);
             console.log("response from post reply", reply);
@@ -184,6 +150,31 @@ const View = () => {
                 ...replies,
                 [commentId]: ''
             });
+            const comments = await getSharedComments(id);
+            setSharedComments(comments.comments);
+        } catch (error) {
+            console.error("Error submitting reply:", error);
+        }
+    };
+
+    const handleReplySendEmail = async (commentId,groupId) => {
+        const replyText = replies[commentId];
+        console.log("handleReplySendEmail - commentId:", commentId, "groupId:", groupId);
+        try {
+            // const reply = await postReplyComment(commentId, replyText, groupId, id);
+            // console.log("response from post reply", reply);
+            const replymail = await innerCirclePostReplyComment({
+                commentId,
+                replyText,
+                groupId,
+                id
+            })
+            console.log('replyMail',replymail);
+            setReplies(prevReplies => ({
+                ...prevReplies,
+                [commentId]: ''
+            }));
+
             const comments = await getSharedComments(id);
             setSharedComments(comments.comments);
         } catch (error) {
@@ -340,12 +331,15 @@ const View = () => {
                                             style={{
                                                 height: "3rem",
                                                 padding: "1rem",
-                                                width: "100%",
-                                                maxWidth: "100%",
+                                                width: "85%",
+                                                maxWidth: "85%",
                                                 marginRight: "0.5rem"
                                             }}
                                         />
+                                        <div style={{ display: 'flex', gap: '8px',height:'50px' }}>
                                         <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
+                                        <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId,id)}>Reply & Email</Button>
+                                        </div>
                                     </Box>
                                 )}
 
@@ -355,7 +349,7 @@ const View = () => {
                 ) : (
                     <Typography variant="body2">No comments shared yet.</Typography>
                 )}
-                <div>
+                {/* <div>
                     {comments[id]?.length === 0 ? (
                         <p>No comments available.</p>
                     ) : (
@@ -367,7 +361,8 @@ const View = () => {
                                         key={comment.id} // Added a unique key prop
                                         className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
                                         style={{
-                                            backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
+                                            width: '90%', // Width styling added
+                                            backgroundColor: comment.parentCommentId ? '#FFF' : '#e8f5e9',
                                             textAlign: comment.parentCommentId ? 'right' : 'left',
                                             padding: '8px',
                                             borderRadius: '8px',
@@ -401,20 +396,59 @@ const View = () => {
                                                 </Typography>
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: comment.parentCommentId ? 'flex-end' : 'flex-start', marginTop: '8px', gap: '10px' }}>
-                                            <input
-                                                type="text"
-                                                className="comment-input"
-                                                placeholder="Reply to this comment..."
-                                                value={replyComment[decision.decision_id]?.[comment.id] || ''}
-                                                onChange={(e) => handleReplyInputChange(decision.decision_id, comment.id, e.target.value)}
-                                                style={{ width: '60%', fontSize: '12px', marginRight: '8px' }}
-                                            />
-                                            <button
-                                                className="reply-button"
-                                                onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
-                                                Reply
-                                            </button>
+                                    </div>
+                                ))}
+                        </ul>
+                    )}
+                </div> */}
+                <div>
+                    {comments[id]?.length === 0 ? (
+                        <p>No comments available.</p>
+                    ) : (
+                        <ul>
+                            {comments[id]
+                                ?.sort((a, b) => (a.type_of_member === 'member' ? -1 : 1))
+                                .map(comment => (
+                                    <div
+                                        key={comment.id}
+                                        className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
+                                        style={{
+                                            width: '90%', 
+                                            backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
+                                            textAlign: comment.type_of_member === 'member' ? 'left' : 'left', 
+                                            padding: '8px',
+                                            borderRadius: '8px',
+                                            marginBottom: '16px',
+                                            position: 'relative',
+                                            border: '1px solid #ccc',
+                                            marginLeft: comment.type_of_member === 'member' ? '0' : 'auto', 
+                                            marginRight: comment.type_of_member === 'author' ? '0' : 'auto', 
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                {comment.comment}
+                                            </Typography>
+                                            {comment.type_of_member === 'author' && (
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer',fontSize:'22px' }} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                {comment.displayname[0]}
+                                            </Avatar>
+                                            <div>
+                                                <Typography variant="caption">
+                                                    {comment.displayname} | {comment.email} |
+                                                    {comment.created_at === comment.updated_at ? (
+                                                        <span>{formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                    ) : (
+                                                        <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                    )}
+                                                </Typography>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

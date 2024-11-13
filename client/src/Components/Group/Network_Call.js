@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const getUserListForInnerCircle = async () => {
     //console.log("get user list");
@@ -326,6 +327,30 @@ const innerCirclePostComment = async (decision, groupMemberID,commentText, email
     }
 }
 
+
+const innerCirclePostReplyComment = async (commentId, reply, groupId, decisionId) =>{
+    console.log('asedrf',commentId, reply, groupId, decisionId);
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/innerCirclePostReply`,
+        {commentId, reply, groupId, decisionId},  
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        if(response.status === 200){
+            toast.success("Reply Post successfully");
+        }
+        console.log("response for inner circle post reply", response.data);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching inner circle reply comment", error);
+        throw error;
+    }
+}
+
+
 const innerCircleInvitation = async (email) =>{
     const token = localStorage.getItem('token');
     try {
@@ -400,6 +425,7 @@ export {
     EditCommentAdded,
     mailToInnerCircleDecisionShare,
     innerCirclePostComment,
+    innerCirclePostReplyComment,
     innerCircleInvitation,
     getSharedDecisionDetails, 
     innerCircleAddInvitation
