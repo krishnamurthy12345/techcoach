@@ -28,6 +28,7 @@ router.post("/postReplyComment",groupController.postReplyComment);
 router.put("/editCommentsAdded",groupController.editCommentsAdded);
 router.post("/innerCircleDecisionShare",groupController.innerCircleDecisionShare);
 router.post("/innerCirclePostComment",groupController.innerCirclePostComment);
+router.post("/innerCirclePostReply",groupController.innerCirclePostReply);
 router.post("/innerCircleInvitation",groupController.innerCircleInvitation);
 router.post("/innerCircleAddInvitation",groupController.innerCircleAddInvitation);
 router.get("/getSharedDecisionDetails",groupController.getSharedDecisionDetails);

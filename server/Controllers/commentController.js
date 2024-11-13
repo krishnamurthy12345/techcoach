@@ -200,6 +200,10 @@ const updateComment = async (req, res) => {
 
 const replyToComment = async (req, res) => {
     const { parentCommentId, groupId, commentText, decisionId } = req.body;
+    console.log('parentId',parentCommentId);
+    console.log('groupId',groupId);
+    console.log('commentText',commentText);
+    console.log('decision',decisionId);
     const userId = req.user.id;
     let conn;
 

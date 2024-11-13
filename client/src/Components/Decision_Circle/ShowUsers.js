@@ -103,22 +103,23 @@ const ShowUsers = () => {
         }
     };
 
-    const handleMailToReplyComment = async (decisionId,parentCommentId, email) => {
+    const handleMailToReplyComment = async (decisionId,parentCommentId,reply) => {
         console.log('Decision ID:', decisionId);
-        const comment = replyComment[decisionId]?.trim();
+        console.log("Parent Comment ID:", parentCommentId);
+        const comment = replyComment[decisionId]?.[parentCommentId]?.trim();
         if (!comment) {
             return toast.error('Comment cannot be empty');
         }
 
         try {
             
-            await replyToComment({ groupId, commentText: comment, decisionId });
+            await replyToComment({ groupId, parentCommentId,commentText: comment, decisionId ,groupId});
             const decisionDetails = decisions.find((d) => d.decision_id === decisionId);
             if (!decisionDetails) {
                 throw new Error('Decision details not found');
             }
-            await mailToDecisionCircleReplyComment(decisionDetails,comment, decisionDetails.user.displayname);
-            console.log('Sending email with:', decisionDetails,comment, decisionDetails.user.displayname);
+            await mailToDecisionCircleReplyComment(decisionDetails,parentCommentId,reply,groupId);
+            console.log('Sending email with:', decisionDetails,parentCommentId);
             toast.success('Comment posted and email sent successfully');
             fetchComments(groupId, decisionId);
         } catch (error) {

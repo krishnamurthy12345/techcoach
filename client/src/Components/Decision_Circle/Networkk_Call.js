@@ -197,12 +197,12 @@ const getMemberSharedDecisions = async (groupId) => {
     }
 }
 
-const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment,email) => {
+const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment, email) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`, {
-            decision, 
-            groupMemberIds, 
+            decision,
+            groupMemberIds,
             comment,
             email
         }, {
@@ -219,26 +219,26 @@ const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment
 }
 
 
-const mailToDecisionCircleReplyComment = async (decision, groupMemberIds, reply, parentCommenterDisplayName) => {
+const mailToDecisionCircleReplyComment = async (decision, parentCommentId,reply,groupId) => {
     const token = localStorage.getItem('token');
 
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCircleReplyComment`, {
-            decision, 
-            groupMemberIds, 
-            reply, 
-            parentCommenterDisplayName 
+            decision,
+            parentCommentId,
+            reply,
+            groupId
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
 
-        console.log('Response for added reply:', response.data.message); 
+        console.log('Response for added reply:', response.data.message);
         return response.data.message;
     } catch (error) {
         console.error('Error sending reply:', error.response ? error.response.data : error.message);
-        throw error; 
+        throw error;
     }
 }
 
@@ -342,7 +342,7 @@ const deleteDecisionGroup = async (id) => {
     }
 };
 
-const postComment = async (groupId, groupMemberIds, commentText,decisionId) => {
+const postComment = async (groupId, groupMemberIds, commentText, decisionId) => {
     const token = localStorage.getItem('token');
 
     // Logging the payload to be sent
@@ -354,17 +354,17 @@ const postComment = async (groupId, groupMemberIds, commentText,decisionId) => {
     });
 
     try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`, 
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`,
             {
                 groupId,
                 groupMemberIds,
                 commentText,
                 decisionId,
             }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
+            headers: {
+                Authorization: `Bearer ${token}`,
             }
+        }
         );
 
         console.log("Response for comments", response);
@@ -383,7 +383,7 @@ const postComment = async (groupId, groupMemberIds, commentText,decisionId) => {
     }
 };
 
-const getComments = async ( groupId,decisionId ) => {
+const getComments = async (groupId, decisionId) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${groupId}/${decisionId}`, {
@@ -391,7 +391,7 @@ const getComments = async ( groupId,decisionId ) => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data.comments,"getcomments");
+        console.log(response.data.comments, "getcomments");
         return response.data.comments;
     } catch (error) {
         console.error('Error fetching comments:', error);
@@ -399,7 +399,7 @@ const getComments = async ( groupId,decisionId ) => {
     }
 }
 
-const getDecisionComments = async ( decisionId ) => {
+const getDecisionComments = async (decisionId) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`, {
@@ -407,7 +407,7 @@ const getDecisionComments = async ( decisionId ) => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data.comments,"getcomments");
+        console.log(response.data.comments, "getcomments");
         return response.data.comments;
     } catch (error) {
         console.error('Error fetching comments:', error);
@@ -429,7 +429,7 @@ const updateComment = async (commentId, updatedComment) => {
         return response.data;
     } catch (error) {
         console.error('Error updating comment:', error.response ? error.response.data : error.message);
-        throw error.response ? error.response.data : new Error("Error updating comment"); 
+        throw error.response ? error.response.data : new Error("Error updating comment");
     }
 };
 
