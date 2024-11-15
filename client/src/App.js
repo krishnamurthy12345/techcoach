@@ -88,7 +88,7 @@ function App() {
         <Route path='/decisioncircle/:id' element={<DecisionCircle />} />
         <Route path='/getdecisioncircle' element={<GetGroup />} />
         <Route path='/decisiongroup' element={<DecisionGroup />} />
-        <Route path='/decisiongroup/:group_name' element={<DecisionGroup />} />
+        <Route path='/decisiongroup/:id' element={<DecisionGroup />} />
         <Route path='/getdecisioncircle/:groupId' element={<ShowUsers />} />
         <Route path='/sharecircle/:id' element={<ShareCircle />}/>
         <Route path='/shareCircleDisplay/:id' element={<ShareCircleGroup />} />

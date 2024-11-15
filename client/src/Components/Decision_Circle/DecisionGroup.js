@@ -1,40 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Avatar,
-  Checkbox,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  Paper,
-  Typography,
-  Box,
-  Grid,
-  Button
-} from '@mui/material';
+import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, Grid, Button } from '@mui/material';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import withAuth from '../withAuth';
-import { getUserListForDecisionCircle,sendDecisionCircleInvitation } from './Networkk_Call';
+import { getUserListForDecisionCircle, sendDecisionCircleInvitation } from './Networkk_Call';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-
 
 const DecisionGroup = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const { group_name } = useParams();
+  
+  const { id } = useParams(); 
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const params = new URLSearchParams(location.search);
-  const id = params.get('id');
-
-  console.log('Group Name from URL:', group_name);
+  // console.log('nuooo',id);
 
   useEffect(() => {
     const fetchNames = async () => {
@@ -59,25 +39,35 @@ const DecisionGroup = () => {
   };
 
   const handleSubmit = async () => {
-    if (!group_name) {
-      console.error('Group name is not specified.');
+    if (!id) {
+      toast.error('Group ID is not specified.');
       return;
     }
 
     if (selectedUsers.length === 0) {
-      console.error('No users selected.');
+      toast.error('No users selected.');
       return;
     }
 
-    const members = selectedUsers.map(user => ({ user_id: user.user_id }));
+    const members = selectedUsers.map(user => (user.user_id ));
 
     try {
       const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('user_id');
+      // console.log('awww',userId);
+
+      
+    if (!userId) {
+      toast.error('User ID is not available.');
+      return;
+    }
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
         {
-          group_name, 
-          members,    
+          created_by: userId,
+        type_of_group: 'decision_circle',
+        group_name: id,  
+        members:members
         },
         {
           headers: {
@@ -86,17 +76,20 @@ const DecisionGroup = () => {
         }
       );
 
+      toast.success('Decision circle created successfully!');
       console.log('Response:', response);
+
+      // Send individual invitations
       for (const user of selectedUsers) {
         try {
           await sendDecisionCircleInvitation(user.email);
           toast.success(`Invitation sent to ${user.email} successfully`);
-          console.log(`Invitation sent to ${user.email}`);
         } catch (invitationError) {
           toast.error(`Failed to invite ${user.email}`);
           console.error(`Error sending invitation to ${user.email}:`, invitationError);
         }
       }
+
       navigate('/getdecisioncircle');
     } catch (error) {
       toast.error('Error creating decision circle');
@@ -105,17 +98,14 @@ const DecisionGroup = () => {
   };
 
   const handleSearchInputChange = (e) => {
-    setSearchQuery(e.target.value);
+    setSearchQuery(e.target.value.toLowerCase());
   };
-
 
   return (
     <div>
       <center>
         <div style={{ maxWidth: '500px' }}>
-          <label htmlFor="groupId"className='mt-2 fs-5'><b>Group Name:</b></label>
-          {/* <h4>{group_name}</h4> */}
-          <input type="text" id="group_name" value={group_name || ''} readOnly />
+          <input type="text" id="group_id" value={id || ''} readOnly />
         </div>
       </center>
       <Box sx={{ margin: '1rem', display: 'flex', justifyContent: 'center' }}>
@@ -123,8 +113,7 @@ const DecisionGroup = () => {
           <Grid item xs={12} md={6}>
             <Typography variant="h6">List of Members</Typography>
             <input
-              label="Search by email"
-              variant="outlined"
+              placeholder="Search by email"
               fullWidth
               value={searchQuery}
               onChange={handleSearchInputChange}
@@ -135,20 +124,24 @@ const DecisionGroup = () => {
               }}
             />
             <List>
-              {users.filter(user => user.email === searchQuery).map((user) => (
-                <ListItem key={user.user_id} button>
-                  <ListItemAvatar>
-                    <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>{user.displayname.charAt(0)}</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={user.displayname} secondary={user.email} />
-                  <ListItemSecondaryAction>
-                    <Checkbox
-                      edge="end"
-                      onChange={(event) => handleCheckboxChange(event, user)}
-                      name={user.displayname}
-                    />
-                  </ListItemSecondaryAction>
-                </ListItem>
+              {users
+                .filter(user => user.email===searchQuery)
+                .map((user) => (
+                  <ListItem key={user.user_id} button>
+                    <ListItemAvatar>
+                      <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>
+                        {user.displayname.charAt(0)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={user.displayname} secondary={user.email} />
+                    <ListItemSecondaryAction>
+                      <Checkbox
+                        edge="end"
+                        onChange={(event) => handleCheckboxChange(event, user)}
+                        checked={selectedUsers.some(selectedUser => selectedUser.user_id === user.user_id)}
+                      />
+                    </ListItemSecondaryAction>
+                  </ListItem>
               ))}
             </List>
           </Grid>

@@ -243,6 +243,19 @@ const mailToDecisionCircleReplyComment = async (decision, parentCommentId,reply,
 }
 
 
+// const getSharedDecisionCircleDetails = async () =>{
+//     const token = localStorage.getItem('token');
+//     const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisionCircleDetails`, {
+//         headers: {
+//             Authorization: `Bearer ${token}`
+//         }
+//     });
+
+//     return response.data;
+// }
+
+
+
 // group Name Networkk_calls  //
 const postdecisionGroup = async (group_name, type_of_group = 'decision_circle') => {
     const token = localStorage.getItem('token');
@@ -483,6 +496,7 @@ export {
     getMemberSharedDecisions,
     mailToDecisionCirclePostComment,
     mailToDecisionCircleReplyComment,
+    getSharedDecisionCircleDetails,
 
     // group namess
     postdecisionGroup,
