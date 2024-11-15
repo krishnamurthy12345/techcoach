@@ -496,7 +496,7 @@ export {
     getMemberSharedDecisions,
     mailToDecisionCirclePostComment,
     mailToDecisionCircleReplyComment,
-    getSharedDecisionCircleDetails,
+    // getSharedDecisionCircleDetails,
 
     // group namess
     postdecisionGroup,
