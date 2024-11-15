@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Button, Avatar, IconButton, Popover, TextField } from '@mui/material';
+import { Box, Typography, Button, Avatar, IconButton, Popover, TextField,Modal } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded,innerCirclePostReplyComment } from '../../Group/Network_Call';
-import { getDecisionComments } from '../../Decision_Circle/Networkk_Call';
+import { getDecisionComments,updateComment } from '../../Decision_Circle/Networkk_Call';
 import { useNavigate } from 'react-router-dom';
 import { AiFillEdit } from "react-icons/ai";
 
@@ -29,6 +29,9 @@ const View = () => {
     const [editedCommentContent, setEditedCommentContent] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [editComment,setEditComment] = useState(null);
+    const [isEditModalOpen, setEditModalOpen] = useState(false);  // Controls modal visibility
+    const [editContent, setEditContent] = useState('');
 
     useEffect(() => {
         const innerGroupCheck = async () => {
@@ -206,6 +209,31 @@ const View = () => {
         setEditingCommentId(null);
         setIsPopoverOpen(false);
     };
+
+    const handleEditClick =(commentId) =>{
+        setEditComment(commentId.id);
+        setEditContent(commentId.comment);
+        setEditModalOpen(true);
+       }
+
+
+       const handleSaveEditComment = async() =>{
+        try {
+            const updatedComment = {comment: editContent};
+            await updateComment(editComment,updatedComment);
+            toast.success('Comment Updated successfully');
+            fetchDecisionComments();
+            setEditModalOpen(false);
+            setEditComment(null);
+            setEditContent('')
+        } catch (error) {
+            console.error('Failed to update comment:',error);
+            toast.error('Failed to update comment');
+        } finally {
+            setEditModalOpen(false);
+        }
+       }
+
 
     const handleDeleteReply = async (replyId) => {
         console.log("Delete reply", replyId);
@@ -431,7 +459,8 @@ const View = () => {
                                             </Typography>
                                             {comment.type_of_member === 'author' && (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer',fontSize:'22px' }} />
+                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer',fontSize:'22px' }} 
+                                                    onClick={() => handleEditClick(comment)} />
                                                 </div>
                                             )}
                                         </div>
@@ -455,6 +484,17 @@ const View = () => {
                         </ul>
                     )}
                 </div>
+
+                <Modal open={isEditModalOpen} onClose={() =>setEditModalOpen(false)}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                <Typography variant="h6" mb={2}>Edit Comment</Typography>
+                    <TextField fullWidth multiline rows={4} value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                    <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                        <Button variant="contained" color="primary" onClick={handleSaveEditComment}>Save</Button>
+                        <Button variant="outlined" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                    </Box>
+                </Box>
+                </Modal>
 
             </Box>
 

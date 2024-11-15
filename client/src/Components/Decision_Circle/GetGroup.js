@@ -15,6 +15,8 @@ const GetGroup = () => {
     const [error, setError] = useState('');
 
     const { id } = useParams();
+    const searchParams = new URLSearchParams(window.location.search);
+    const groupName = searchParams.get("group_name");
     const navigate = useNavigate();
 
 

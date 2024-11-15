@@ -42,6 +42,7 @@ const ShowUsers = () => {
                 setGroups(response.data.group);
                 setMembers(response.data.members || []);
             }
+            // console.log('members',response);
         } catch (err) {
             toast.error('An error occurred while fetching the details');
             console.error(err);

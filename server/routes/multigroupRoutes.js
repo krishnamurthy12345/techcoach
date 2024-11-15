@@ -22,7 +22,7 @@ router.post("/decisionshareDecisionCircle",multigroupController.decisionshareDec
 router.get("/getdecisionSharedDecisionCircle/:groupId",multigroupController.getdecisionSharedDecisionCircle);
 router.get("/getMemberSharedDecisions/:groupId",multigroupController.getMemberSharedDecisions);
 router.get("/getSharedDecisionCircleCount",multigroupController.getSharedDecisionCircleCount);
-router.get("/getSharedDecisionCircleDetails",multigroupController.getSharedDecisionCircleDetails);
+// router.get("/getSharedDecisionCircleDetails",multigroupController.getSharedDecisionCircleDetails);
 router.post("/decisionCirclePostComment",multigroupController.decisionCirclePostComment);
 router.post("/decisionCircleReplyComment",multigroupController.decisionCircleReplyComment);
 
