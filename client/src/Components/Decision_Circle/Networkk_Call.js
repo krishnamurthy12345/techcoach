@@ -355,13 +355,13 @@ const deleteDecisionGroup = async (id) => {
     }
 };
 
-const postComment = async (groupId, groupMemberIds, commentText, decisionId) => {
+const postComment = async (groupId, groupMemberId, commentText, decisionId) => {
     const token = localStorage.getItem('token');
 
     // Logging the payload to be sent
     console.log("Posting comment with data:", {
         groupId,
-        groupMemberIds,
+        groupMemberId,
         commentText,
         decisionId,
     });
@@ -370,7 +370,7 @@ const postComment = async (groupId, groupMemberIds, commentText, decisionId) => 
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`,
             {
                 groupId,
-                groupMemberIds,
+                groupMemberId,
                 commentText,
                 decisionId,
             }, {
