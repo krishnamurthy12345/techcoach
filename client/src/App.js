@@ -6,6 +6,8 @@ import 'bootstrap/dist/js/bootstrap.js';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/Home';
 import Header from './Components/Header';
+import Admin from './Components/Admin/Admin.js';
+import AdminView from './Components/Admin/AdminView.js';
 import Decision from './Components/pages/Decision/Decision.js';
 import Readd from './Components/pages/Decision/Readd.js';
 import View from './Components/pages/Decision/View.js';
@@ -52,6 +54,8 @@ function App() {
       <Routes>
         {/* Dashboard Routes */}
         <Route path='/' element={<Home />} />
+        <Route path='/admin' element={<Admin />} />
+        <Route path='/adminView/:id' element={<AdminView />} />
         <Route path='/dashboard' element={<DashboardRedirect />} />
         <Route path='/decision' element={<Decision />} />
         <Route path='/decisioncircle' element={<DecisionCircle />} />

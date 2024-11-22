@@ -15,6 +15,7 @@ const Nav = () => {
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
   const [pendingDecisionsData, setPendingDecisionsData] = useState([]);
   const [receivedDecisionsCount, setReceivedDecisionsCount] = useState(0);
+  const [sharedByDecisionsCount, setSharedByDecisionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const [sharedDecisionDetails, setSharedDecisionDetails] = useState(null);
@@ -33,9 +34,38 @@ const Nav = () => {
     fetchSharedDecisionsDetails();
   }, []);
 
-  console.log("shareDecision details", sharedDecisionDetails);
-  const sharedDecisionCount = Array.isArray(sharedDecisionDetails?.sharedDecisions) ? sharedDecisionDetails.sharedDecisions.length : 0;
-  console.log("shareDecision count", sharedDecisionCount);
+// Fetch Shared Decisions Count (Received)
+useEffect(() => {
+  const fetchReceivedDecisionsCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisionsCount`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setReceivedDecisionsCount(response.data.decisionCount);
+    } catch (error) {
+      console.error("Error fetching received decision count:", error);
+    }
+  };
+  fetchReceivedDecisionsCount();
+}, []);
+
+// Fetch Shared By Decisions Count
+useEffect(() => {
+  const fetchSharedByDecisionsCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedByDecisionsCount`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSharedByDecisionsCount(response.data.decisionCount);
+    } catch (error) {
+      console.error("Error fetching shared by decision count:", error);
+    }
+  };
+  fetchSharedByDecisionsCount();
+}, []);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -67,27 +97,6 @@ const Nav = () => {
     setPendingDecisionsData(pendingDecisions);
   }, [data]);
 
-  useEffect(() => {
-    const sharedDecisionCount = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getSharedDecisionsCount`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const sharedDecisions = response.data.decisionCount;
-        setReceivedDecisionsCount(sharedDecisions);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-        setLoading(false);
-      }
-    };
-
-    sharedDecisionCount();
-  }, []);
 
   const filteredData = data.filter(decision => {
     const decisionNameMatch = decision.decision_name && decision.decision_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -157,7 +166,7 @@ const Nav = () => {
           <CustomCard
             icon={<Share />}
             title="Shared by me"
-            count={sharedDecisionCount}
+            count={sharedByDecisionsCount}
             onClick={navigateToReceivedDecisions}
           />
         </Grid>

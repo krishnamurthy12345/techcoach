@@ -1142,7 +1142,7 @@ const decisionCircleReplyComment = async (req, res) => {
 //             decision.decision_name = decryptText(decision.decision_name, encryptedKey);
 //             decision.user_statement = decryptText(decision.user_statement, encryptedKey);
 //         });
-
+        
 //         // Fetch and link tag information
 //         const decisionTags = await conn.query(
 //             `SELECT dt.decision_id, t.tag_name, t.tag_type 
@@ -1170,6 +1170,408 @@ const decisionCircleReplyComment = async (req, res) => {
 // };
 
 
+// const getDecisionCirclememberSharedDecisions = async (req, res) => {
+//     const userId = req.user.id; 
+//     let conn;
+
+//     const decryptText = (text, key) => {
+//         if (!text || typeof text !== 'string') {
+//             console.error('Invalid text provided for decryption:', text);
+//             return null; // Return null or an appropriate fallback value
+//         }
+//         try {
+//             const decipher = crypto.createDecipher('aes-256-cbc', key);
+//             let decryptedText = decipher.update(text, 'hex', 'utf8');
+//             decryptedText += decipher.final('utf8');
+//             return decryptedText;
+//         } catch (error) {
+//             console.error('Error decrypting text:', error);
+//             return 'Decryption failed';
+//         }
+//     };
+    
+
+//     const encryptText = (text, key) => {
+//         try {
+//             const cipher = crypto.createCipher('aes-256-cbc', key);
+//             let encryptedText = cipher.update(text, 'utf8', 'hex');
+//             encryptedText += cipher.final('hex');
+//             return encryptedText;
+//         } catch (error) {
+//             console.error('Error encrypting text:', error);
+//             return null;
+//         }
+//     };
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         // Query for shared decisions
+//         const decisionQuery = `
+//             SELECT 
+//                 tsd.id AS shared_decision_id,
+//                 tsd.decisionId AS decision_id,
+//                 tg.id AS group_id,
+//                 tg.group_name,
+//                 tg.type_of_group,
+//                 td.decision_name
+//             FROM 
+//                 techcoach_lite.techcoach_shared_decisions tsd
+//             JOIN 
+//                 techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+//             JOIN 
+//                 techcoach_lite.techcoach_group_members tgm ON tg.id = tgm.group_id
+//             JOIN 
+//                 techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+//             WHERE 
+//                 tgm.member_id = ?
+//                 AND tg.type_of_group = 'decision_circle';
+//         `;
+
+//         const getDecisions = await conn.query(decisionQuery, [userId]);
+//         console.log('shared with me',getDecisions);
+
+//         if (!Array.isArray(getDecisions) || !getDecisions.length) {
+//             return res.status(200).json({ message: 'No decisions found', results: [], decisionCount: 0 });
+//         }
+
+//         const decisionDetailsMap = new Map();
+
+//         // Decrypt decisions and fetch reasons
+//         for (const decision of getDecisions) {
+//             const { decision_id } = decision;
+//             const [userData] = await conn.query('SELECT displayName, email FROM techcoach_lite.techcoach_users WHERE email = ?', req.user.email);
+
+//             if (!userData || userData.length === 0) {
+//                 throw new Error('User not found');
+//             }
+    
+//             const user = userData;
+
+//             // Generate key for decryption
+//             const keyData = undefined + user.displayName + user.email;
+//             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
+
+//             // Decrypt decision details
+//             decision.decision_name = decryptText(decision.decision_name, encryptedKey);
+//             decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+
+//             // Fetch decision reasons
+//             const decisionReasonQuery = `
+//                 SELECT decision_reason_text 
+//                 FROM techcoach_lite.techcoach_decision_reason 
+//                 WHERE decision_id = ?`;
+
+//             const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
+
+//             decision.reasons = decisionReasons.map(reason => 
+//                 decryptText(reason.decision_reason_text, encryptedKey)
+//             );
+
+//             decisionDetailsMap.set(decision_id, decision);
+//         }
+
+//         const decisionIds = [...decisionDetailsMap.keys()];
+
+//         // Fetch tags for the decisions
+//         if (decisionIds.length > 0) {
+//             const tagQuery = `
+//                 SELECT dt.decision_id, t.tag_name, t.tag_type 
+//                 FROM techcoach_lite.techcoach_decision_tag_linked_info dt
+//                 JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+//                 WHERE dt.decision_id IN (?);
+//             `;
+
+//             const decisionTags = await conn.query(tagQuery, [decisionIds]);
+
+//             // Add tags to the corresponding decisions
+//             decisionTags.forEach(tag => {
+//                 const decision = decisionDetailsMap.get(tag.decision_id);
+//                 if (decision) {
+//                     if (!decision.tags) {
+//                         decision.tags = [];
+//                     }
+//                     decision.tags.push({ tag_name: tag.tag_name, tag_type: tag.tag_type });
+//                 }
+//             });
+//         }
+
+//         const decryptedResults = [...decisionDetailsMap.values()];
+
+//         res.status(200).json({
+//             message: 'Group members and decisions fetched successfully',
+//             results: decryptedResults,
+//             decisionCount: decryptedResults.length
+//         });
+
+//         await conn.commit();
+//     } catch (error) {
+//         console.error('Error fetching group members with decisions:', error);
+//         if (conn) await conn.rollback();
+//         res.status(500).json({ error: 'An error occurred while fetching group members and decisions' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
+
+const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
+    const userId = req.user.id;
+    let conn;
+
+    const decryptText = (text, key) => {
+        try {
+            const decipher = crypto.createDecipher('aes-256-cbc', key);
+            let decryptedText = decipher.update(text, 'hex', 'utf8');
+            decryptedText += decipher.final('utf8');
+            return decryptedText;
+        } catch (error) {
+            console.error('Error decrypting text:', error);
+            return null;
+        }
+    };
+
+    const encryptText = (text, key) => {
+        try {
+            const cipher = crypto.createCipher('aes-256-cbc', key);
+            let encryptedText = cipher.update(text, 'utf8', 'hex');
+            encryptedText += cipher.final('hex');
+            return encryptedText;
+        } catch (error) {
+            console.error('Error encrypting text:', error);
+            return null;
+        }
+    };
+
+    try {
+        conn = await getConnection();
+
+        // Update query to fetch shared decisions where created_by matches the userId
+        const sharedDecisionsQuery = `
+        SELECT 
+    tsd.decisionId AS decision_id,
+    td.decision_name,
+    td.user_statement,
+    td.decision_taken_date,
+    td.decision_due_date,
+    tg.group_name,
+    tg.type_of_group,
+    tu.displayname AS shared_by,
+    tu.email AS shared_by_email,
+    tg.created_by AS group_creator_id,
+    GROUP_CONCAT(tgm.member_id) AS shared_with_ids,
+    GROUP_CONCAT(tmu.displayname) AS shared_with_names
+FROM techcoach_lite.techcoach_shared_decisions tsd
+JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+WHERE tg.created_by = ? AND tg.type_of_group = 'decision_circle'
+GROUP BY tsd.decisionId 
+        `;
+
+        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId]);
+
+        if (!Array.isArray(sharedDecisions)) {
+            res.status(500).json({ error: 'Unexpected data format: sharedDecisions is not an array' });
+            return;
+        }
+
+        if (sharedDecisions.length === 0) {
+            res.status(200).json({ message: 'No shared decisions found', decisionCount: 0 });
+            return;
+        }
+
+        const decisionIds = sharedDecisions.map(sd => sd.decision_id);
+
+        for (const decision of sharedDecisions) {
+            const { decision_id, shared_by, shared_by_email, group_creator_id } = decision;
+
+            // Generate decryption key based on creator
+            const keyData = undefined + shared_by + shared_by_email; // Adjust keyData as needed
+            const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
+
+            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
+            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+
+            const decisionReasonQuery = `
+                SELECT decision_reason_text 
+                FROM techcoach_lite.techcoach_decision_reason 
+                WHERE decision_id = ?`;
+
+            const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
+
+            decision.reasons = decisionReasons.map(reason =>
+                decryptText(reason.decision_reason_text, encryptedKey)
+            );
+        }
+
+        const decisionTags = await conn.query(
+            `SELECT dt.decision_id, t.tag_name, t.tag_type 
+             FROM techcoach_lite.techcoach_decision_tag_linked_info dt
+             JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+             WHERE dt.decision_id IN (?)`,
+            [decisionIds]
+        );
+
+        sharedDecisions.forEach(decision => {
+            decision.tags = decisionTags
+                .filter(tag => tag.decision_id === decision.decision_id)
+                .map(tag => ({ tag_name: tag.tag_name, tag_type: tag.tag_type }));
+        });
+
+        res.status(200).json({
+            message: 'Shared Decisions Fetched Successfully',
+            results: sharedDecisions,
+            decisionCount: sharedDecisions.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching shared decisions:', error);
+        res.status(500).json({ error: 'An error occurred while fetching shared decisions' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+const getUserSharedDecisions = async (req, res) => {
+    const userId = req.user.id;
+    let conn;
+
+    const decryptText = (text, key) => {
+        try {
+            const decipher = crypto.createDecipher('aes-256-cbc', key);
+            let decryptedText = decipher.update(text, 'hex', 'utf8');
+            decryptedText += decipher.final('utf8');
+            return decryptedText;
+        } catch (error) {
+            console.error('Error decrypting text:', error);
+            return 'Decryption failed';
+        }
+    };
+
+    const encryptText = (text, key) => {
+        try {
+            const cipher = crypto.createCipher('aes-256-cbc', key);
+            let encryptedText = cipher.update(text, 'utf8', 'hex');
+            encryptedText += cipher.final('hex');
+            return encryptedText;
+        } catch (error) {
+            console.error('Error encrypting text:', error);
+            return null;
+        }
+    };
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        // Fetch decisions shared with the group and specific user
+        const decisionQuery = `
+            SELECT 
+    tsd.decisionId AS decision_id,
+    td.decision_name,
+    td.user_statement,
+    td.decision_taken_date,
+    td.decision_due_date,
+    tg.group_name,
+    tg.type_of_group,
+    tu.displayname AS shared_by,
+    tu.email AS shared_by_email,
+    GROUP_CONCAT(tmu.displayname) AS shared_with_names,
+    GROUP_CONCAT(tmu.email) AS shared_with_emails
+FROM techcoach_lite.techcoach_shared_decisions tsd
+JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+WHERE tu.user_id = ? 
+  AND tg.type_of_group = 'decision_circle'
+GROUP BY tsd.decisionId
+`;
+
+        const getDecisions = await conn.query(decisionQuery, [userId]);
+
+        if (!Array.isArray(getDecisions) || !getDecisions.length) {
+            return res.status(200).json({ message: 'No decisions found for the user', results: [], decisionCount: 0 });
+        }
+
+        const decisionDetailsMap = new Map();
+
+        // Loop through decisions, decrypt fields and fetch additional data
+        for (const decision of getDecisions) {
+            const { decision_id, shared_by, shared_by_email } = decision;
+
+            // Key generation for decryption (you might need to modify this logic)
+            const keyData = undefined + shared_by + shared_by_email;
+            const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
+
+            // Decrypt fields
+            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
+            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+
+            // Fetch and decrypt decision reasons
+            const decisionReasonQuery = `
+                SELECT decision_reason_text 
+                FROM techcoach_lite.techcoach_decision_reason 
+                WHERE decision_id = ?`;
+
+            const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
+
+            decision.reasons = decisionReasons.map(reason =>
+                decryptText(reason.decision_reason_text, encryptedKey)
+            );
+
+            decisionDetailsMap.set(decision_id, decision);
+        }
+
+        // Extract decision IDs for querying tags
+        const decisionIds = [...decisionDetailsMap.keys()];
+
+        if (decisionIds.length > 0) {
+            // Fetch tags associated with the decisions
+            const tagQuery = `
+                SELECT dt.decision_id, t.tag_name, t.tag_type 
+                FROM techcoach_lite.techcoach_decision_tag_linked_info dt
+                JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+                WHERE dt.decision_id IN (?)`;
+
+            const decisionTags = await conn.query(tagQuery, [decisionIds]);
+
+            // Attach tags to corresponding decisions
+            decisionTags.forEach(tag => {
+                const decision = decisionDetailsMap.get(tag.decision_id);
+                if (decision) {
+                    if (!decision.tags) {
+                        decision.tags = [];
+                    }
+                    decision.tags.push({ tag_name: tag.tag_name, tag_type: tag.tag_type });
+                }
+            });
+        }
+
+        const decryptedResults = [...decisionDetailsMap.values()];
+
+        res.status(200).json({
+            message: 'Decisions shared with the user fetched successfully',
+            results: decryptedResults,
+            decisionCount: decryptedResults.length
+        });
+
+        await conn.commit();
+    } catch (error) {
+        console.error('Error fetching decisions shared with the user:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while fetching shared decisions' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
+
 module.exports = {
     getUserList,
     decisionCircleCreation,
@@ -1188,4 +1590,7 @@ module.exports = {
     decisionCirclePostComment,
     decisionCircleReplyComment,
     // getSharedDecisionCircleDetails,
+    // getDecisionCirclememberSharedDecisions,
+    getdecisionSharedDecisionCirclebyuser,
+    getUserSharedDecisions
 };
