@@ -110,7 +110,7 @@
 //         }
 //     };
 
-    
+
 //     const fetchComments = async (groupId, decisionId) => {
 //         try {
 //             const response = await getComments(groupId, decisionId);
@@ -369,7 +369,7 @@ const MemberSharedDecisions = () => {
         }
     };
 
-    const handlePostComment = async (decisionId, groupMemberIds) => {
+    const handlePostComment = async (decisionId) => {
         const comment = newComments[decisionId]?.trim();
         if (!comment) {
             return toast.error('Comment cannot be empty');
@@ -377,9 +377,14 @@ const MemberSharedDecisions = () => {
         setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
 
         try {
-            for (const memberId of groupMemberIds) {
-                await postComment(groupId, memberId, comment, decisionId);
-            }
+            const dataToSend = {
+                groupId,
+                comment,
+                decisionId,
+            };
+
+            console.log('Posting data:', dataToSend);
+            await postComment(groupId, comment, decisionId);
             setNewComments((prevState) => ({ ...prevState, [decisionId]: '' }));
             toast.success('Comment posted successfully');
             fetchComments(groupId, decisionId);
@@ -398,7 +403,7 @@ const MemberSharedDecisions = () => {
         }
         setButtonLoading((prevState) => ({ ...prevState, [decisionId + '_email']: true }));
         try {
-            await postComment(groupId, groupMemberIds, comment, decisionId);
+            await postComment(groupId, comment, decisionId);
             const decision = decisions.find(d => d.decision_id === decisionId);
             if (!decision) {
                 throw new Error(`Decision with ID ${decisionId} not found`);
@@ -417,7 +422,7 @@ const MemberSharedDecisions = () => {
         }
     };
 
-    
+
     const fetchComments = async (groupId, decisionId) => {
         try {
             const response = await getComments(groupId, decisionId);
@@ -425,6 +430,7 @@ const MemberSharedDecisions = () => {
                 ...prevComments,
                 [decisionId]: response || [],
             }));
+            console.log('babababa', response);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
@@ -482,7 +488,6 @@ const MemberSharedDecisions = () => {
             <Grid container spacing={3}>
                 {decisions.length > 0 ? (
                     decisions.map((decision) => {
-                        const groupMemberIds = members.map((member) => member.user_id);
                         return (
                             <Grid item xs={12} key={decision.decision_id}>
                                 <Card>
@@ -499,59 +504,96 @@ const MemberSharedDecisions = () => {
                                         <div className="comments-section">
                                             <h6>Comments:</h6>
                                             {comments[decision.decision_id]?.length > 0 ? (
-                                                comments[decision.decision_id].filter(comment => comment.type_of_member === 'author').map((comment) => (
-                                                    <div key={comment.id} className={`comment-bubble ${comment.type_of_member === 'author' ? 'author-comment' : 'member-comment'}`}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                comments[decision.decision_id].map((comment, index) => (
+                                                    <div
+                                                        key={index}
+                                                        style={{
+                                                            display: 'flex',
+                                                            justifyContent: comment.type_of_member === 'author' ? 'flex-end' : 'flex-start',
+                                                            marginBottom: '10px',
+                                                        }}
+                                                    >
+                                                        <div
+                                                            className="comment-container"
+                                                            style={{
+                                                                maxWidth: '70%',
+                                                                padding: '10px',
+                                                                borderRadius: '8px',
+                                                                border: '1px solid #ccc',
+                                                                backgroundColor: comment.type_of_member === 'author' ? '#e1f5fe' : '#ffff',
+                                                                textAlign: comment.type_of_member === 'author' ? 'right' : 'left',
+                                                            }}
+                                                        >
+                                                            <Typography variant="body1" className="comment-text">
                                                                 {comment.comment}
                                                             </Typography>
-                                                            {comment.type_of_member === 'author' && (
-                                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
+                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                     <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
                                                                     <MdOutlineDeleteForever
                                                                         style={{ cursor: 'pointer' }}
                                                                         onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
                                                                     />
                                                                 </div>
-                                                            )}
+                                                            <Box>
+                                                                <Box className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                                                    <Avatar sx={{ textAlign: 'end', bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                                        {comment.displayname[0]}
+                                                                    </Avatar>
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <Typography variant='caption'>
+                                                                            {comment.displayname} | {comment.email} | {comment.created_at === comment.updated_at
+                                                                                ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                                : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </Box>
+                                                            </Box>
                                                         </div>
-                                                        <Box className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                            <Avatar sx={{ textAlign:'end', bgcolor: "#526D82", color: "white", marginRight: 2 }}>
-                                                                {comment.displayname[0]}
-                                                            </Avatar>
-                                                            <div style={{ flex: 1 }}>
-                                                                <Typography variant='caption'>
-                                                                    {comment.displayname} | {comment.email} |
-                                                                    {comment.created_at === comment.updated_at
-                                                                        ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                        : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </Box>
                                                     </div>
                                                 ))
                                             ) : (
-                                                <p>No comments available for this decision.</p>
+                                                <Typography variant="body2" style={{ margin: '10px 0' }}>
+                                                    No comments yet.
+                                                </Typography>
                                             )}
-                                            
                                             <textarea
                                                 value={newComments[decision.decision_id] || ''}
                                                 onChange={(e) => handleCommentChange(decision.decision_id, e.target.value)}
                                                 placeholder="Add your comment..."
+                                                style={{ width: '90%', margin: '10px 0', padding: '8px' }}
                                             />
+                                            <div className='member-button'>
                                             <button
-                                                onClick={() => handlePostComment(decision.decision_id, groupMemberIds)}
+                                                onClick={() => handlePostComment(decision.decision_id)}
                                                 disabled={buttonLoading[decision.decision_id]}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    backgroundColor: '#007bff',
+                                                    color: '#fff',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                }}
                                             >
                                                 {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
                                             </button>
+                                            
                                             <button
-                                                onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds)}
+                                                onClick={() => handleMailToPostComment(decision.decision_id,groupMemberIds)}
                                                 disabled={buttonLoading[decision.decision_id + '_email']}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    backgroundColor: '#007bff',
+                                                    color: '#fff',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                }}
                                             >
-                                                {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Send Email'}
+                                                {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Post & Email'}
                                             </button>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -559,7 +601,7 @@ const MemberSharedDecisions = () => {
                         );
                     })
                 ) : (
-                    <Typography style={{marginTop:'10px',marginLeft:'20px',padding:'5px'}}>No shared decisions available for this group.</Typography>
+                    <Typography style={{ marginTop: '10px', marginLeft: '20px', padding: '5px' }}>No shared decisions available for this group.</Typography>
                 )}
             </Grid>
             <ToastContainer />

@@ -32,6 +32,7 @@ router.post("/innerCirclePostReply",groupController.innerCirclePostReply);
 router.post("/innerCircleInvitation",groupController.innerCircleInvitation);
 router.post("/innerCircleAddInvitation",groupController.innerCircleAddInvitation);
 router.get("/getSharedDecisionDetails",groupController.getSharedDecisionDetails);
-router.get("/getSharedDecisionsCount",groupController.getSharedDecisionsCount);
+router.get("/getSharedDecisionsCount",groupController.getSharedwithDecisionsCount);
+router.get("/getSharedByDecisionsCount",groupController.getSharedByDecisionsCount);
 
 module.exports = router;

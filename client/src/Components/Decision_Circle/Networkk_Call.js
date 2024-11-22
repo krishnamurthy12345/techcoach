@@ -254,6 +254,40 @@ const mailToDecisionCircleReplyComment = async (decision, parentCommentId,reply,
 //     return response.data;
 // }
 
+const getUserSharedDecisions = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedwithme`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            }
+        )
+        return response.data.results;
+    } catch (error) {
+        console.error('Error Fetching Decision Get Circles:', error);
+        throw error
+    }
+}
+
+
+const getdecisionSharedDecisionCirclebyuser = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedbyme`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            }
+        )
+        return response.data.results;
+    } catch (error) {
+        console.error('Error Fetching Decision Get Circles:', error);
+        throw error
+    }
+}
 
 
 // group Name Networkk_calls  //
@@ -355,13 +389,12 @@ const deleteDecisionGroup = async (id) => {
     }
 };
 
-const postComment = async (groupId, groupMemberId, commentText, decisionId) => {
+const postComment = async (groupId, commentText, decisionId) => {
     const token = localStorage.getItem('token');
 
     // Logging the payload to be sent
     console.log("Posting comment with data:", {
         groupId,
-        groupMemberId,
         commentText,
         decisionId,
     });
@@ -370,7 +403,6 @@ const postComment = async (groupId, groupMemberId, commentText, decisionId) => {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comments`,
             {
                 groupId,
-                groupMemberId,
                 commentText,
                 decisionId,
             }, {
@@ -497,6 +529,8 @@ export {
     mailToDecisionCirclePostComment,
     mailToDecisionCircleReplyComment,
     // getSharedDecisionCircleDetails,
+    getUserSharedDecisions,
+    getdecisionSharedDecisionCirclebyuser,
 
     // group namess
     postdecisionGroup,

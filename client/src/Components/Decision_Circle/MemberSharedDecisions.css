@@ -68,3 +68,7 @@ button:disabled {
 button + button {
     margin-left: 8px;
 }
+.member-button{
+    display: flex;
+    justify-content: flex-end;
+}

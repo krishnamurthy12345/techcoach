@@ -4,9 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import tech from './assets/tech.png';
 import { getInnerCircleAcceptNotification } from '../Components/Group/Network_Call';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isAdmin,setIsAdmin] = useState(false);
     const navigate = useNavigate();
     const [response, setResponse] = useState(null);
     const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
@@ -15,10 +17,27 @@ const Header = () => {
         const token = localStorage.getItem('token');
         if (token) {
             setIsLoggedIn(true);
+            fetchUserType(token);
         } else {
             setIsLoggedIn(false);
         }
     }, []);
+
+    const fetchUserType = async () =>{
+        const token = localStorage.getItem('token');
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/type`,{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            console.log('UserType',response.data)
+            setIsAdmin(response.data.isAdmin || false);
+        } catch (error) {
+            console.error('Error fetching User type:',error);
+            setIsAdmin(false);
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,6 +78,12 @@ const Header = () => {
                         <ul className="navbar-nav ms-auto">
                             {isLoggedIn ? (
                                 <>
+                                {isAdmin && (
+                                        <li className="nav-item">
+                                            <Link to='/admin' className="nav-link">Admin</Link>
+                                        </li>
+                                    )}
+
                                     <li className="nav-item">
                                         <Link to='/dashboard' className="nav-link">Dashboard</Link>
                                     </li>
