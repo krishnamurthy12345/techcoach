@@ -19,7 +19,8 @@ const authMiddleware = (req, res, next) => {
         }
         const verified = jwt.verify(token, JWT_SECRET_KEY);
         req.user = verified;
-        // console.log(req.user, "jkdhvjkdhvjkhdk");
+        console.log(req.user, "jkdhvjkdhvjkhdk");
+        console.log('ggggggg',JWT_SECRET_KEY);
         next();
     } catch (err) {
         console.error('Error verifying token:', err);
