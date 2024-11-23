@@ -34,6 +34,7 @@ import DecisionGroup from './Components/Decision_Circle/DecisionGroup.js';
 import ShowUsers from './Components/Decision_Circle/ShowUsers.js';
 import ShareCircleGroup from './Components/Decision_Circle/ShareCircleGroup.js';
 import MemberSharedDecisions from './Components/Decision_Circle/MemberSharedDecisions.js';
+import SharedDecisionCircle from './Components/Decision_Circle/SharedDecisionCircle.js';
 
 function App() {
   console.log("one is working")
@@ -103,6 +104,7 @@ function App() {
         <Route path='/sharedDecisions' element={<SharedDecision />} />
         <Route path='/sharedByMe' element={<ShareWithMe />} />
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
+        <Route path='/sharedDecisionCircle' element={<SharedDecisionCircle />} />
 
 
         <Route path='/group' element={<MultipleMemberGroup />} />
