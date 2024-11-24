@@ -377,58 +377,6 @@ const View = () => {
                 ) : (
                     <Typography variant="body2">No comments shared yet.</Typography>
                 )}
-                {/* <div>
-                    {comments[id]?.length === 0 ? (
-                        <p>No comments available.</p>
-                    ) : (
-                        <ul>
-                            {comments[id]
-                                ?.sort((a, b) => (a.type_of_member === 'member' ? -1 : 1))
-                                .map(comment => (
-                                    <div
-                                        key={comment.id} // Added a unique key prop
-                                        className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
-                                        style={{
-                                            width: '90%', // Width styling added
-                                            backgroundColor: comment.parentCommentId ? '#FFF' : '#e8f5e9',
-                                            textAlign: comment.parentCommentId ? 'right' : 'left',
-                                            padding: '8px',
-                                            borderRadius: '8px',
-                                            marginBottom: '16px',
-                                            position: 'relative',
-                                            border: '1px solid #ccc',
-                                        }}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
-                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
-                                                {comment.comment}
-                                            </Typography>
-                                            {comment.type_of_member === 'author' && (
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
-                                                {comment.displayname[0]}
-                                            </Avatar>
-                                            <div>
-                                                <Typography variant="caption">
-                                                    {comment.displayname} | {comment.email} |
-                                                    {comment.created_at === comment.updated_at ? (
-                                                        <span>{formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                    ) : (
-                                                        <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
-                                                    )}
-                                                </Typography>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                        </ul>
-                    )}
-                </div> */}
                 <div>
                     {comments[id]?.length === 0 ? (
                         <p>No comments available.</p>

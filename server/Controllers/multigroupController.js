@@ -970,12 +970,101 @@ const decisionCirclePostComment = async (req, res) => {
 };
 
 
+
+// const decisionCircleReplyComment = async (req, res) => {
+//     const { parentCommentId, decision, reply, groupId } = req.body;
+//     console.log('decision', decision);
+//     console.log('commentId', parentCommentId);
+//     console.log('groupId', groupId);
+//     // const memberId = req.user.id;
+//     let conn;
+
+//     const truncateText = (text, maxLength) => {
+//         if (typeof text !== 'string') {
+//             console.warn('Input to truncateText is not a string:', text);
+//             return '';
+//         }
+
+//         if (!text || text.length <= maxLength) return text;
+//         const firstPart = text.substring(0, 10);
+//         const lastPart = text.substring(text.length - 10);
+//         return `${firstPart}...${lastPart}`;
+//     };
+
+//     try {
+//         conn = await getConnection();
+//         await conn.beginTransaction();
+
+//         // Fetch all members of the group
+//         const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users 
+//                                   WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
+//         const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
+
+//         // Fetch original comment poster details
+//         const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
+//             JOIN techcoach_lite.techcoach_conversations 
+//             ON techcoach_users.user_id = techcoach_conversations.groupMember 
+//             WHERE techcoach_conversations.id = ?`, [parentCommentId]));
+
+//         // console.log('Group members:', groupMemberRows);
+//         const { decision_name, decision_due_date, creation_date } = decision;
+//         const truncatedReplyText = truncateText(reply, 20);
+
+//         // Send email to each group member
+//         for (const groupMember of groupMemberRows) {
+//             const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+//                 <p>Dear ${groupMember.displayname},</p>
+//                 <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+//                 <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+//                 <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+//                 <p><strong>Reply by ${originalCommentPoster.displayname}:</strong></p>
+//                 <p><em>${truncatedReplyText}</em></p>
+//                 <p>Regards,</p>
+//                 <p>Team @ Decision Coach</p>
+//             </div>`;
+
+//             const emailPayload = {
+//                 from: {
+//                     address: "Decision-Coach@www.careersheets.in"
+//                 },
+//                 to: [
+//                     {
+//                         email_address: {
+//                             address: groupMember.email
+//                         }
+//                     }
+//                 ],
+//                 subject: "New Reply on Your Shared Decision Circle",
+//                 htmlbody: htmlBody
+//             };
+
+//             const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+//             const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+
+//             await axios.post(zeptoMailApiUrl, emailPayload, {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+//                 }
+//             });
+//         }
+
+//         await conn.commit();
+//         res.status(200).json({ message: 'Emails Sent Successfully to Group Members' });
+//     } catch (error) {
+//         console.error('Error in sending email on reply to decision circle comment:', error);
+//         if (conn) await conn.rollback();
+//         res.status(500).json({ error: 'An error occurred while processing your request' });
+//     } finally {
+//         if (conn) conn.release();
+//     }
+// };
+
+
 const decisionCircleReplyComment = async (req, res) => {
     const { parentCommentId, decision, reply, groupId } = req.body;
-    console.log('decision', decision);
-    console.log('commentId', parentCommentId);
-    console.log('groupId', groupId);
-    // const memberId = req.user.id;
+    const memberId = req.user.id;
+
     let conn;
 
     const truncateText = (text, maxLength) => {
@@ -999,13 +1088,14 @@ const decisionCircleReplyComment = async (req, res) => {
                                   WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
         const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
 
-        // Fetch original comment poster details
-        const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
-            JOIN techcoach_lite.techcoach_conversations 
-            ON techcoach_users.user_id = techcoach_conversations.groupMember 
-            WHERE techcoach_conversations.id = ?`, [parentCommentId]))[0];
+        // Fetch replying user's details
+        const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
+        const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
 
-        // console.log('Group members:', groupMemberRows);
+        if (!replyingUser) {
+            throw new Error(`Replying user not found for user_id: ${memberId}`);
+        }
+
         const { decision_name, decision_due_date, creation_date } = decision;
         const truncatedReplyText = truncateText(reply, 20);
 
@@ -1016,7 +1106,7 @@ const decisionCircleReplyComment = async (req, res) => {
                 <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
                 <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
                 <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-                <p><strong>Reply by ${originalCommentPoster.displayname}:</strong></p>
+                <p><strong>Reply by ${replyingUser.displayname}:</strong></p>
                 <p><em>${truncatedReplyText}</em></p>
                 <p>Regards,</p>
                 <p>Team @ Decision Coach</p>

@@ -304,8 +304,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import { getMemberSharedDecisions, mailToDecisionCirclePostComment, postComment, getComments, deleteComment } from './Networkk_Call';
-import { Card, CardContent, Typography, Grid, Avatar, CircularProgress, Box } from '@mui/material';
+import { getMemberSharedDecisions, mailToDecisionCirclePostComment, postComment, getComments, deleteComment, updateComment } from './Networkk_Call';
+import { Card, CardContent, Typography, Grid, Avatar, CircularProgress, Box, TextField, Button, Modal } from '@mui/material';
 import { AiFillEdit } from "react-icons/ai";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import './MemberSharedDecisions.css';
@@ -321,6 +321,10 @@ const MemberSharedDecisions = () => {
     const [comments, setComments] = useState({});
     const [newComments, setNewComments] = useState({});
     const [buttonLoading, setButtonLoading] = useState({});
+    const [editComment, setEditComment] = useState(null);
+    const [isEditModalOpen, setEditModalOpen] = useState(false);
+    const [editContent, setEditContent] = useState('');
+
 
     const { groupId } = useParams();
     const location = useLocation();
@@ -465,6 +469,31 @@ const MemberSharedDecisions = () => {
         return <p>{error}</p>;
     }
 
+    const handleEditClick = (commentId) => {
+        setEditComment(commentId.id);
+        setEditContent(commentId.comment);
+        setEditModalOpen(true);
+    }
+
+
+    const handleSaveEditComment = async () => {
+        try {
+            const updatedComment = { comment: editContent };
+            await updateComment(editComment, updatedComment);
+            toast.success('Comment Updated successfully');
+            fetchComments();
+            setEditModalOpen(false);
+            setEditComment(null);
+            setEditContent('')
+        } catch (error) {
+            console.error('Failed to update comment:', error);
+            toast.error('Failed to update comment');
+        } finally {
+            setEditModalOpen(false);
+        }
+    }
+
+
     return (
         <div className='getGroup'>
             {groups && (
@@ -521,19 +550,23 @@ const MemberSharedDecisions = () => {
                                                                 borderRadius: '8px',
                                                                 border: '1px solid #ccc',
                                                                 backgroundColor: comment.type_of_member === 'author' ? '#e1f5fe' : '#ffff',
-                                                                textAlign: comment.type_of_member === 'author' ? 'right' : 'left',
+                                                                textAlign: comment.type_of_member === 'author' ? 'left' : 'left',
                                                             }}
                                                         >
                                                             <Typography variant="body1" className="comment-text">
                                                                 {comment.comment}
                                                             </Typography>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                     <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }} />
+                                                            {comment.type_of_member === 'author' && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }}
+                                                                        onClick={() => handleEditClick(comment)}
+                                                                    />
                                                                     <MdOutlineDeleteForever
                                                                         style={{ cursor: 'pointer' }}
                                                                         onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
                                                                     />
                                                                 </div>
+                                                            )}
                                                             <Box>
                                                                 <Box className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                                     <Avatar sx={{ textAlign: 'end', bgcolor: "#526D82", color: "white", marginRight: 2 }}>
@@ -557,42 +590,42 @@ const MemberSharedDecisions = () => {
                                                     No comments yet.
                                                 </Typography>
                                             )}
-                                            <textarea
+                                            <input
                                                 value={newComments[decision.decision_id] || ''}
                                                 onChange={(e) => handleCommentChange(decision.decision_id, e.target.value)}
                                                 placeholder="Add your comment..."
                                                 style={{ width: '90%', margin: '10px 0', padding: '8px' }}
                                             />
                                             <div className='member-button'>
-                                            <button
-                                                onClick={() => handlePostComment(decision.decision_id)}
-                                                disabled={buttonLoading[decision.decision_id]}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    backgroundColor: '#007bff',
-                                                    color: '#fff',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                }}
-                                            >
-                                                {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
-                                            </button>
-                                            
-                                            <button
-                                                onClick={() => handleMailToPostComment(decision.decision_id,groupMemberIds)}
-                                                disabled={buttonLoading[decision.decision_id + '_email']}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    backgroundColor: '#007bff',
-                                                    color: '#fff',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                }}
-                                            >
-                                                {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Post & Email'}
-                                            </button>
+                                                <button
+                                                    onClick={() => handlePostComment(decision.decision_id)}
+                                                    disabled={buttonLoading[decision.decision_id]}
+                                                    style={{
+                                                        padding: '8px 16px',
+                                                        backgroundColor: '#007bff',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds)}
+                                                    disabled={buttonLoading[decision.decision_id + '_email']}
+                                                    style={{
+                                                        padding: '8px 16px',
+                                                        backgroundColor: '#007bff',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Post & Email'}
+                                                </button>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -604,6 +637,16 @@ const MemberSharedDecisions = () => {
                     <Typography style={{ marginTop: '10px', marginLeft: '20px', padding: '5px' }}>No shared decisions available for this group.</Typography>
                 )}
             </Grid>
+            <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                    <Typography variant="h6" mb={2}>Edit Comment</Typography>
+                    <TextField fullWidth multiline rows={4} value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                    <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                        <Button variant="contained" color="primary" onClick={handleSaveEditComment}>Save</Button>
+                        <Button variant="outlined" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                    </Box>
+                </Box>
+            </Modal>
             <ToastContainer />
         </div>
     );
