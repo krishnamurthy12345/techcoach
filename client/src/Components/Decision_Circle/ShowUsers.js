@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ShowUsers.css';
-import { removeUsersFromGroup, getdecisionSharedDecisionCircle, getComments, replyToComment, mailToDecisionCircleReplyComment } from './Networkk_Call';
+import { removeUsersFromGroup, getdecisionSharedDecisionCircle, getComments, replyToComment, mailToDecisionCircleReplyComment, updateComment, deleteComment } from './Networkk_Call';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import { IoPersonAdd } from "react-icons/io5";
 import { IoMdRemoveCircle } from "react-icons/io";
-import { Card, CardContent, Typography, Grid, Avatar } from '@mui/material';
+import { AiFillEdit } from "react-icons/ai";
+import { MdOutlineDeleteForever } from "react-icons/md";
+import { Card, CardContent, Typography, Grid, Avatar, Box, TextField, Button, Modal } from '@mui/material';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const ShowUsers = () => {
@@ -15,6 +17,9 @@ const ShowUsers = () => {
     const [members, setMembers] = useState([]);
     const [comments, setComments] = useState({});
     const [replyComment, setReplyComment] = useState({});
+    const [editComment, setEditComment] = useState(null);
+    const [isEditModalOpen, setEditModalOpen] = useState(false);
+    const [editContent, setEditContent] = useState('');
     const { groupId } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -150,6 +155,45 @@ const ShowUsers = () => {
         }));
     };
 
+    const handleDeleteComment = async (commentId, decisionId) => {
+        try {
+            await deleteComment(commentId);
+            setComments((prevComments) => ({
+                ...prevComments,
+                [decisionId]: prevComments[decisionId].filter((comment) => comment.id !== commentId),
+            }));
+            toast.success('Comment deleted successfully');
+        } catch (error) {
+            console.error("Error deleting comment:", error.response?.data);
+            toast.error('Error deleting comment');
+        }
+    };
+
+    const handleEditClick = (commentId) => {
+        setEditComment(commentId.id);
+        setEditContent(commentId.comment);
+        setEditModalOpen(true);
+    }
+
+
+    const handleSaveEditComment = async () => {
+        try {
+            const updatedComment = { comment: editContent };
+            await updateComment(editComment, updatedComment);
+            toast.success('Comment Updated successfully');
+            fetchComments();
+            setEditModalOpen(false);
+            setEditComment(null);
+            setEditContent('')
+        } catch (error) {
+            console.error('Failed to update comment:', error);
+            toast.error('Failed to update comment');
+        } finally {
+            setEditModalOpen(false);
+        }
+    }
+
+
     return (
         <div className="getGroupp">
             {groups && (
@@ -226,6 +270,17 @@ const ShowUsers = () => {
                                                         }}
                                                     >
                                                         <Typography>{comment.comment}</Typography>
+                                                        {comment.type_of_member === 'author' && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }}
+                                                                        onClick={() => handleEditClick(comment)}
+                                                                    />
+                                                                    <MdOutlineDeleteForever
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
+                                                                    />
+                                                                </div>
+                                                            )}
                                                         <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                             <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
                                                                 {comment.displayname[0]}
@@ -275,6 +330,16 @@ const ShowUsers = () => {
                     )}
                 </Grid>
             </div>
+            <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                    <Typography variant="h6" mb={2}>Edit Comment</Typography>
+                    <TextField fullWidth multiline rows={4} value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                    <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                        <Button variant="contained" color="primary" onClick={handleSaveEditComment}>Save</Button>
+                        <Button variant="outlined" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                    </Box>
+                </Box>
+            </Modal>
             <ToastContainer />
         </div>
     );
