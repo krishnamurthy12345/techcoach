@@ -1,14 +1,3 @@
-// import React from 'react'
-
-// const SharedDecisionCircle = () => {
-//   return (
-//     <div>SharedDecisionCircle</div>
-//   )
-// }
-
-// export default SharedDecisionCircle
-
-
 import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Box, Avatar, Grid, Popover, IconButton, ToggleButton, ButtonGroup, CircularProgress } from '@mui/material';
 import { getUserSharedDecisions,postComment } from '../Decision_Circle/Networkk_Call';
@@ -25,8 +14,6 @@ const SharedDecisionCircle = () => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [showPending, setShowPending] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [editingComment, setEditingComment] = useState(null);
-    const [editedCommentCircleContent, setEditedCommentCircleContent] = useState('');
     const [buttonLoading, setButtonLoading] = useState({});
 
 
@@ -114,11 +101,6 @@ const SharedDecisionCircle = () => {
         (selectedUser ? item.shared_by_email === selectedUser.email : true)
     );
 
-    const handleEdited = (commentId, initialContent) => {
-        setEditingComment(commentId);
-        setEditedCommentCircleContent(initialContent);
-        setIsPopoverOpen(true);
-    };
 
     const handleCommentChange = (decisionId, newText) => {
         setCommentTexts(prevState => ({
@@ -269,7 +251,7 @@ const SharedDecisionCircle = () => {
                                                                 </Typography>
                                                             </Grid>
                                                             <Grid item>
-                                                                <IconButton onClick={() => handleEdited(comment.id, comment.comment)}>
+                                                                <IconButton >
                                                                     <EditIcon sx={{ color: "black" }} />
                                                                 </IconButton>
                                                             </Grid>

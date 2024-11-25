@@ -366,7 +366,7 @@ const View = () => {
                                         />
                                         <div style={{ display: 'flex', gap: '8px',height:'50px' }}>
                                         <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
-                                        <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId,id)}>Reply & Email</Button>
+                                        {/* <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId,id)}>Reply & Email</Button> */}
                                         </div>
                                     </Box>
                                 )}

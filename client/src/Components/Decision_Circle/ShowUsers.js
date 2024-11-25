@@ -309,11 +309,11 @@ const ShowUsers = () => {
                                                                 onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
                                                                 Reply
                                                             </button>
-                                                            <button
+                                                            {/* <button
                                                                 className="reply-button"
                                                                 onClick={() => handleMailToReplyComment(decision.decision_id,comment.id, true)}>
                                                                 Reply & Email
-                                                            </button>
+                                                            </button> */}
                                                         </div>
                                                     </div>
                                                 ))
