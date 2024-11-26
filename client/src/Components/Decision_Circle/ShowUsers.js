@@ -261,7 +261,7 @@ const ShowUsers = () => {
                                                         className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
                                                         style={{
                                                             backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
-                                                            textAlign: comment.parentCommentId ? 'right' : 'left',
+                                                            textAlign: comment.parentCommentId ? 'left' : 'left',
                                                             padding: '8px',
                                                             borderRadius: '8px',
                                                             marginBottom: '16px',
@@ -309,11 +309,11 @@ const ShowUsers = () => {
                                                                 onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
                                                                 Reply
                                                             </button>
-                                                            {/* <button
+                                                            <button
                                                                 className="reply-button"
                                                                 onClick={() => handleMailToReplyComment(decision.decision_id,comment.id, true)}>
                                                                 Reply & Email
-                                                            </button> */}
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ))

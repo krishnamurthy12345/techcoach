@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Box, Avatar, Grid, Popover, IconButton, ToggleButton, ButtonGroup, CircularProgress } from '@mui/material';
-import { getUserSharedDecisions,postComment } from '../Decision_Circle/Networkk_Call';
+import { getdecisionSharedDecisionCirclebyuser,postComment } from '../Decision_Circle/Networkk_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import { Edit as EditIcon } from '@mui/icons-material';
 import { formatDistanceToNow, parseISO } from 'date-fns';
@@ -21,7 +21,7 @@ const SharedDecisionCircle = () => {
     const fetchSharedDecisionCircles = async () => {
         try {
             setIsLoading(true);
-            const response = await getUserSharedDecisions();
+            const response = await getdecisionSharedDecisionCirclebyuser();
             console.log('qweerwe', response);
             const sortedDecisions = response.sort((a, b) => {
                 const aTimestamp = getRecentCommentTimestamp(a);

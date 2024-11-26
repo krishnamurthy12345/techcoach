@@ -432,7 +432,7 @@ const sendDecisionCircleInvitation = async (req, res) => {
         };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -444,7 +444,7 @@ const sendDecisionCircleInvitation = async (req, res) => {
         await conn.commit();
         res.status(200).json({ message: 'Mail Sent Successfully' });
     } catch (error) {
-        console.error('Error in sending mail on invite to inner circle:', error);
+        console.error('Error in sending mail on invite to decision circle:', error);
         if (conn) await conn.rollback();
         res.status(500).json({ error: 'An error occurred while processing your request' });
     } finally {
@@ -948,7 +948,7 @@ const decisionCirclePostComment = async (req, res) => {
             };
 
             const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-            const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+            const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
             await axios.post(zeptoMailApiUrl, emailPayload, {
                 headers: {
@@ -971,12 +971,100 @@ const decisionCirclePostComment = async (req, res) => {
 
 
 
+const decisionCircleReplyComment = async (req, res) => {
+    const { parentCommentId, decision, reply, groupId } = req.body;
+    console.log('decision', decision);
+    console.log('commentId', parentCommentId);
+    console.log('groupId', groupId);
+    // const memberId = req.user.id;
+    let conn;
+
+    const truncateText = (text, maxLength) => {
+        if (typeof text !== 'string') {
+            console.warn('Input to truncateText is not a string:', text);
+            return '';
+        }
+
+        if (!text || text.length <= maxLength) return text;
+        const firstPart = text.substring(0, 10);
+        const lastPart = text.substring(text.length - 10);
+        return `${firstPart}...${lastPart}`;
+    };
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        // Fetch all members of the group
+        const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users 
+                                  WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
+        const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
+
+        // Fetch original comment poster details
+        const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
+            JOIN techcoach_lite.techcoach_conversations 
+            ON techcoach_users.user_id = techcoach_conversations.groupMember 
+            WHERE techcoach_conversations.id = ?`, [parentCommentId]));
+
+        // console.log('Group members:', groupMemberRows);
+        const { decision_name, decision_due_date, creation_date } = decision;
+        const truncatedReplyText = truncateText(reply, 20);
+
+        // Send email to each group member
+        for (const groupMember of groupMemberRows) {
+            const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+                <p>Dear ${groupMember.displayname},</p>
+                <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+                <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+                <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+                <p><strong>Reply by ${originalCommentPoster.displayname}:</strong></p>
+                <p><em>${truncatedReplyText}</em></p>
+                <p>Regards,</p>
+                <p>Team @ Decision Coach</p>
+            </div>`;
+
+            const emailPayload = {
+                from: {
+                    address: "Decision-Coach@www.careersheets.in"
+                },
+                to: [
+                    {
+                        email_address: {
+                            address: groupMember.email
+                        }
+                    }
+                ],
+                subject: "New Reply on Your Shared Decision Circle",
+                htmlbody: htmlBody
+            };
+
+            const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+            const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
+
+            await axios.post(zeptoMailApiUrl, emailPayload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+                }
+            });
+        }
+
+        await conn.commit();
+        res.status(200).json({ message: 'Emails Sent Successfully to Group Members' });
+    } catch (error) {
+        console.error('Error in sending email on reply to decision circle comment:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
 // const decisionCircleReplyComment = async (req, res) => {
 //     const { parentCommentId, decision, reply, groupId } = req.body;
-//     console.log('decision', decision);
-//     console.log('commentId', parentCommentId);
-//     console.log('groupId', groupId);
-//     // const memberId = req.user.id;
+//     const memberId = req.user.id;
+
 //     let conn;
 
 //     const truncateText = (text, maxLength) => {
@@ -1000,13 +1088,14 @@ const decisionCirclePostComment = async (req, res) => {
 //                                   WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
 //         const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
 
-//         // Fetch original comment poster details
-//         const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
-//             JOIN techcoach_lite.techcoach_conversations 
-//             ON techcoach_users.user_id = techcoach_conversations.groupMember 
-//             WHERE techcoach_conversations.id = ?`, [parentCommentId]));
+//         // Fetch replying user's details
+//         const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
+//         const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
 
-//         // console.log('Group members:', groupMemberRows);
+//         if (!replyingUser) {
+//             throw new Error(`Replying user not found for user_id: ${memberId}`);
+//         }
+
 //         const { decision_name, decision_due_date, creation_date } = decision;
 //         const truncatedReplyText = truncateText(reply, 20);
 
@@ -1017,7 +1106,7 @@ const decisionCirclePostComment = async (req, res) => {
 //                 <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
 //                 <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
 //                 <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-//                 <p><strong>Reply by ${originalCommentPoster.displayname}:</strong></p>
+//                 <p><strong>Reply by ${replyingUser.displayname}:</strong></p>
 //                 <p><em>${truncatedReplyText}</em></p>
 //                 <p>Regards,</p>
 //                 <p>Team @ Decision Coach</p>
@@ -1059,95 +1148,6 @@ const decisionCirclePostComment = async (req, res) => {
 //         if (conn) conn.release();
 //     }
 // };
-
-
-const decisionCircleReplyComment = async (req, res) => {
-    const { parentCommentId, decision, reply, groupId } = req.body;
-    const memberId = req.user.id;
-
-    let conn;
-
-    const truncateText = (text, maxLength) => {
-        if (typeof text !== 'string') {
-            console.warn('Input to truncateText is not a string:', text);
-            return '';
-        }
-
-        if (!text || text.length <= maxLength) return text;
-        const firstPart = text.substring(0, 10);
-        const lastPart = text.substring(text.length - 10);
-        return `${firstPart}...${lastPart}`;
-    };
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        // Fetch all members of the group
-        const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users 
-                                  WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
-        const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
-
-        // Fetch replying user's details
-        const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
-        const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
-
-        if (!replyingUser) {
-            throw new Error(`Replying user not found for user_id: ${memberId}`);
-        }
-
-        const { decision_name, decision_due_date, creation_date } = decision;
-        const truncatedReplyText = truncateText(reply, 20);
-
-        // Send email to each group member
-        for (const groupMember of groupMemberRows) {
-            const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-                <p>Dear ${groupMember.displayname},</p>
-                <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
-                <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
-                <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-                <p><strong>Reply by ${replyingUser.displayname}:</strong></p>
-                <p><em>${truncatedReplyText}</em></p>
-                <p>Regards,</p>
-                <p>Team @ Decision Coach</p>
-            </div>`;
-
-            const emailPayload = {
-                from: {
-                    address: "Decision-Coach@www.careersheets.in"
-                },
-                to: [
-                    {
-                        email_address: {
-                            address: groupMember.email
-                        }
-                    }
-                ],
-                subject: "New Reply on Your Shared Decision Circle",
-                htmlbody: htmlBody
-            };
-
-            const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-            const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
-
-            await axios.post(zeptoMailApiUrl, emailPayload, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
-                }
-            });
-        }
-
-        await conn.commit();
-        res.status(200).json({ message: 'Emails Sent Successfully to Group Members' });
-    } catch (error) {
-        console.error('Error in sending email on reply to decision circle comment:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
 
 
 // const getSharedDecisionCircleDetails = async (req, res) => {
@@ -1260,7 +1260,7 @@ const decisionCircleReplyComment = async (req, res) => {
 // };
 
 
-// const getDecisionCirclememberSharedDecisions = async (req, res) => {
+// const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
 //     const userId = req.user.id; 
 //     let conn;
 
@@ -1436,32 +1436,38 @@ const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
     try {
         conn = await getConnection();
 
-        // Update query to fetch shared decisions where created_by matches the userId
+        // Update query to exclude decisions where the current user is the creator or member of the group
         const sharedDecisionsQuery = `
         SELECT 
-    tsd.decisionId AS decision_id,
-    td.decision_name,
-    td.user_statement,
-    td.decision_taken_date,
-    td.decision_due_date,
-    tg.group_name,
-    tg.type_of_group,
-    tu.displayname AS shared_by,
-    tu.email AS shared_by_email,
-    tg.created_by AS group_creator_id,
-    GROUP_CONCAT(tgm.member_id) AS shared_with_ids,
-    GROUP_CONCAT(tmu.displayname) AS shared_with_names
-FROM techcoach_lite.techcoach_shared_decisions tsd
-JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
-JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
-JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
-JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
-JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
-WHERE tg.created_by = ? AND tg.type_of_group = 'decision_circle'
-GROUP BY tsd.decisionId 
+            tsd.decisionId AS decision_id,
+            td.decision_name,
+            td.user_statement,
+            td.decision_taken_date,
+            td.decision_due_date,
+            tg.group_name,
+            tg.type_of_group,
+            tu.displayname AS shared_by,
+            tu.email AS shared_by_email,
+            tg.created_by AS group_creator_id,
+            GROUP_CONCAT(tgm.member_id) AS shared_with_ids,
+            GROUP_CONCAT(tmu.displayname) AS shared_with_names
+        FROM techcoach_lite.techcoach_shared_decisions tsd
+        JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+        JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+        JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+        JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+        JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+        WHERE tg.type_of_group = 'decision_circle'
+        AND tg.created_by != ?  -- Exclude decisions created by current user
+        AND NOT EXISTS (
+            SELECT 1
+            FROM techcoach_lite.techcoach_group_members tgm2
+            WHERE tgm2.group_id = tg.id AND tgm2.member_id = ?
+        )  -- Exclude decisions where current user is a member
+        GROUP BY tsd.decisionId
         `;
 
-        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId]);
+        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId, userId]);
 
         if (!Array.isArray(sharedDecisions)) {
             res.status(500).json({ error: 'Unexpected data format: sharedDecisions is not an array' });
