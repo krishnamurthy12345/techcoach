@@ -1052,7 +1052,7 @@ const innerCirclePostComment = async (req, res) => {
         };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1152,7 +1152,7 @@ const innerCircleDecisionShare = async (req, res) => {
         };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1264,7 +1264,7 @@ const innerCirclePostReply = async (req, res) => {
         // Log email payload before sending
         // console.log("Email payload:", JSON.stringify(emailPayload, null, 2));
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
         // Send the email using ZeptoMail
         await axios.post(zeptoMailApiUrl, emailPayload, {
@@ -1328,7 +1328,7 @@ const innerCircleInvitation = async (req, res) => {
         };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
@@ -1396,7 +1396,7 @@ const innerCircleAddInvitation = async (req, res) => {
         };
 
         const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
-        const zeptoMailApiKey = 'PHtE6r1cReDp2m599RcG4aC8H5L3M45/+ONleQcSttwWWfEGSU1UrN8swDDjr08uV/cTE6OSzNpv5++e4e2ALWvqY2pIVGqyqK3sx/VYSPOZsbq6x00ZslQcfkbeUYHsd9Zs0ifRu92X';
+        const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
         await axios.post(zeptoMailApiUrl, emailPayload, {
             headers: {
