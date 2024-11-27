@@ -715,46 +715,34 @@ const getSharedwithDecisionsCount = async (req, res) => {
             ON tsd.groupId = tgm.group_id
             JOIN techcoach_lite.techcoach_groups tg
             ON tsd.groupId = tg.id
-            WHERE tgm.member_id != ?  -- Exclude the current user from the shared count
+            WHERE tg.created_by = ?  -- Exclude the current user from the shared count
             AND tg.type_of_group = 'inner_circle'
-            AND tsd.groupId IN (
-                SELECT group_id 
-                FROM techcoach_lite.techcoach_group_members 
-                WHERE member_id = ?  -- Current user is a member of these groups
-            )
-        `, [userId, userId]);
+        `, [userId]);
 
         // Query for 'decision_circle' shared decisions count (excluding current user and excluding decisions shared by the current user)
         const [decisionCircleCountResult] = await conn.query(`
             SELECT COUNT(DISTINCT tsd.id) AS count
             FROM techcoach_lite.techcoach_shared_decisions tsd
-            JOIN techcoach_lite.techcoach_group_members tgm
-            ON tsd.groupId = tgm.group_id
-            JOIN techcoach_lite.techcoach_groups tg
-            ON tsd.groupId = tg.id
-            WHERE tgm.member_id != ?  -- Exclude the current user from the shared count
-            AND tg.type_of_group = 'decision_circle'
-            AND tsd.groupId IN (
-                SELECT group_id 
-                FROM techcoach_lite.techcoach_group_members 
-                WHERE member_id = ?  -- Current user is a member of these groups
-            )
-            AND tsd.groupId NOT IN (  -- Exclude the decisions shared by the current user
-                SELECT group_id
-                FROM techcoach_lite.techcoach_groups
-                WHERE created_by = ?
-            )
-        `, [userId, userId, userId]);
+            JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+            JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+            JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+            JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+            JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+            WHERE tg.created_by != ?
+            AND tg.type_of_group = 'decision_circle';
+        `, [userId]);
 
         await conn.commit();
 
         // Convert results to numbers
         const innerCircleCount = Number(innerCircleCountResult.count || 0);
         const decisionCircleCount = Number(decisionCircleCountResult.count || 0);
+        // console.log('ananna',innerCircleCount);
+        // console.log('aabba',decisionCircleCount);
 
         const decisionCount = innerCircleCount + decisionCircleCount;
 
-        // If no decisions are shared by the user
+        // If no decisions are shared with the user
         if (decisionCount === 0) {
             return res.status(200).json({ message: 'No decisions fetched', decisionCount });
         }
@@ -1570,41 +1558,33 @@ const getSharedByDecisionsCount = async (req, res) => {
         conn = await getConnection();
 
         // Query for 'inner_circle'
-        const innerCircleCountResult = await conn.query(`
-            SELECT 
-                COUNT(DISTINCT tsd.id) AS count
-            FROM 
-                techcoach_lite.techcoach_shared_decisions tsd
-            JOIN 
-                techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
-            WHERE 
-                tg.created_by = ? 
-                AND tg.type_of_group = 'inner_circle'
-        `, [userId]);
+        const innerCircleQuery = `
+            SELECT COUNT(DISTINCT tsd.id) AS count
+            FROM techcoach_lite.techcoach_shared_decisions tsd
+            JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+            WHERE tg.created_by = ? AND tg.type_of_group = 'inner_circle';
+        `;
+        const [innerCircleCountResult] = await conn.query(innerCircleQuery, [userId]);
+        const innerCircleCount = Number(innerCircleCountResult?.count || 0);
 
-        // Query for 'decision_circle' (created or invited)
-        const decisionCircleCountResult = await conn.query(`
-            SELECT 
-                COUNT(DISTINCT tsd.id) AS count
-            FROM 
-                techcoach_lite.techcoach_shared_decisions tsd
-            JOIN 
-                techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
-            LEFT JOIN 
-                techcoach_lite.techcoach_group_members tgm ON tg.id = tgm.group_id
-            WHERE 
-                tg.type_of_group = 'decision_circle'
-                AND (
-                    tg.created_by = ? OR tgm.member_id = ?
-                )
-        `, [userId, userId]);
+        // Query for 'decision_circle'
+        const decisionCircleQuery = `
+            SELECT COUNT(DISTINCT tsd.id) AS count
+            FROM techcoach_lite.techcoach_shared_decisions tsd
+            JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+            JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+            JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
+            JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+            JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+            WHERE tu.user_id = ? AND tg.type_of_group = 'decision_circle';
+        `;
+        const [decisionCircleCountResult] = await conn.query(decisionCircleQuery, [userId]);
+        const decisionCircleCount = Number(decisionCircleCountResult?.count || 0);
 
-        // Convert results to numbers
-        const innerCircleCount = Number(innerCircleCountResult[0]?.count || 0);
-        const decisionCircleCount = Number(decisionCircleCountResult[0]?.count || 0);
+        // Calculate total shared decisions count
         const decisionCount = innerCircleCount + decisionCircleCount;
 
-        // If no decisions are shared by the user
+        // Handle case where no shared decisions are found
         if (decisionCount === 0) {
             return res.status(200).json({ message: 'No decisions fetched', decisionCount });
         }

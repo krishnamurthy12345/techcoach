@@ -26,8 +26,8 @@ router.get("/getSharedDecisionCircleCount",multigroupController.getSharedDecisio
 router.post("/decisionCirclePostComment",multigroupController.decisionCirclePostComment);
 router.post("/decisionCircleReplyComment",multigroupController.decisionCircleReplyComment);
 // router.get("/getDecisionCirclememberSharedDecisions",multigroupController.getDecisionCirclememberSharedDecisions);
-router.get("/sharedbyme",multigroupController.getdecisionSharedDecisionCirclebyuser);
-router.get("/sharedwithme",multigroupController.getUserSharedDecisions);
+router.get("/sharedwithme",multigroupController.getdecisionSharedDecisionCirclebyuser);
+router.get("/sharedbyme",multigroupController.getUserSharedDecisions);
 
 
 module.exports = router;
