@@ -728,7 +728,7 @@ const getSharedwithDecisionsCount = async (req, res) => {
             JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
             JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
             JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
-            WHERE tg.created_by != ?
+            WHERE tg.created_by = ?
             AND tg.type_of_group = 'decision_circle';
         `, [userId]);
 
