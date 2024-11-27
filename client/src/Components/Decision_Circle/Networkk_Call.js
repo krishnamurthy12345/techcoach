@@ -257,7 +257,7 @@ const mailToDecisionCircleReplyComment = async (decision, parentCommentId,reply,
 const getUserSharedDecisions = async () => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedwithme`,
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedbyme`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -275,7 +275,7 @@ const getUserSharedDecisions = async () => {
 const getdecisionSharedDecisionCirclebyuser = async () => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedbyme`,
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/sharedwithme`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`

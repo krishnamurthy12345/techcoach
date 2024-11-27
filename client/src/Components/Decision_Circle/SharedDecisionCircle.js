@@ -194,7 +194,7 @@ const SharedDecisionCircle = () => {
                                                         Group Name : {item.group_name}
                                                     </Typography>
                                                     <Typography variant="body2">
-                                                        Shared By: {item.shared_with_names} | {item.shared_with_emails}
+                                                        Shared By: {item.shared_by} | {item.shared_by_email}
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
