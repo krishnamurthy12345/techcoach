@@ -1299,6 +1299,7 @@ const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
             td.decision_taken_date,
             td.decision_due_date,
             tg.group_name,
+            tg.id,
             tg.type_of_group,
             tu.displayname AS shared_by,
             tu.email AS shared_by_email,

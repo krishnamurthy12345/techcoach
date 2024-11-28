@@ -14,6 +14,7 @@ router.get('/comments/:decisionId',commentController.getDecisionComments);
 router.put('/comments/:commentId', commentController.updateComment);
 router.post('/comments/reply', commentController.replyToComment);
 router.delete('/comments/:commentId', commentController.deleteComment);
+router.post('/comment', commentController.postShareWithComment);
 
 
 // GroupName Routes
