@@ -612,7 +612,7 @@ const MemberSharedDecisions = () => {
                                                     {buttonLoading[decision.decision_id] ? <CircularProgress size={24} /> : 'Post Comment'}
                                                 </button>
 
-                                                {/* <button
+                                                <button
                                                     onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds)}
                                                     disabled={buttonLoading[decision.decision_id + '_email']}
                                                     style={{
@@ -625,7 +625,7 @@ const MemberSharedDecisions = () => {
                                                     }}
                                                 >
                                                     {buttonLoading[decision.decision_id + '_email'] ? <CircularProgress size={24} /> : 'Post & Email'}
-                                                </button> */}
+                                                </button>
                                             </div>
                                         </div>
                                     </CardContent>

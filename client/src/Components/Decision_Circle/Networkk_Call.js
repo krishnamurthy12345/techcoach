@@ -428,6 +428,46 @@ const postComment = async (groupId, commentText, decisionId) => {
     }
 };
 
+
+const postShareWithComment = async (groupId, commentText, decisionId) => {
+    const token = localStorage.getItem('token');
+
+    // Logging the payload to be sent
+    console.log("Posting comment with data:", {
+        groupId,
+        commentText,
+        decisionId,
+    });
+
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/comment`,
+            {
+                groupId,
+                commentText,
+                decisionId,
+            }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        }
+        );
+
+        console.log("Response for comments", response);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error("Error posting comment:", error.response.data);
+            throw error.response.data; // Propagate error for further handling
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            throw new Error('No response received from the server');
+        } else {
+            console.error("Error", error.message);
+            throw new Error('An error occurred while posting the comment');
+        }
+    }
+};
+
 const getComments = async (groupId, decisionId) => {
     const token = localStorage.getItem('token');
     try {
@@ -546,4 +586,5 @@ export {
     updateComment,
     replyToComment,
     deleteComment,
+    postShareWithComment,
 };

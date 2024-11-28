@@ -471,6 +471,85 @@ const deleteDecisionGroup = async (req, res) => {
     }
 };
 
+const postShareWithComment = async (req, res) => {
+    const { groupId, commentText, decisionId } = req.body;
+    const memberId = req.user.id;
+
+    console.log('Request Body:', req.body);
+    let conn;
+
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        // Validate groupId
+        const group = await conn.query(
+            'SELECT id FROM techcoach_lite.techcoach_groups WHERE id = ?',
+            [groupId]
+        );
+        if (group.length === 0) {
+            return res.status(400).json({ message: 'Invalid group_id, group does not exist' });
+        }
+
+        // Validate decisionId
+        const decision = await conn.query(
+            'SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE decision_id = ?',
+            [decisionId]
+        );
+        if (decision.length === 0) {
+            return res.status(400).json({ message: 'Invalid decision_id, decision does not exist' });
+        }
+
+        // Check if the logged-in user is a member of the group
+        const member = await conn.query(
+            'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ? AND member_id = ?',
+            [groupId, memberId]
+        );
+        if (member.length === 0) {
+            return res.status(403).json({
+                message: 'You are not authorized to post comments in this group',
+            });
+        }
+
+        // Insert comment for the logged-in user
+        await conn.query(
+            `
+            INSERT INTO techcoach_lite.techcoach_conversations 
+            (groupId, groupMember, comment, decisionId, created_at)
+            VALUES (?, ?, ?, ?, NOW());
+            `,
+            [groupId, memberId, commentText, decisionId]
+        );
+
+        // Commit transaction
+        await conn.commit();
+
+        // Return success response
+        res.status(201).json({
+            message: 'Comment added successfully!',
+            comment: {
+                groupId,
+                memberId,
+                comment: commentText,
+                decisionId,
+            },
+        });
+    } catch (error) {
+        if (conn) {
+            await conn.rollback();
+        }
+        console.error('Error adding comment:', error.message);
+        res.status(500).json({
+            message: 'Server error while adding comment',
+            error: error.message,
+        });
+    } finally {
+        if (conn) {
+            conn.release();
+        }
+    }
+};
+
 module.exports = {
     // Conversation Controllers
     postComment,
@@ -479,6 +558,7 @@ module.exports = {
     updateComment,
     replyToComment,
     deleteComment,
+    postShareWithComment,
 
     // groupNames controller
     postdecisionGroup,

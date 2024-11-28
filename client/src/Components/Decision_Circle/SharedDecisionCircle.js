@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Typography, Card, CardContent, Box, Avatar, Grid, Popover, IconButton, ToggleButton, ButtonGroup, CircularProgress } from '@mui/material';
-import { getdecisionSharedDecisionCirclebyuser,postComment } from '../Decision_Circle/Networkk_Call';
+import { getdecisionSharedDecisionCirclebyuser,postShareWithComment,getComments } from '../Decision_Circle/Networkk_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import { Edit as EditIcon } from '@mui/icons-material';
+import { Link,useParams } from 'react-router-dom';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import withAuth from '../withAuth';
 
@@ -17,75 +18,45 @@ const SharedDecisionCircle = () => {
     const [buttonLoading, setButtonLoading] = useState({});
 
 
-
     const fetchSharedDecisionCircles = async () => {
         try {
             setIsLoading(true);
             const response = await getdecisionSharedDecisionCirclebyuser();
             console.log('qweerwe', response);
-            const sortedDecisions = response.sort((a, b) => {
-                const aTimestamp = getRecentCommentTimestamp(a);
-                const bTimestamp = getRecentCommentTimestamp(b);
-                return new Date(bTimestamp) - new Date(aTimestamp);
-            });
-            const initialCommentTexts = {};
             setSharedDecisionCircles(response || []);
-            sortedDecisions.forEach(item => {
-                initialCommentTexts[item.decisionDetails.decision_id] = "";
-            });
-            setCommentTexts(initialCommentTexts);
+            setCommentTexts({});
         } catch (error) {
             console.error('Error fetching shared decisions:', error);
-            // toast.error('An error occurred while fetching shared decision circles');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const getRecentCommentTimestamp = (decision) => {
-        if (!decision.decisionDetails || !decision.decisionDetails.creation_date) {
-            return null;
-        }
-        if (!decision.comments || decision.comments.length === 0) {
-            return decision.decisionDetails.creation_date;
-        }
-        const mostRecentComment = decision.comments.reduce((prev, current) => {
-            const prevTimestamp = new Date(prev.updated_at || prev.created_at);
-            const currentTimestamp = new Date(current.updated_at || current.created_at);
-            return prevTimestamp > currentTimestamp ? prev : current;
-        });
-
-        return mostRecentComment.updated_at || mostRecentComment.created_at;
-    };
-
 
     useEffect(() => {
         fetchSharedDecisionCircles();
+        fetchComments();    
     }, []);
 
     const handlePopoverClose = () => {
         setIsPopoverOpen(false);
     };
     
-    const handlePostComment = async (decisionId, groupMemberIds) => {
-       
+    const handlePostComment = async (decisionId,id) => { 
         const comment = commentTexts[decisionId]?.trim();
         if (!comment) {
             return toast.error('Comment cannot be empty');
         }
+        if (!id) {
+            return toast.error('Group ID is missing');
+        }
+        if (!comment) {
+            return toast.error('Comment cannot be empty');
+        }        
         setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
-
         try {
-            const dataToSend = {
-                memberIds: groupMemberIds,
-                comment,
-                decisionId,
-            };
-    
-            console.log('Posting data:', dataToSend); 
-            for (const memberId of groupMemberIds) {
-                await postComment(memberId, comment, decisionId);
-            }
+            const dataToSend = await postShareWithComment(id,comment, decisionId);
+            console.log('Posting data:', dataToSend);
             setCommentTexts((prevState) => ({ ...prevState, [decisionId]: '' }));
             toast.success('Comment posted successfully');
         } catch (error) {
@@ -101,7 +72,6 @@ const SharedDecisionCircle = () => {
         (selectedUser ? item.shared_by_email === selectedUser.email : true)
     );
 
-
     const handleCommentChange = (decisionId, newText) => {
         setCommentTexts(prevState => ({
             ...prevState,
@@ -109,8 +79,26 @@ const SharedDecisionCircle = () => {
         }));
     };
 
+    const fetchComments = async (groupId, decisionId) => {
+        try {
+            const response = await getComments(groupId, decisionId);
+            setCommentTexts((prevComments) => ({
+                ...prevComments,
+                [decisionId]: response || [],
+            }));
+            console.log('babababa', response);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    };
 
     return (
+        <div>
+            <div className='ml-5'>
+                <Link to='/sharedDecisions'>
+                <button>Go Back</button>
+                </Link>
+            </div>
         <Box p={3}>
             <h2>Decision Circle Decisions:</h2>
             {isLoading ? (
@@ -168,9 +156,7 @@ const SharedDecisionCircle = () => {
                                     }}
                                 >
                                     Show All Decisions
-                                </ToggleButton>
-
-                                
+                                </ToggleButton>        
                             </ButtonGroup>
                             {filteredDecisions.length === 0 ? (
                                 <Typography variant="h5" align="center" mt={2} mb={2}>
@@ -190,6 +176,9 @@ const SharedDecisionCircle = () => {
                                                     <Typography variant="h6">
                                                         Decision: {item.decision_name}
                                                     </Typography>
+                                                    {/* <Typography variant="body2">
+                                                        groupId: {item.id}
+                                                    </Typography> */}
                                                     <Typography variant="body2">
                                                         Group Name : {item.group_name}
                                                     </Typography>
@@ -226,7 +215,7 @@ const SharedDecisionCircle = () => {
                                         </CardContent>
                                         <CardContent>
                                             <Typography variant="h6">Comments:</Typography>
-                                            {item.comments?.length > 0 ? (
+                                            {item.comments && item.comments.length > 0 ? (
                                                 item.comments.map((comment, commentIndex) => (
                                                     <Box key={commentIndex} mt={2} mb={2}>
                                                         <Grid container spacing={2} alignItems="center">
@@ -256,34 +245,6 @@ const SharedDecisionCircle = () => {
                                                                 </IconButton>
                                                             </Grid>
                                                         </Grid>
-                                                        {comment.replies?.length > 0 && (
-                                                            <Box mt={1} ml={4} pl={2}>
-                                                                {comment.replies.map((reply, replyIndex) => (
-                                                                    <Box
-                                                                        key={replyIndex} mt={1} mb={1} pl={2} border={1} borderColor="#526D82" padding={2} borderRadius={2} sx={{ backgroundColor: "#DDE6ED" }}>
-                                                                        <Grid container spacing={2} alignItems="center">
-                                                                            <Grid item>
-                                                                                <Avatar
-                                                                                    sx={{ bgcolor: "#526D82", color: "white", mr: 2, }} >
-                                                                                    {reply.displayname?.[0] || "?"}
-                                                                                </Avatar>
-                                                                            </Grid>
-                                                                            <Grid item xs>
-                                                                                <Typography variant="body1">{reply.comment || "No reply provided"}</Typography>
-                                                                                <Typography variant="caption" color="textSecondary">
-                                                                                    {reply.displayname || "Unknown User"} | {reply.email || "No Email"} |
-                                                                                    {reply.created_at === reply.updated_at ? (
-                                                                                        <span> {" "} {formatDistanceToNow(parseISO(reply.created_at), { addSuffix: true })} </span>
-                                                                                    ) : (
-                                                                                        <span> {" "} Edited {formatDistanceToNow(parseISO(reply.updated_at), { addSuffix: true })} </span>
-                                                                                    )}
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                        </Grid>
-                                                                    </Box>
-                                                                ))}
-                                                            </Box>
-                                                        )}
                                                     </Box>
                                                 ))
                                             ) : (
@@ -297,8 +258,8 @@ const SharedDecisionCircle = () => {
                                                     style={{
                                                         height: "3rem", padding: "1rem", width: "100%", maxWidth: "100%", marginRight: "0.5rem",
                                                     }}
-                                                    value={commentTexts[item.decisionDetails?.decision_id] || ""}
-                                                    onChange={(e) => handleCommentChange(item.decisionDetails?.decision_id, e.target.value)}
+                                                    value={commentTexts[item.decision_id] || ""}
+                                                    onChange={(e) => handleCommentChange(item.decision_id, e.target.value)}
                                                 />
                                                 <Grid container spacing={2} justifyContent="flex-end">
                                                     <Grid item>
@@ -306,13 +267,13 @@ const SharedDecisionCircle = () => {
                                                             variant="contained"
                                                             color="primary"
                                                             style={{ marginTop: "1rem" }}
-                                                            onClick={() => handlePostComment(item.decisionDetails.decision_id, item.sharedDecision.groupMember, item.sharedDecision.groupId)}
+                                                            onClick={() => handlePostComment(item.decision_id,item.id)}
                                                             disabled={
-                                                                !commentTexts[item.decisionDetails?.decision_id] ||
-                                                                buttonLoading[item.decisionDetails?.decision_id]
+                                                                !commentTexts[item.decision_id] ||
+                                                                buttonLoading[item.decision_id]
                                                             }
                                                         >
-                                                            {buttonLoading[item.decisionDetails?.decision_id] ? (
+                                                            {buttonLoading[item.decision_id] ? (
                                                                 <CircularProgress size={24} />
                                                             ) : (
                                                                 "Save"
@@ -343,6 +304,7 @@ const SharedDecisionCircle = () => {
             />
             <ToastContainer />
         </Box>
+        </div>
     );
 };
 
