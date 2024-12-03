@@ -484,6 +484,25 @@ const getComments = async (groupId, decisionId) => {
     }
 }
 
+
+const getWithComments = async (decisionId,groupId) => {
+    console.log('decisionId:', decisionId,'groupId:', groupId,);
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/comment/${groupId}/${decisionId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log(response.data.comments, "getcomments");
+        return response.data.comments;
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw new Error('Failed to fetch comments');
+    }
+}
+
+
 const getDecisionComments = async (decisionId) => {
     const token = localStorage.getItem('token');
     try {
@@ -505,6 +524,24 @@ const updateComment = async (commentId, updatedComment) => {
 
     try {
         const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/comments/${commentId}`, updatedComment, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+
+        console.log("Updated comment response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating comment:', error.response ? error.response.data : error.message);
+        throw error.response ? error.response.data : new Error("Error updating comment");
+    }
+};
+
+const editComments = async (commentId, updatedComment) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/comment/${commentId}`, updatedComment, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
@@ -587,4 +624,6 @@ export {
     replyToComment,
     deleteComment,
     postShareWithComment,
+    getWithComments,
+    editComments,
 };
