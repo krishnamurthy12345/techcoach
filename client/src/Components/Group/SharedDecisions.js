@@ -79,20 +79,20 @@ const SharedDecision = () => {
             console.error('Error posting comment:', error);
             toast('An error occurred while posting the comment');
         } finally {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId]: false })); // Set loading to false
+            setButtonLoading(prevState => ({ ...prevState, [decisionId]: false })); 
         }
     };
 
     const handlePostCommentAndEmail = async (decisionId, groupMemberID, groupId, email) => {
         try {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: true })); // Set loading to true
+            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: true }));
             await handlePostComment(decisionId, groupMemberID, groupId);
             const responseToPostComment = await innerCirclePostComment(sharedDecisions.find(decision => decision.decisionDetails.decision_id === decisionId).decisionDetails, groupMemberID, commentTexts[decisionId], email);
             console.log("response from the responseToPostComment", responseToPostComment);
         } catch (error) {
             console.error('Error posting comment and emailing:', error);
         } finally {
-            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: false })); // Set loading to false
+            setButtonLoading(prevState => ({ ...prevState, [decisionId + '_email']: false })); 
         }
     };
 
@@ -242,7 +242,7 @@ const SharedDecision = () => {
                                         maxWidth: '300px',
                                         marginTop: "0",
                                         padding: "0.7rem",
-                                        '@media (max-width: 600px)': {
+                                        '@media (maxWidth: 600px)': {
                                             maxWidth: '100%',
                                         }
                                     }}
@@ -358,7 +358,7 @@ const SharedDecision = () => {
                                                         <input
                                                             label="Add Comment"
                                                             variant="outlined"
-                                                            fullWidth
+                                                            fullWidth='true'
                                                             placeholder="Add a comment..."
                                                             style={{
                                                                 height: "3rem",
