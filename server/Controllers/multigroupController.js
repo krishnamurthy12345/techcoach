@@ -384,6 +384,47 @@ const removeUsersFromGroup = async (req, res) => {
     }
 };
 
+const getGroupDetails = async (req, res) => {
+    const groupId = req.params.groupId; 
+    let conn;
+
+    try {
+        conn = await getConnection(); 
+        await conn.beginTransaction(); 
+
+        const query = `
+            SELECT 
+                g.group_name,
+                g.id,
+                g.created_at,
+                u.displayname AS created_by,
+                u.email AS creator_email
+            FROM 
+                techcoach_lite.techcoach_groups g
+            JOIN 
+                techcoach_lite.techcoach_users u ON g.created_by = u.user_id
+            WHERE 
+                g.type_of_group = 'decision_circle' AND 
+                g.id = ?
+        `;
+
+        const [rows] = await conn.execute(query, [groupId]); 
+
+        await conn.commit(); 
+        res.status(200).json(rows);
+    } catch (error) {
+        if (conn) {
+            await conn.rollback(); 
+        }
+        console.error('Error fetching group details:', error);
+        res.status(500).json({ error: 'An error occurred while fetching group details.' });
+    } finally {
+        if (conn) {
+            await conn.release();
+        }
+    }
+};
+
 const sendDecisionCircleInvitation = async (req, res) => {
     // console.log("Request body invitation:", req.user);
     // console.log("Request body invitation:", req.body);
@@ -854,47 +895,6 @@ const getMemberSharedDecisions = async (req, res) => {
 };
 
 
-const getSharedDecisionCircleCount = async (req, res) => {
-    const userId = req.user.id;
-    let conn;
-
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-
-        const decisionCountQuery = `
-        SELECT COUNT(*) AS decisionCount
-        FROM techcoach_lite.techcoach_decision_group_share_decisions tgsd
-        JOIN techcoach_lite.techcoach_decision_group tg ON tgsd.group_id = tg.id
-        WHERE tg.user_id = ?
-      `;
-
-        const decisionCountResult = await conn.query(decisionCountQuery, [userId]);
-
-        if (!decisionCountResult) {
-            res.status(500).json({ error: 'Failed to retrieve decision count' });
-            return;
-        }
-
-        const decisionCount = decisionCountResult.decisionCount || 0;
-
-        await conn.commit();
-
-        // Return the decision count
-        res.status(200).json({
-            message: 'Decision count fetched successfully',
-            decisionCount
-        });
-    } catch (error) {
-        console.error('Error fetching decision count:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while fetching the decision count' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-
 const decisionCirclePostComment = async (req, res) => {
     const { decision, groupMemberIds, comment, email } = req.body;
     console.log('req.body', req.body);
@@ -1309,14 +1309,15 @@ const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
         JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
         JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
         JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
-        JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
+        JOIN techcoach_lite.techcoach_group_members tgm ON tg.id = tgm.group_id
         JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
-        WHERE tg.created_by = ?
+        WHERE (tg.created_by = ? OR tgm.member_id = ?)
         AND tg.type_of_group = 'decision_circle'
+        AND tgm.member_id != td.user_id          -- Exclude the decision creator from members list
         GROUP BY tsd.decisionId
         `;
 
-        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId]);
+        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId,userId]);
 
         if (!Array.isArray(sharedDecisions)) {
             res.status(500).json({ error: 'Unexpected data format: sharedDecisions is not an array' });
@@ -1527,11 +1528,11 @@ module.exports = {
     // getAllGroups,
     getUsersForGroup,
     removeUsersFromGroup,
+    getGroupDetails,
     sendDecisionCircleInvitation,
     decisionshareDecisionCircle,
     getdecisionSharedDecisionCircle,
     getMemberSharedDecisions,
-    getSharedDecisionCircleCount,
     decisionCirclePostComment,
     decisionCircleReplyComment,
     // getSharedDecisionCircleDetails,
