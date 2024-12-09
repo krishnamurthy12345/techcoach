@@ -4,6 +4,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import Home from './Components/Home';
 import Header from './Components/Header';
 import Admin from './Components/Admin/Admin.js';
@@ -46,7 +47,28 @@ function App() {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
     };
+
+    const setupAxiosInterceptors = () => {
+      axios.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          if (error.response && error.response.status === 401) {
+            toast.error('Session expired. Please log in again.', {
+              position: 'top-right',
+              autoClose: 5000,
+            });
+            localStorage.removeItem('token');
+            localStorage.removeItem('user_id');
+            window.location.href = '/'; 
+          }
+          return Promise.reject(error);
+        }
+      );
+    };
+
+
     setAuthToken();
+    setupAxiosInterceptors();
   },[]); 
 
   return (

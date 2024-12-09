@@ -5,7 +5,7 @@ const postComment = async (req, res) => {
     const { groupId, commentText, decisionId } = req.body;
     const memberId = req.user.id;
 
-    console.log('Request Body:', req.body);
+    // console.log('Request Body:', req.body);
     let conn;
 
     try {
@@ -222,10 +222,10 @@ const updateComment = async (req, res) => {
 
 const replyToComment = async (req, res) => {
     const { parentCommentId, groupId, commentText, decisionId } = req.body;
-    console.log('parentId',parentCommentId);
-    console.log('groupId',groupId);
-    console.log('commentText',commentText);
-    console.log('decision',decisionId);
+    // console.log('parentId',parentCommentId);
+    // console.log('groupId',groupId);
+    // console.log('commentText',commentText);
+    // console.log('decision',decisionId);
     const userId = req.user.id;
     let conn;
 
@@ -303,11 +303,10 @@ const deleteComment = async (req, res) => {
 const postShareWithComment = async (req, res) => {
     const { groupId, commentText, decisionId } = req.body;
     const memberId = req.user.id;
-    console.log('groupId:', groupId);
-    console.log('memberId:', memberId);
-
-
-    console.log('Request Body:', req.body);
+    // console.log('Logged-in user ID:', req.user.id);
+    // console.log('groupId:', groupId); 
+    // console.log('memberId:', memberId);
+    // console.log('Request Body:', req.body);
     let conn;
 
     try {
@@ -333,61 +332,37 @@ const postShareWithComment = async (req, res) => {
         }
 
         // Check if the logged-in user is a member of the group
-        const parsedGroupId = isNaN(groupId) ? groupId : parseInt(groupId, 10);
-        const parsedMemberId = isNaN(memberId) ? memberId : parseInt(memberId, 10);
-        
         const member = await conn.query(
             'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ? AND member_id = ?',
-            [parsedGroupId, parsedMemberId]
+            [groupId, memberId]
         );
-        
-        console.log(`Checking membership for groupId: ${groupId} and memberId: ${memberId}`);
-
-        console.log('Membership Query Result:', member);
         if (member.length === 0) {
-           console.warn(`No membership found for groupId=${groupId} and memberId=${memberId}`);
+            console.log(`User ${memberId} is not a member of group ${groupId}`);
+            return res.status(403).json({
+                message: 'You are not authorized to post comments in this group',
+            });
         }
+        
 
-
-        // Retrieve all group members
-        const groupMembers = await conn.query(
-            'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?',
-            [groupId]
+        // Insert comment for the logged-in user
+        await conn.query(
+            `
+            INSERT INTO techcoach_lite.techcoach_conversations 
+            (groupId, groupMember, comment, decisionId, created_at)
+            VALUES (?, ?, ?, ?, NOW());
+            `,
+            [groupId, memberId, commentText, decisionId]
         );
 
-        if (groupMembers.length === 0) {
-            return res.status(404).json({ message: 'No members found in this group' });
-        }
-
-       // Insert the comment for all group members
-    const values = groupMembers.map((member) => [
-    groupId,
-    member.member_id,
-    commentText,
-    decisionId,
-    new Date() 
-     ]);
-
-     const placeholders = values
-    .map(() => `(?, ?, ?, ?, ?)`) 
-    .join(', ');
-
-   const flattenedValues = values.flat();
-
-    await conn.query(
-    `
-    INSERT INTO techcoach_lite.techcoach_conversations 
-    (groupId, groupMember, comment, decisionId, created_at)
-    VALUES ${placeholders}
-    `,
-    flattenedValues
-             );
+        // Commit transaction
         await conn.commit();
 
+        // Return success response
         res.status(201).json({
-            message: 'Comment added successfully for all group members!',
+            message: 'Comment added successfully!',
             comment: {
                 groupId,
+                memberId,
                 comment: commentText,
                 decisionId,
             },
@@ -475,26 +450,36 @@ const getWithComments = async (req, res) => {
 };
 
 const editComments = async (req, res) => {
-    const commentId = req.params.commentId;
-    const { comment } = req.body;
+    const { commentId }  = req.params;
+    const { comment } = req.body; 
+    // console.log('annana',commentId);
+    // console.log('naan',comment);
     let conn;
 
+    if (!commentId || !comment) {
+        return res.status(400).json({ message: 'commentId and comment are required' });
+    }
+
     try {
-        const conn = await getConnection();
+        conn = await getConnection();
+        await conn.beginTransaction();  
 
         const sql = `
-        UPDATE techcoach_lite.techcoach_conversations
-        SET comment = ?, updated_at = NOW()
-        WHERE id = ?
-      `;
+            UPDATE techcoach_lite.techcoach_conversations
+            SET comment = ?, updated_at = NOW()
+            WHERE id = ?
+        `;
 
         const result = await conn.query(sql, [comment, commentId]);
 
         if (result.affectedRows === 0) {
+            await conn.rollback();  
             return res.status(404).json({ message: 'Comment not found' });
         }
 
-        res.status(200).json({ message: 'Comment updated successfully!' });
+        await conn.commit();
+        res.status(200).json({ 
+            message: 'Comment updated successfully!' });
     } catch (error) {
         console.error('Error updating comment:', error);
         if (conn) {
@@ -509,11 +494,9 @@ const editComments = async (req, res) => {
 };
 
 
-
 // group name Controllers
 const postdecisionGroup = async (req, res) => {
     const { type_of_group = 'decision_circle', group_name } = req.body;
-
     let conn;
 
     try {

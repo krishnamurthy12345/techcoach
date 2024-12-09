@@ -314,6 +314,7 @@ import axios from 'axios';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
+    const [user, setUser] = useState();
     const [decisions, setDecisions] = useState([]);
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -337,6 +338,7 @@ const MemberSharedDecisions = () => {
         if (groupId) {
             fetchGroupDetails();
             fetchSharedDecisions();
+            fetchGroupExtra();
         }
     }, [groupId]);
 
@@ -359,6 +361,21 @@ const MemberSharedDecisions = () => {
             console.error(err);
         }
     };
+
+    const fetchGroupExtra = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/group/getGroupDetails/${groupId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            })
+            setUser(response.data)
+            console.log('Group Admin Details:', response.data);
+        } catch (err) {
+            console.log("An Occured fetching data", err)
+        }
+    }
 
     const fetchSharedDecisions = async () => {
         try {
@@ -434,7 +451,7 @@ const MemberSharedDecisions = () => {
                 ...prevComments,
                 [decisionId]: response || [],
             }));
-            console.log('babababa', response);
+            console.log('comments:', response);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
@@ -499,6 +516,20 @@ const MemberSharedDecisions = () => {
             {groups && (
                 <div className="group-details">
                     <h4>{groupName || groups.group_name}</h4>
+                    {user && user.created_by ? (
+                        <div className="group-adminContainer">
+                            <Card key={user.created_by} className="group-adminCard">
+                                <CardContent className="group-adminCardContent">
+                                    <p className="group-adminLabel"><b>Admin</b></p>
+                                    <Typography variant="body1" className="group-userInfo">
+                                        {user.created_by} ({user.creator_email})
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    ) : (
+                        <p className="loadingText">Loading user data...</p>
+                    )}
                     {members.length > 0 ? (
                         <ul className="group-members">
                             {members.map((member) => (

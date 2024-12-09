@@ -537,15 +537,16 @@ const updateComment = async (commentId, updatedComment) => {
     }
 };
 
-const editComments = async (commentId, updatedComment) => {
+const editComments = async (commentId, comment) => {
     const token = localStorage.getItem('token');
-
     try {
-        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/comment/${commentId}`, updatedComment, {
-            headers: {
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/group/comment/${commentId}`,
+             comment ,
+            {
+             headers: {
                 Authorization: `Bearer ${token}`,
-            }
-        });
+             },
+           });
 
         console.log("Updated comment response:", response.data);
         return response.data;

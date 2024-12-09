@@ -35,80 +35,6 @@
     margin-top: 20px;
 }
 
-/* .comment-submit {
-    margin-left: 10px;
-    background-color: #007bff;
-    border: none;
-    border-radius:10px;
-    padding: 10px;
-    color: white;
-    cursor: pointer;
-}
-
-.author-comment {
-    align-self: flex-end;
-    background-color: #b7f2fe;
-    text-align: right;
-    padding: 8px;
-    border-radius: 12px;
-}
-
-.member-comment {
-    align-self: flex-start;
-    background-color: white;
-    text-align: left;
-    padding: 8px;
-    border-radius: 12px;
-}
-
-.comment-content{
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-}
-.comment-submit .send-icon {
-    font-size: 1.5rem;
-}
-.comment-bubble {
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.comment-bubble.comment {
-    background-color: white;
-    text-align: left;
-}
-
-.comment-bubble.reply {
-    background-color: #007BFF;
-    color: white;
-    text-align: right;
-    margin-left: auto;
-}
-
-.comment-username {
-    font-weight: 500;
-}
-
-.comment-input {
-    margin-top: 10px;
-    width: 100%;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.reply-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 5px;
-} */
-
 .comment-box.original-comment {
     background-color: #FFF;
     text-align: left;
@@ -119,4 +45,40 @@
     background-color: #e8f5e9;
     text-align: right;
     align-self: flex-end;
+}
+
+.group-adminContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.group-adminCard {
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #888;
+}
+
+.group-adminCardContent {
+    text-align: center;
+}
+
+.group-adminLabel {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.group-userInfo {
+    font-size: 14px;
+    color: #555;
+}
+
+.loadingText {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #888;
 }
