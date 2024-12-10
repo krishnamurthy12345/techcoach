@@ -708,33 +708,38 @@ const getSharedwithDecisionsCount = async (req, res) => {
         await conn.beginTransaction();
 
         // Query for 'inner_circle' shared decisions count (excluding current user)
-        const [innerCircleCountResult] = await conn.query(`
+        const innerCircleQuery = `
             SELECT COUNT(DISTINCT tsd.id) AS count
             FROM techcoach_lite.techcoach_shared_decisions tsd
             JOIN techcoach_lite.techcoach_group_members tgm
             ON tsd.groupId = tgm.group_id
             JOIN techcoach_lite.techcoach_groups tg
             ON tsd.groupId = tg.id
-            WHERE tg.created_by = ?  -- Exclude the current user from the shared count
+            WHERE tgm.member_id = ?
             AND tg.type_of_group = 'inner_circle'
-        `, [userId]);
+            AND tg.created_by != ?
+        `;
+        const [innerCircleCountResult] = await conn.query(innerCircleQuery, [userId,userId]);
+        const innerCircleCount = Number(innerCircleCountResult?.count || 0);
+        console.log('bababab',innerCircleCount);
 
         // Query for 'decision_circle' shared decisions count (excluding current user and excluding decisions shared by the current user)
-        const [decisionCircleCountResult] = await conn.query(`
+        const decisionCircleQuery = `
             SELECT COUNT(DISTINCT tsd.id) AS count
             FROM techcoach_lite.techcoach_shared_decisions tsd
+            JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
             JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+            JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
             JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
-            WHERE tg.created_by = ?
+            JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
+            WHERE tu.user_id != ?
             AND tg.type_of_group = 'decision_circle'
-        `, [userId]);
+        `;
 
-        await conn.commit();
 
         // Convert results to numbers
-        const innerCircleCount = Number(innerCircleCountResult.count || 0);
-        const decisionCircleCount = Number(decisionCircleCountResult.count || 0);
-        // console.log('ananna',innerCircleCount);
+        const [decisionCircleCountResult] = await conn.query(decisionCircleQuery, [userId]);
+        const decisionCircleCount = Number(decisionCircleCountResult?.count || 0);
         console.log('aabba',decisionCircleCount);
 
         const decisionCount = innerCircleCount + decisionCircleCount;
