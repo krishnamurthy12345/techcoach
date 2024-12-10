@@ -40,7 +40,6 @@ const Header = () => {
                 toast.error('Session timed out. Please log in again.');
                 localStorage.removeItem('token'); 
                 localStorage.removeItem('user_id');
-                localStorage.removeItem('email');
                 setIsLoggedIn(false);
                 navigate('/'); 
             } else {
@@ -71,7 +70,6 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
-        localStorage.removeItem('email');
         setIsLoggedIn(false);
         navigate("/");
     };

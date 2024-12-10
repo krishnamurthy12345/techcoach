@@ -50,9 +50,24 @@ const SharedDecisionCircle = () => {
 
     useEffect(() => {
         const fetchCurrentUserEmail = async () => {
-            const email = localStorage.getItem('email');
-            setCurrentUserEmail(email);
-        }
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                });
+
+                if (response.status === 200 && response.data.tasks.length > 0) {
+                    const email = response.data.tasks[0].email; 
+                    setCurrentUserEmail(email);
+                } else {
+                    console.error('User details not found');
+                }
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            }
+        };
+
         fetchCurrentUserEmail();
     }, []);
 
@@ -120,6 +135,7 @@ const SharedDecisionCircle = () => {
                 return acc;
             }, {});
             setComments(updatedComments);
+            console.log('comments', commentsData);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
@@ -286,7 +302,19 @@ const SharedDecisionCircle = () => {
                                                 <List>
                                                     {Array.isArray(comments[item.decision_id]) &&
                                                         comments[item.decision_id].map((comment) => (
-                                                            <ListItem key={comment.commentId} alignItems="flex-start" style={{border: '1px solid #ccc'}}>
+                                                            <ListItem
+                                                                key={comment.commentId}
+                                                                alignItems="flex-start"
+                                                                style={{
+                                                                    border: '1px solid #ccc',
+                                                                    maxWidth: '70%',
+                                                                    marginLeft: comment.type_of_member === 'member' ? '0' : 'auto', 
+                                                                    marginRight: comment.type_of_member === 'author' ? '0' : 'auto',
+                                                                    marginBottom: '16px',
+                                                                    backgroundColor: comment.type_of_member === 'author' ? '#f0f8ff' : 'transparent', 
+                                                                    padding: '8px',
+                                                                }}
+                                                            >
                                                                 <ListItemText
                                                                     primary={comment.comment}
                                                                     secondary={
@@ -327,6 +355,7 @@ const SharedDecisionCircle = () => {
                                                             </ListItem>
                                                         ))}
                                                 </List>
+
                                                 <Box mt={2}>
                                                     <input
                                                         type="text"

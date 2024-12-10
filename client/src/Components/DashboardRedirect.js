@@ -7,7 +7,6 @@ const DashboardRedirect = () => {
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get('token');
   const userId = queryParams.get('user_id'); 
-  const email = queryParams.get('email');
 
   if (token) {
     localStorage.setItem('token', token); 
@@ -15,10 +14,6 @@ const DashboardRedirect = () => {
 
   if(userId) {
     localStorage.setItem('user_id',userId);
-  }
-
-  if(email) {
-    localStorage.setItem('email',email)
   }
 
   return <Nav />;

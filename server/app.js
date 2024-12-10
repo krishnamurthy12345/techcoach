@@ -13,6 +13,7 @@ const linkRoutes = require('./routes/linkRoutes');
 const multigroupRoutes = require('./routes/multigroupRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const advancedProfileRoutes = require('./routes/advancedProfileRoutes');
 
 require('dotenv').config();
 
@@ -39,6 +40,7 @@ app.use('/api',linkRoutes);
 app.use('/group',multigroupRoutes);
 app.use('/group',commentRoutes);
 app.use('/api/admin',adminRoutes);
+app.use('/api',advancedProfileRoutes);
 
 
 app.listen(PORT, () => {
