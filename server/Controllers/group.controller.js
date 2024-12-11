@@ -732,13 +732,14 @@ const getSharedwithDecisionsCount = async (req, res) => {
             JOIN techcoach_lite.techcoach_users tu ON td.user_id = tu.user_id
             JOIN techcoach_lite.techcoach_group_members tgm ON tsd.groupId = tgm.group_id
             JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
-            WHERE tu.user_id != ?
+            WHERE tgm.member_id = ?
             AND tg.type_of_group = 'decision_circle'
+            AND tg.created_by != ?
         `;
 
 
         // Convert results to numbers
-        const [decisionCircleCountResult] = await conn.query(decisionCircleQuery, [userId]);
+        const [decisionCircleCountResult] = await conn.query(decisionCircleQuery, [userId,userId]);
         const decisionCircleCount = Number(decisionCircleCountResult?.count || 0);
         console.log('aabba',decisionCircleCount);
 
