@@ -1,0 +1,80 @@
+.main-table{
+    max-width: 70%;
+    background-color: white;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.advanced-table{
+    max-width: 800px;
+    margin:0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #9ccdf8;
+    padding: 20px;
+    border-radius: 10px;
+    
+}
+.main-form{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+label {
+    font-weight: bold;
+    color: #333;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+}
+.advanced-add{
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+.icons{
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+    transition: color 0.3s;
+}
+.icons:hover {
+    color: #0056b3;
+}
+@media (max-width: 768px) {
+    .main-table {
+        max-width: 90%;
+        padding: 10px;
+    }
+
+    .advanced-table {
+        max-width: 100%;
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .main-form {
+        padding: 0;
+    }
+
+    input {
+        font-size: 14px;
+    }
+
+    .icons {
+        font-size: 20px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}

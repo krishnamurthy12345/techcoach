@@ -36,6 +36,8 @@ import ShowUsers from './Components/Decision_Circle/ShowUsers.js';
 import ShareCircleGroup from './Components/Decision_Circle/ShareCircleGroup.js';
 import MemberSharedDecisions from './Components/Decision_Circle/MemberSharedDecisions.js';
 import SharedDecisionCircle from './Components/Decision_Circle/SharedDecisionCircle.js';
+import AdvancedProfile from './Components/pages/Profile_Table/AdvancedProfile.js';
+import AdvancedProfileTable from './Components/pages/Profile_Table/AdvancedProfileTable.js';
 
 function App() {
   console.log("one is working")
@@ -88,6 +90,8 @@ function App() {
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
+        <Route path = '/advancedProfile' element={<AdvancedProfile />} />
+        <Route path = '/advancedProfileTable' element={<AdvancedProfileTable />} />
 
         {/* Soft_Skills Routes */}
         <Route path='/skillget' element={<Skillget />} />

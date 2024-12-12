@@ -894,7 +894,6 @@ const getMemberSharedDecisions = async (req, res) => {
     }
 };
 
-
 const decisionCirclePostComment = async (req, res) => {
     const { decision, groupMemberIds, comment, email } = req.body;
     console.log('req.body', req.body);
@@ -969,22 +968,18 @@ const decisionCirclePostComment = async (req, res) => {
     }
 };
 
-
-
 const decisionCircleReplyComment = async (req, res) => {
-    const { parentCommentId, decision, reply, groupId } = req.body;
-    console.log('decision', decision);
-    console.log('commentId', parentCommentId);
-    console.log('groupId', groupId);
-    // const memberId = req.user.id;
+    const { parentCommentId,decision, reply, groupId } = req.body;
+    // console.log('decision:', decision);
+    // console.log('groupId:', groupId);
+    const memberId = req.user.id;
+
+
     let conn;
 
+    // Helper to truncate text
     const truncateText = (text, maxLength) => {
-        if (typeof text !== 'string') {
-            console.warn('Input to truncateText is not a string:', text);
-            return '';
-        }
-
+        if (typeof text !== 'string') return '';
         if (!text || text.length <= maxLength) return text;
         const firstPart = text.substring(0, 10);
         const lastPart = text.substring(text.length - 10);
@@ -995,59 +990,76 @@ const decisionCircleReplyComment = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        // Fetch all members of the group
-        const groupMemberQuery = `SELECT user_id, displayname, email FROM techcoach_lite.techcoach_users 
-                                  WHERE user_id IN (SELECT user_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?)`;
-        const groupMemberRows = await conn.query(groupMemberQuery, [groupId]);
+        // Fetch group members and original poster in a single query
+        const groupAndPosterQuery = `
+            SELECT 
+                u.user_id, u.displayname AS member_name, u.email AS member_email, 
+                op.displayname AS original_poster_name, op.email AS original_poster_email
+            FROM techcoach_lite.techcoach_group_members gm
+            JOIN techcoach_lite.techcoach_users u ON gm.member_id = u.user_id
+            LEFT JOIN techcoach_lite.techcoach_conversations c ON c.id = ?
+            LEFT JOIN techcoach_lite.techcoach_users op ON op.user_id = c.groupMember
+            WHERE gm.group_id = ?;
+        `;
 
-        // Fetch original comment poster details
-        const originalCommentPoster = (await conn.query(`SELECT email, displayname FROM techcoach_lite.techcoach_users 
-            JOIN techcoach_lite.techcoach_conversations 
-            ON techcoach_users.user_id = techcoach_conversations.groupMember 
-            WHERE techcoach_conversations.id = ?`, [parentCommentId]));
+        const groupMembers = await conn.query(groupAndPosterQuery, [parentCommentId,groupId]);
 
-        // console.log('Group members:', groupMemberRows);
+        if (!groupMembers || groupMembers.length === 0) {
+            console.log("No group members or original poster found.");
+            return res.status(400).json({ message: 'Invalid group or comment ID.' });
+        }
+
+       // Fetch replying user's details
+        const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
+        const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
+
+        if (!replyingUser) {
+                        throw new Error(`Replying user not found for user_id: ${memberId}`);
+                    }
+
         const { decision_name, decision_due_date, creation_date } = decision;
         const truncatedReplyText = truncateText(reply, 20);
 
-        // Send email to each group member
-        for (const groupMember of groupMemberRows) {
-            const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-                <p>Dear ${groupMember.displayname},</p>
-                <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
-                <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
-                <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
-                <p><strong>Reply by ${originalCommentPoster.displayname}:</strong></p>
-                <p><em>${truncatedReplyText}</em></p>
-                <p>Regards,</p>
-                <p>Team @ Decision Coach</p>
-            </div>`;
+        // Prepare email sending tasks
+        const emailPromises = groupMembers.map(async (groupMember) => {
+            const htmlBody = `
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <p>Dear ${groupMember.member_name},</p>
+                    <p>A reply has been posted on the decision titled "<strong>${decision_name}</strong>":</p>
+                    <p><strong>Creation Date:</strong> ${new Date(creation_date).toLocaleDateString()}</p>
+                    <p><strong>Due Date:</strong> ${new Date(decision_due_date).toLocaleDateString()}</p>
+                    <p><strong>Reply by ${replyingUser.displayname}:</strong></p>
+                    <p><em>${truncatedReplyText}</em></p>
+                    <p>Regards,</p>
+                    <p>Team @ Decision Coach</p>
+                </div>
+            `;
 
             const emailPayload = {
-                from: {
-                    address: "Decision-Coach@www.careersheets.in"
-                },
-                to: [
-                    {
-                        email_address: {
-                            address: groupMember.email
-                        }
-                    }
-                ],
+                from: { address: "Decision-Coach@www.careersheets.in" },
+                to: [{ email_address: { address: groupMember.member_email } }],
                 subject: "New Reply on Your Shared Decision Circle",
-                htmlbody: htmlBody
+                htmlbody: htmlBody,
             };
 
             const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
             const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
-            await axios.post(zeptoMailApiUrl, emailPayload, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
-                }
-            });
-        }
+            try {
+                await axios.post(zeptoMailApiUrl, emailPayload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
+                    }
+                });
+                // console.log(`Email sent to: ${groupMember.member_email}`);
+            } catch (emailError) {
+                console.error(`Failed to send email to: ${groupMember.member_email}`, emailError.message);
+            }
+        });
+
+        // Wait for all email promises to complete
+        await Promise.all(emailPromises);
 
         await conn.commit();
         res.status(200).json({ message: 'Emails Sent Successfully to Group Members' });
@@ -1059,7 +1071,6 @@ const decisionCircleReplyComment = async (req, res) => {
         if (conn) conn.release();
     }
 };
-
 
 // const decisionCircleReplyComment = async (req, res) => {
 //     const { parentCommentId, decision, reply, groupId } = req.body;
@@ -1380,7 +1391,6 @@ const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
     }
 };
 
-
 const getUserSharedDecisions = async (req, res) => {
     const userId = req.user.id;
     let conn;
@@ -1517,7 +1527,6 @@ GROUP BY tsd.decisionId
 };
 
 
-
 module.exports = {
     getUserList,
     decisionCircleCreation,
@@ -1536,7 +1545,6 @@ module.exports = {
     decisionCirclePostComment,
     decisionCircleReplyComment,
     // getSharedDecisionCircleDetails,
-    // getDecisionCirclememberSharedDecisions,
     getdecisionSharedDecisionCirclebyuser,
     getUserSharedDecisions
 };

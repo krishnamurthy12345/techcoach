@@ -1,0 +1,25 @@
+.advanced-profile {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+  }
+  
+  .section {
+    margin-bottom: 15px;
+  }
+  
+  .section strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  ul {
+    list-style-type: disc;
+    margin-left: 20px;
+  }
+  
