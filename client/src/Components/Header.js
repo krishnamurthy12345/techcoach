@@ -129,6 +129,9 @@ const Header = () => {
                                             <li>
                                                 <Link to='/profile' className="dropdown-item">Profile</Link>
                                             </li>
+                                            {/* <li>
+                                                <Link to='/advancedProfile' className="dropdown-item">Advanced-Profile</Link>
+                                            </li> */}
                                             <li>
                                                 <Link to='/skillget' className="dropdown-item">Soft Skills</Link>
                                             </li>
