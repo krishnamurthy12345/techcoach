@@ -63,7 +63,7 @@ const postAdvancedProfile = async (req, res) => {
         { headerName: 'Values', headerValue: values },
         { headerName: 'Resolutions', headerValue: resolutions },
         { headerName: 'Constraints', headerValue: constraints },
-        { headerName: 'Other Factors', headerValue: other_factors }
+        { headerName: 'OtherFactors', headerValue: other_factors }
       ];
   
       for (const { headerName, headerValue } of headersAndValues) {
@@ -235,7 +235,7 @@ const putAdvancedProfile = async (req, res) => {
         { headerName: 'Values', headerValue: values },
         { headerName: 'Resolutions', headerValue: resolutions },
         { headerName: 'Constraints', headerValue: constraints },
-        { headerName: 'Other Factors', headerValue: other_factors }
+        { headerName: 'OtherFactors', headerValue: other_factors }
       ];
   
       for (const { headerName, headerValue } of headersAndValues) {

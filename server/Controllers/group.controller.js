@@ -715,9 +715,9 @@ const getSharedwithDecisionsCount = async (req, res) => {
             ON tsd.groupId = tgm.group_id
             JOIN techcoach_lite.techcoach_groups tg
             ON tsd.groupId = tg.id
-            WHERE tgm.member_id = ?
+            WHERE tgm.member_id != ?
             AND tg.type_of_group = 'inner_circle'
-            AND tg.created_by != ?
+            AND tg.created_by = ?
         `;
         const [innerCircleCountResult] = await conn.query(innerCircleQuery, [userId,userId]);
         const innerCircleCount = Number(innerCircleCountResult?.count || 0);
@@ -734,7 +734,7 @@ const getSharedwithDecisionsCount = async (req, res) => {
             JOIN techcoach_lite.techcoach_users tmu ON tgm.member_id = tmu.user_id
             WHERE tgm.member_id = ?
             AND tg.type_of_group = 'decision_circle'
-            AND tg.created_by != ?
+            AND tu.user_id != ?
         `;
 
 

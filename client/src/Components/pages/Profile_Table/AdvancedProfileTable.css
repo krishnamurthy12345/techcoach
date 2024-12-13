@@ -1,80 +1,82 @@
-.main-table{
-    max-width: 70%;
-    background-color: white;
+.main-table {
+    background-color: #f5f3f3;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.advanced-table{
-    max-width: 800px;
-    margin:0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background-color: #9ccdf8;
-    padding: 20px;
-    border-radius: 10px;
-    
-}
-.main-form{
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-label {
-    font-weight: bold;
-    color: #333;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
-input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    width: 100%;
-}
-.advanced-add{
+.advanced-table {
     display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    gap: 50px;
 }
-.icons{
-    font-size: 24px;
+
+.form-section {
+    background-color: #e3d8d8;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.section-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: left;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.form-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.action-icons {
+    display: flex;
+    gap: 5px;
+}
+
+.icons {
+    font-size: 20px;
     cursor: pointer;
     color: #007bff;
-    transition: color 0.3s;
 }
+
 .icons:hover {
     color: #0056b3;
 }
-@media (max-width: 768px) {
-    .main-table {
-        max-width: 90%;
-        padding: 10px;
-    }
 
-    .advanced-table {
-        max-width: 100%;
-        padding: 10px;
-        gap: 15px;
-    }
-
-    .main-form {
-        padding: 0;
-    }
-
-    input {
-        font-size: 14px;
-    }
-
-    .icons {
-        font-size: 20px;
-    }
-
-    button {
-        font-size: 14px;
-        padding: 8px 16px;
-    }
+.save-AdvancedProfilebutton {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 20px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: center;
 }
+
+.save-button:hover {
+    background-color: #0056b3;
+}
+
