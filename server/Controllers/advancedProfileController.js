@@ -172,7 +172,7 @@ const getAdvancedProfile = async (req, res) => {
   
       // Query to get the header values for the user
       const headerValuesResult = await conn.query(
-        `SELECT v.id, h.header_name, v.header_value 
+        `SELECT v.id, h.header_name, v.header_value , h.type_of_profile
         FROM techcoach_lite.techcoach_profile_swot_values v 
         JOIN techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
         WHERE v.user_id = ? AND h.type_of_profile = 'Advanced_Profile'`,
@@ -196,7 +196,7 @@ const getAdvancedProfile = async (req, res) => {
         ...profileDetails
       };
   
-      console.log('Full Profile:', fullProfile);
+      // console.log('Full Profile:', fullProfile);
 
       res.status(200).json(fullProfile);
     } catch (error) {

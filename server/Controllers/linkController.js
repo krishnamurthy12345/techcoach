@@ -187,7 +187,8 @@ const getAllProfileLink = async (req, res) => {
                 d.decision_name,
                 v.id AS v_id,
                 h.header_name,
-                v.header_value
+                v.header_value,
+                h.type_of_profile
             FROM 
                 techcoach_lite.techcoach_decision_swot_linked_info dh
             JOIN 

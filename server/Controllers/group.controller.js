@@ -711,13 +711,12 @@ const getSharedwithDecisionsCount = async (req, res) => {
         const innerCircleQuery = `
             SELECT COUNT(DISTINCT tsd.id) AS count
             FROM techcoach_lite.techcoach_shared_decisions tsd
-            JOIN techcoach_lite.techcoach_group_members tgm
-            ON tsd.groupId = tgm.group_id
-            JOIN techcoach_lite.techcoach_groups tg
-            ON tsd.groupId = tg.id
-            WHERE tgm.member_id != ?
+            JOIN techcoach_lite.techcoach_decision td ON tsd.decisionId = td.decision_id
+            JOIN techcoach_lite.techcoach_groups tg ON tsd.groupId = tg.id
+            JOIN techcoach_lite.techcoach_group_members tgm ON tg.id = tgm.group_id
+            WHERE tgm.member_id = ?
             AND tg.type_of_group = 'inner_circle'
-            AND tg.created_by = ?
+            AND tsd.groupMember = ?
         `;
         const [innerCircleCountResult] = await conn.query(innerCircleQuery, [userId,userId]);
         const innerCircleCount = Number(innerCircleCountResult?.count || 0);

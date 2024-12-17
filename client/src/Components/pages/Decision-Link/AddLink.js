@@ -207,15 +207,23 @@ import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 const AddLink = () => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
+  const [advancedProfiles, setAdvancedProfiles] = useState([]);
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
+  const [selectedAdvancedProfiles,setSelectedAdvancedProfiles] = useState([]);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showSkillOptions, setShowSkillOptions] = useState(false);
+  const [showAdvancedProfiles,setShowAdvancedProfiles] = useState(false);
   const [attitude, setAttitude] = useState([]);
   const [strength, setStrength] = useState([]);
   const [weakness, setWeakness] = useState([]);
   const [opportunity, setOpportunity] = useState([]);
   const [threat, setThreat] = useState([]);
+  const [goals,setGoals] = useState([]);
+  const [values,setValues] = useState([]);
+  const [resolutions,setResolutions] = useState([]);
+  const [constraints,setConstraints] = useState([]);
+  const [otherfactors,setOtherfactors] = useState([]);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -252,6 +260,27 @@ const AddLink = () => {
     }
   };
 
+  const fecthAdvancedProfiles = async () =>{
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/data/advanced`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      console.log('Fetching AdvancedProfile Data:',response.data);
+      setAdvancedProfiles(Array.isArray(response.data.advancedProfiles) ? response.data.advancedProfiles : []);
+      setGoals(Array.isArray(response.data.goals) ? response.data.goals : []);
+      setValues(Array.isArray(response.data.values) ? response.data.values : []);
+      setResolutions(Array.isArray(response.data.resolutions) ? response.data.resolutions : []);
+      setConstraints(Array.isArray(response.data.constraints) ? response.data.constraints : []);
+      setOtherfactors(Array.isArray(response.data.otherfactors) ? response.data.otherfactors : []);
+    } catch (error) {
+      console.log('Error fetching AdvancedProfile Data:',error);
+      setAdvancedProfiles([]);
+    }
+  }
+
   const fetchSkills = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -270,6 +299,7 @@ const AddLink = () => {
 
   useEffect(() => {
     fetchProfiles();
+    fecthAdvancedProfiles();
     fetchSkills();
   }, [id]);
 
@@ -284,6 +314,10 @@ const AddLink = () => {
     }
   };
 
+  const handleAdvancedProfileClick = () =>{
+    setShowAdvancedProfiles(!showAdvancedProfiles);
+  }
+
   const handleProfileChange = (e) => {
     const { value, checked } = e.target;
     setSelectedProfiles((prev) =>
@@ -297,6 +331,13 @@ const AddLink = () => {
       checked ? [...prev, value] : prev.filter((id) => id !== value)
     );
   };
+
+  const handleAdvancedProfileChange = (e) =>{
+    const { value,checked } = e.target;
+    setSelectedAdvancedProfiles((prev)=>
+      checked ? [...prev, value] : prev.filter((id) => id !== value)
+    )
+  }
 
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
@@ -318,6 +359,25 @@ const AddLink = () => {
     }
   };
 
+  const handleAdvancedProfileSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${process.env.REACT_APP_API_URL}/link/advancedLink`, {
+        v_ids: selectedAdvancedProfiles,
+        decision_id: id,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Profiles Linked Successfully");
+      navigate('/getall');
+    } catch (err) {
+      console.log('Error linking profiles:', err);
+      toast.error("Error adding profile link");
+    }
+  };
 
   const handleSkillSubmit = async (event) => {
     event.preventDefault();
@@ -445,6 +505,100 @@ const AddLink = () => {
           )}
         </div>
         <button type='submit' onClick={handleProfileSubmit} className='savebtn'>Save SWOT Link</button>
+      </div>
+      <div>
+        <div>
+          <div className='d-flex gap-2' style={{maxWidth:'400px'}}>
+            <IoIosInformationCircle className='fs-4' />
+            <p> To link your decisions to your Profile data like AdvancedProfile, please click "Get Advanced-Profile Data" </p>
+          </div>
+          <button type="button" className='swot' onClick={handleAdvancedProfileClick}>Get Advanced-Profile Data</button>
+          {showAdvancedProfiles && (
+            <div className='options'>
+              {Array.isArray(advancedProfiles) && advancedProfiles.map((profile) => (
+                <div key={profile.header_id}>
+                  <label htmlFor={`profile-${profile.header_id}`}>
+                    <input
+                      type="checkbox"
+                      id={`profile-${profile.header_id}`}
+                      value={profile.header_id}
+                      onChange={handleAdvancedProfileChange}
+                    />
+                    {profile.header_name}
+                  </label>
+                </div>
+              ))}
+              <div className='swot-list ml-3'>
+                <h5>Goals</h5>
+                <div className='checkbox-container'>
+                  {Array.isArray(goals) && goals.map((item) => (
+                    <div key={item.id}>
+                      <input
+                        type="checkbox"
+                        onChange={handleAdvancedProfileChange}
+                        value={item.id}
+                      />
+                      <span>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <h5>Values</h5>
+                <div className='checkbox-container'>
+                  {Array.isArray(values) && values.map((item) => (
+                    <div key={item.id}>
+                      <input
+                        type="checkbox"
+                        onChange={handleAdvancedProfileChange}
+                        value={item.id}
+                      />
+                      <span>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <h5>Resolution</h5>
+                <div className='checkbox-container'>
+                  {Array.isArray(resolutions) && resolutions.map((item) => (
+                    <div key={item.id}>
+                      <input
+                        type="checkbox"
+                        onChange={handleAdvancedProfileChange}
+                        value={item.id}
+                      />
+                      <span>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <h5>constraints</h5>
+                <div className='checkbox-container'>
+                  {Array.isArray(constraints) && constraints.map((item) => (
+                    <div key={item.id}>
+                      <input
+                        type="checkbox"
+                        onChange={handleAdvancedProfileChange}
+                        value={item.id}
+                      />
+                      <span>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <h5>Other Factors</h5>
+                <div className='checkbox-container'>
+                  {Array.isArray(otherfactors) && otherfactors.map((item) => (
+                    <div key={item.id}>
+                      <input
+                        type="checkbox"
+                        onChange={handleAdvancedProfileChange}
+                        value={item.id}
+                      />
+                      <span>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <button type='submit' onClick={handleAdvancedProfileSubmit} className='savebtn'>Save AdvancedProfile Link</button>
       </div>
       <div>
         <div>
