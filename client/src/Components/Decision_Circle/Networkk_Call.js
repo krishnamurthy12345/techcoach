@@ -197,12 +197,12 @@ const getMemberSharedDecisions = async (groupId) => {
     }
 }
 
-const mailToDecisionCirclePostComment = async (decision, groupMemberIds, comment, email) => {
+const mailToDecisionCirclePostComment = async (decisionId, groupId, comment, email) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`, {
-            decision,
-            groupMemberIds,
+            decisionId,
+            groupId,
             comment,
             email
         }, {
