@@ -331,7 +331,6 @@ const MemberSharedDecisions = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const groupName = params.get('group_name');
-    const groupMemberIds = members.map((member) => member.user_id);
 
 
     useEffect(() => {
@@ -356,6 +355,7 @@ const MemberSharedDecisions = () => {
                 setGroups(response.data.group);
                 setMembers(response.data.members);
             }
+            console.log('details',response.data)
         } catch (err) {
             toast.error('An error occurred while fetching the group details.');
             console.error(err);
@@ -417,7 +417,7 @@ const MemberSharedDecisions = () => {
         }
     };
 
-    const handleMailToPostComment = async (decisionId, groupMemberIds, email) => {
+    const handleMailToPostComment = async (decisionId, email) => {
         const comment = newComments[decisionId]?.trim();
         if (!comment) {
             return toast.error('Comment cannot be empty');
@@ -430,7 +430,7 @@ const MemberSharedDecisions = () => {
                 throw new Error(`Decision with ID ${decisionId} not found`);
             }
             const responseToPostEmailComment = await mailToDecisionCirclePostComment(
-                decision, groupMemberIds, comment, email
+                decision, groupId, comment, email
             );
             toast.success('Comment posted and email sent successfully');
             console.log('Response to post email comment:', responseToPostEmailComment);
@@ -644,7 +644,7 @@ const MemberSharedDecisions = () => {
                                                 </button>
 
                                                 <button
-                                                    onClick={() => handleMailToPostComment(decision.decision_id, groupMemberIds)}
+                                                    onClick={() => handleMailToPostComment(decision.decision_id)}
                                                     disabled={buttonLoading[decision.decision_id + '_email']}
                                                     style={{
                                                         padding: '8px 16px',

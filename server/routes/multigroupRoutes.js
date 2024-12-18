@@ -22,10 +22,8 @@ router.post("/sendDecisionCircleInvitation",multigroupController.sendDecisionCir
 router.post("/decisionshareDecisionCircle",multigroupController.decisionshareDecisionCircle);
 router.get("/getdecisionSharedDecisionCircle/:groupId",multigroupController.getdecisionSharedDecisionCircle);
 router.get("/getMemberSharedDecisions/:groupId",multigroupController.getMemberSharedDecisions);
-// router.get("/getSharedDecisionCircleDetails",multigroupController.getSharedDecisionCircleDetails);
 router.post("/decisionCirclePostComment",multigroupController.decisionCirclePostComment);
 router.post("/decisionCircleReplyComment",multigroupController.decisionCircleReplyComment);
-// router.get("/getDecisionCirclememberSharedDecisions",multigroupController.getDecisionCirclememberSharedDecisions);
 router.get("/sharedwithme",multigroupController.getdecisionSharedDecisionCirclebyuser);
 router.get("/sharedbyme",multigroupController.getUserSharedDecisions);
 
