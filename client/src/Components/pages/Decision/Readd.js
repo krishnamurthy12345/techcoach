@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Chip from '@mui/material/Chip';
 import './Readd.css';
 import withAuth from '../../withAuth';
+import TrendChart from './Views/TrendChart';
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -54,7 +55,7 @@ const Readd = () => {
   }, []);
 
 
-  console.log("dataa", data);
+  // console.log("dataa", data);
 
 
   const fetchComments = async decisionId => {
@@ -77,7 +78,7 @@ const Readd = () => {
     }
   };
 
-  
+
   const handleSortByDueDate = () => {
     const sortedData = [...data].sort((a, b) => {
       const dateA = new Date(a.decision_due_date);
@@ -203,7 +204,7 @@ const Readd = () => {
                     style={{ color: '#526D82' }}
                   >
                     <MdLink />
-                    </IconButton>
+                  </IconButton>
                 </TableCell>
               </TableRow>
             );
@@ -483,6 +484,7 @@ const Readd = () => {
               </div>
             </div>
           </div>
+          <TrendChart />
         </div>
       </div>
     );
@@ -492,49 +494,49 @@ const Readd = () => {
     const filteredDecisions = data
       .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
       .filter(decision => {
-      if (selectedTag === 'Advanced Tags') {
+        if (selectedTag === 'Advanced Tags') {
           return decision.tags.some(tag => tag.tag_type === 'Advanced Tags');
-        } 
-      if (selectedTag === 'Sharpen the Saw') {
-        return decision.tags.some(tag => tag.tag_type === 'Sharpen the Saw');
-      }
-      if (selectedTag === 'Outcome') {
-        return decision.tags.some(tag => tag.tag_type === 'Outcome');
-      }
-      if (selectedTag === 'Time Span') {
-        return decision.tags.some(tag => tag.tag_type === 'Time Span');
-      }
-      if (selectedTag === 'Urgency') {
-        return decision.tags.some(tag => tag.tag_type === 'Urgency');
-      }
-      if (selectedTag === 'Financial Outcome') {
-        return decision.tags.some(tag => tag.tag_type === 'Financial Outcome');
-      }
-      if (selectedTag === 'Decision Maturity') {
-        return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
-      } 
-      if (selectedTag !== '' && selectedTag !== 'All Tags') {
-        return decision.tags.some(tag => tag.tag_name === selectedTag);
-      }
-      return true;
-    });
+        }
+        if (selectedTag === 'Sharpen the Saw') {
+          return decision.tags.some(tag => tag.tag_type === 'Sharpen the Saw');
+        }
+        if (selectedTag === 'Outcome') {
+          return decision.tags.some(tag => tag.tag_type === 'Outcome');
+        }
+        if (selectedTag === 'Time Span') {
+          return decision.tags.some(tag => tag.tag_type === 'Time Span');
+        }
+        if (selectedTag === 'Urgency') {
+          return decision.tags.some(tag => tag.tag_type === 'Urgency');
+        }
+        if (selectedTag === 'Financial Outcome') {
+          return decision.tags.some(tag => tag.tag_type === 'Financial Outcome');
+        }
+        if (selectedTag === 'Decision Maturity') {
+          return decision.tags.some(tag => tag.tag_type === 'Decision Maturity');
+        }
+        if (selectedTag !== '' && selectedTag !== 'All Tags') {
+          return decision.tags.some(tag => tag.tag_name === selectedTag);
+        }
+        return true;
+      });
     const decisionsByMonth = filteredDecisions.reduce((acc, decision) => {
-      const decisionDate = decision.decision_taken_date 
-      ? new Date(decision.decision_taken_date)
-      : new Date(decision.decision_due_date);
+      const decisionDate = decision.decision_taken_date
+        ? new Date(decision.decision_taken_date)
+        : new Date(decision.decision_due_date);
       const month = decisionDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
       if (!acc[month]) acc[month] = [];
       acc[month].push(decision);
       return acc;
     }, {});
-  
+
     const sortedMonths = Object.keys(decisionsByMonth).sort((a, b) => {
       const [monthA, yearA] = a.split(' ');
       const [monthB, yearB] = b.split(' ');
       return new Date(`${yearB}-${new Date(`${monthB} 1, ${yearB}`).getMonth() + 1}-01`) - new Date(`${yearA}-${new Date(`${monthA} 1, ${yearA}`).getMonth() + 1}-01`);
     });
-  
+
     return (
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Box sx={{ position: 'absolute', left: '50%', top: '0%', bottom: '0%', width: '4px', backgroundColor: '#526D82', transform: 'translateX(-50%)', borderRadius: '0.1rem', zIndex: 1 }} />
@@ -544,7 +546,7 @@ const Readd = () => {
             <Typography variant="h6" sx={{ color: '#526D82', textAlign: 'center', marginBottom: 2, backgroundColor: '#DDE6ED', borderRadius: '4px', padding: '4px', zIndex: 2, position: 'relative' }}>
               {month}
             </Typography>
-  
+
             {decisionsByMonth[month].map((decision) => (
 
               <Box
@@ -731,13 +733,13 @@ const Readd = () => {
               >
                 <MenuItem value="">All Tags</MenuItem>
                 <MenuItem value="Advanced Tags">Advanced Tags</MenuItem>
-                <MenuItem value = "Sharpen the Saw">Sharpen the Saw</MenuItem>
-                <MenuItem value = "Time Span">Time Span</MenuItem>
-                <MenuItem value = 'Outcome'>OutCome</MenuItem>
+                <MenuItem value="Sharpen the Saw">Sharpen the Saw</MenuItem>
+                <MenuItem value="Time Span">Time Span</MenuItem>
+                <MenuItem value='Outcome'>OutCome</MenuItem>
                 <MenuItem value='Decision Maturity'>Decision Maturity</MenuItem>
-                <MenuItem value = 'Financial Outcome'>Financial Outcome</MenuItem>
+                <MenuItem value='Financial Outcome'>Financial Outcome</MenuItem>
 
-                </Select>
+              </Select>
 
             )}
           </Box>
