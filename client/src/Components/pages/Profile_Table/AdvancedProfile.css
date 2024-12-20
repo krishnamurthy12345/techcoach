@@ -1,5 +1,5 @@
 .advanced-profile {
-    font-family: 'playball' cursive;
+    /* font-family: 'playball' cursive; */
     margin:0 auto;
     max-width: 800px;
     margin-top: 20px;
@@ -10,14 +10,15 @@
 }
 
 .header {
-    /* margin-bottom: 20px; */
+    margin-bottom: 20px;
+    font-size: 16px;
     border-bottom: 2px solid #007bff;
     padding-bottom: 10px;
 }
 
-.header h3 {
-    font-size: 1.8rem;
-    font-weight: 600;
+.header h4 {
+    font-size: 1.4rem;
+    font-weight: 550;
     color: #333;
 }
 
@@ -28,7 +29,7 @@
     border-radius: 5px;
     padding: 8px 12px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.8rem;
     transition: background-color 0.3s ease;
 }
 
@@ -53,7 +54,7 @@
 .advanced-section strong {
     display: block;
     margin-bottom: 10px;
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .advanced-section ul {

@@ -116,7 +116,7 @@ const AdvancedProfile = () => {
   return (
     <div className="advanced-profile">
       <div className="header">
-        <h3>Advanced Profile</h3>
+        <h4>Advanced Profile</h4>
         {hasData() ? (
           <Link to="/advancedProfileTable">
             <button>Update Profile</button>

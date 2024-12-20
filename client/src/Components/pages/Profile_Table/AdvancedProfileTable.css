@@ -1,8 +1,11 @@
-.main-table {
-    background-color: #f5f3f3;
+.AdvancedTable{
+    margin-top: 20px;
+}
+.main-Advancedtable {
+    background-color: #f8f7f7;
     padding: 30px;
     border-radius: 10px;
-    max-width: 900px;
+    max-width: 800px;
     margin-top: 50px;
     margin: 0 auto;
     margin-bottom: 20px;
@@ -17,14 +20,14 @@
 }
 
 .form-section {
-    background-color: #e3d8d8;
+    background-color: #ffff;
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 15px;
+    gap: 30px;
 }
 
 .section-header {
-    font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
     text-align: left;

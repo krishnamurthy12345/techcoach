@@ -101,8 +101,8 @@ const Skillget = () => {
         </Link>
       </div>
 
-      <div className="table-main">
-        <table className="table">
+      <div className="skill-table-main">
+        <table className="skill-table">
           <thead>
             <tr>
               <th>Skill Name</th>
