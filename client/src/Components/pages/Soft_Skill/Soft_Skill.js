@@ -112,9 +112,9 @@ const SoftSkill = () => {
   return (
     <div>
       <h3 className='center mt-5'>Soft Skills - Self Assessment</h3>
-      <form className='form'>
+      <form className='skill-form'>
         
-        <table className='table'>
+        <table className='skill-addTable'>
           <thead>
             <tr>
               <th>Select</th>

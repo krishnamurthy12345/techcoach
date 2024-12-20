@@ -122,55 +122,57 @@ const AdvancedProfileTable = () => {
     };
 
     return (
-        <div className='main-table'>
-            <h3>Advanced - Profile</h3>
-            <div className='advanced-table'>
-                <form onSubmit={handleSubmit}>
-                    {Object.keys(formsData).map((type) => (
-                        <div key={type} className='form-section'>
-                            <div className='section-header'>
-                                <h5>{type.charAt(0).toUpperCase() + type.slice(1)}:</h5>
-                            </div>
-                            <div className='form-section-body'>
-                                {Array.isArray(formsData[type]) && formsData[type].length > 0 ? (
-                                    formsData[type].map((item, index) => (
-                                        <div key={index} className='input-row'>
-                                            <input
-                                                type='text'
-                                                value={item}
-                                                placeholder={`Enter Your ${type}...`}
-                                                onChange={(e) => handleChange(type, index, e.target.value)}
-                                            />
-                                            <div className='action-icons'>
-                                                <IoIosAddCircleOutline
-                                                    className='icons'
-                                                    onClick={() => handleAdd(type)}
+        <div className='AdvancedTable'>
+            <div className='main-Advancedtable'>
+            <h3>Advanced - Profile Details</h3>
+                <div className='advanced-table'>
+                    <form onSubmit={handleSubmit}>
+                        {Object.keys(formsData).map((type) => (
+                            <div key={type} className='form-section'>
+                                <div className='section-header'>
+                                    <h6>{type.charAt(0).toUpperCase() + type.slice(1)}:</h6>
+                                </div>
+                                <div className='form-section-body'>
+                                    {Array.isArray(formsData[type]) && formsData[type].length > 0 ? (
+                                        formsData[type].map((item, index) => (
+                                            <div key={index} className='input-row'>
+                                                <input
+                                                    type='text'
+                                                    value={item}
+                                                    placeholder={`Enter Your ${type}...`}
+                                                    onChange={(e) => handleChange(type, index, e.target.value)}
                                                 />
-                                                {formsData[type].length > 1 && (
-                                                    <IoIosRemoveCircleOutline
+                                                <div className='action-icons'>
+                                                    <IoIosAddCircleOutline
                                                         className='icons'
-                                                        onClick={() => handleRemove(type, index)}
+                                                        onClick={() => handleAdd(type)}
                                                     />
-                                                )}
+                                                    {formsData[type].length > 1 && (
+                                                        <IoIosRemoveCircleOutline
+                                                            className='icons'
+                                                            onClick={() => handleRemove(type, index)}
+                                                        />
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div> No data Available </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div> No data Available </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                    <button
-                        type='submit'
-                        className='save-AdvancedProfilebutton'
-                        disabled={loading}>
-                        {isNewAdvancedProfile ? (loading ? 'Saving...' : 'Save') : (loading ? 'Updating...' : 'Update')}
-                    </button>
-                </form>
+                        ))}
+                        <button
+                            type='submit'
+                            className='save-AdvancedProfilebutton'
+                            disabled={loading}>
+                            {isNewAdvancedProfile ? (loading ? 'Saving...' : 'Save') : (loading ? 'Updating...' : 'Update')}
+                        </button>
+                    </form>
+                </div>
+                <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
             </div>
-            <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
-            </div>
+        </div>
     );
 };
 

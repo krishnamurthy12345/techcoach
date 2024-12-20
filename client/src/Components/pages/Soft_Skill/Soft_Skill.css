@@ -1,27 +1,34 @@
 .center {
   text-align: center;
 }
-
-.table {
-  margin-top: 20px;
-  width: 90%;
-  border-collapse: collapse;
+.skill-form{
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
 }
 
-.table th, .table td {
+.skill-addTable {
+  margin-top: 20px;
+  border-collapse: collapse;
+  box-sizing: border-box;
+}
+
+.skill-addTable th, 
+.skill-addTable td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
 
 .textarea {
-  width: 80%;
+  width: 100%;
   height: 60px;
+  box-sizing: border-box;
 }
 
 .skill-option {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -40,6 +47,7 @@
   display: block;
   margin: 20px auto;
   padding: 10px 20px;
+  width: auto;
 }
 
 .error {
@@ -48,26 +56,27 @@
   margin-top: 10px;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
-  .table {
+  .skill-addTable {
     width: 100%;
-    margin-top: 20px;
   }
 
-  .table th, .table td {
+  .skill-addTable th, 
+  .skill-addTable td {
     display: block;
     width: 100%;
-    text-align: right;
-    padding: 10px;
+    text-align: center;
+    /* padding: 10px; */
   }
 
-  .table th {
+  .skill-addTable th {
     display: none;
   }
 
-  .table td::before {
+  .skill-addTable td::before {
     content: attr(data-label);
-    float: left;
+    /* float: left; */
     font-weight: bold;
     text-transform: uppercase;
   }
@@ -87,52 +96,30 @@
 }
 
 @media (max-width: 576px) {
-  .table, .table th, .table td {
-    display: block;
-    width: 100%;
-  }
-
-  .table th {
+  .skill-addTable th {
     display: none;
   }
 
-  .table td {
-    text-align: right;
-    padding-left: 50%;
+  .skill-addTable td {
+    text-align: center;
+    /* padding-left: 50%; */
     position: relative;
   }
 
-  .table td::before {
-    content: attr(data-label);
+  .skill-addTable td::before {
+    /* content: attr(data-label); */
     position: absolute;
-    left: 10px;
+    /* left: 10px; */
     font-weight: bold;
   }
 
-  .skill-option {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .textarea {
-    width: 100%;
     height: 80px;
-  }
-
-  .btn {
-    width: 100%;
   }
 }
 
 @media (max-width: 340px) {
-  .table, .table th, .table td {
-    display: block;
-    width: 100%;
-    text-align: right;
-  }
-
   .textarea {
-    width: 100%;
     height: 100px;
   }
 

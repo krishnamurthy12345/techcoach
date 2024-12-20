@@ -142,7 +142,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
             <Typography variant="h5">Decision Details</Typography>
             <Typography><strong>Name:</strong> {decision.decision_name}</Typography>
             <Typography><strong>Details:</strong> {decision.user_statement}</Typography>
-            <Typography><strong>Reasons:</strong> {decision.decision_reason_text && decision.decision_reason_text.join(', ')}</Typography>
+            <Typography><strong>Reasons:</strong> {decision.decision_reason && decision.decision_reason.join(', ')}</Typography>
             <Typography><strong>Due Date:</strong> {decision.decision_due_date}</Typography>
             <Typography><strong>Taken Date:</strong> {decision.decision_taken_date}</Typography>
             {selectedMember && (
