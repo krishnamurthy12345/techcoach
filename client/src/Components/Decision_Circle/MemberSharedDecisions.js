@@ -189,24 +189,38 @@ const MemberSharedDecisions = () => {
         setEditModalOpen(true);
     }
 
-
     const handleSaveEditComment = async () => {
+        if (!editContent.trim()) {
+            toast.error('Comment cannot be empty');
+            return;
+        }
+        const previousComments = { ...comments };
+        setComments((prevComments) => {
+            const updatedComments = { ...prevComments };
+            Object.keys(updatedComments).forEach((decisionId) => {
+                updatedComments[decisionId] = updatedComments[decisionId].map((comment) =>
+                    comment.id === editComment ? { ...comment, comment: editContent, updated_at: new Date().toISOString() } : comment
+                );
+            });
+            return updatedComments;
+        });
+    
+        setEditModalOpen(false);
+        setEditComment(null);
+        setEditContent('');
+    
         try {
             const updatedComment = { comment: editContent };
             await updateComment(editComment, updatedComment);
-            toast.success('Comment Updated successfully');
-            fetchComments();
-            setEditModalOpen(false);
-            setEditComment(null);
-            setEditContent('')
+            toast.success('Comment updated successfully');
         } catch (error) {
+            // Revert the optimistic update if the request fails
+            setComments(previousComments);
             console.error('Failed to update comment:', error);
             toast.error('Failed to update comment');
-        } finally {
-            setEditModalOpen(false);
         }
-    }
-
+    };
+    
 
     return (
         <div className='getGroup'>
