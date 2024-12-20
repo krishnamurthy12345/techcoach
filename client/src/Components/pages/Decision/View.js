@@ -390,8 +390,8 @@ const View = () => {
                                         className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
                                         style={{
                                             width: '90%', 
-                                            backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
-                                            textAlign: comment.type_of_member === 'member' ? 'left' : 'left', 
+                                            backgroundColor: comment.type_of_member === 'author' ? '#e8f5e9' : '#FFF',
+                                            textAlign: 'left', 
                                             padding: '8px',
                                             borderRadius: '8px',
                                             marginBottom: '16px',
