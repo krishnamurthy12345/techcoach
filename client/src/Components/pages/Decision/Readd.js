@@ -296,8 +296,13 @@ const Readd = () => {
 
     return (
       <div className='container-fluid'>
+        <div className='decision-factor-button'>
+          <Link to='/getall'>
+          <Button>Decision Factors</Button>
+          </Link>
+        </div>
         <div className='row'>
-          <div className='col-12 col-lg-6 d-flex justify-content-center'>
+          <div className='col-12 col-lg-6 d-flex mt-3 justify-content-center'>
             <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '585px', borderRadius: '10px', marginBottom: '20px' }}>
               <DataGrid
                 rows={rows.slice(0, 50)}

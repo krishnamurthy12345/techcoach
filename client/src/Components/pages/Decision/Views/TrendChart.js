@@ -47,7 +47,7 @@ const TrendChart = () => {
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December',
     ];
-
+  
     const groupedData = rawData.reduce(
       (acc, item) => {
         if (item.decision_taken_date) {
@@ -58,7 +58,7 @@ const TrendChart = () => {
           }
           acc.taken[takenYearMonth]++;
         }
-
+  
         if (item.decision_due_date) {
           const dueDate = new Date(item.decision_due_date);
           const dueYearMonth = `${months[dueDate.getMonth()]} ${dueDate.getFullYear()}`;
@@ -67,25 +67,34 @@ const TrendChart = () => {
           }
           acc.due[dueYearMonth]++;
         }
-
+  
         return acc;
       },
       { taken: {}, due: {} }
     );
-
+  
     const combinedData = {};
-
+  
     Object.entries(groupedData.taken).forEach(([month, count]) => {
       if (!combinedData[month]) combinedData[month] = { month, taken: 0, due: 0 };
       combinedData[month].taken = count;
     });
-
+  
     Object.entries(groupedData.due).forEach(([month, count]) => {
       if (!combinedData[month]) combinedData[month] = { month, taken: 0, due: 0 };
       combinedData[month].due = count;
     });
-
-    return Object.values(combinedData);
+  
+    // Sort combinedData by year and month
+    const sortedData = Object.values(combinedData).sort((a, b) => {
+      const [monthA, yearA] = a.month.split(' ');
+      const [monthB, yearB] = b.month.split(' ');
+      const dateA = new Date(`${yearA}-${months.indexOf(monthA) + 1}`);
+      const dateB = new Date(`${yearB}-${months.indexOf(monthB) + 1}`);
+      return dateA - dateB;
+    });
+  
+    return sortedData;
   };
 
   const trendData = prepareTrendData(data);

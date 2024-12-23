@@ -1,0 +1,26 @@
+.chart-container {
+  max-width: 60%;
+  height: 500px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around; 
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  overflow: hidden; /* Prevent any overflow issues */
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    max-width: 90%; /* Wider for smaller screens */
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    max-width: 95%; /* Expand width for very small screens */
+    height: 250px;
+  }
+}
