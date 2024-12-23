@@ -79,9 +79,6 @@ const SharedDecisionCircle = () => {
         if (!id) {
             return toast.error('Group ID is missing');
         }
-        if (!comment) {
-            return toast.error('Comment cannot be empty');
-        }
         setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
         try {
             const dataToSend = await postShareWithComment(id, comment, decisionId);

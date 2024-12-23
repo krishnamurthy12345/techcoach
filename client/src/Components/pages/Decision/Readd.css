@@ -186,3 +186,15 @@ input[type="textt"]{
 .custom-switch input:checked + .slider:before {
   transform: translateX(21px);
 }
+
+.decision-factor-button{
+  background-color: white;
+  max-width: 100px;
+  border-radius: 5px;
+}
+.decision-factor-button:hover{
+  max-width: 100px;
+  background-color: #cacaca;
+  border-radius: 5px;
+  color: #ccc;
+}
