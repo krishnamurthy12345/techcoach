@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import axios from 'axios';
 
-const BubbleChart = () => {
+const BubbleChart = ({ onBubbleClick }) => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [isChartReady, setIsChartReady] = useState(false);
 
   const chartOptions = {
     chart: {
       type: 'bubble',
       height: '100%',
       width: '100%',
+      events: {
+        dataPointSelection: (event, chartContext, config) => {
+          const { seriesIndex, dataPointIndex } = config;
+          const selectedData = chartSeries[seriesIndex]?.data[dataPointIndex];
+          if (onBubbleClick && selectedData) {
+            onBubbleClick(selectedData); 
+          }
+        },
+      },
     },
     dataLabels: {
       enabled: false,
@@ -32,39 +42,39 @@ const BubbleChart = () => {
         text: 'Categories (Profiles and Skills)',
       },
       labels: {
-        rotate: -45, // Rotate labels for better spacing
+        rotate: -45,
       },
     },
     yaxis: {
-      max: 100, // Increase if bubbles are cut off vertically
-      min: 0, // Ensure y-axis starts from 0
-      tickAmount: 10, // Increase number of ticks for better spacing
+      max: 100,
+      min: 0,
+      tickAmount: 10,
       title: {
         text: 'Category Count',
       },
     },
     grid: {
       padding: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10, // Add padding to prevent bubbles from being clipped
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 20,
       },
     },
     plotOptions: {
       bubble: {
-        maxBubbleRadius: 40, // Adjust for consistent sizing
-        minBubbleRadius: 5, // Avoid very small bubbles
+        maxBubbleRadius: 30,
+        minBubbleRadius: 10,
       },
     },
+    tooltip: {
+      enabled: true,
+      shared: false,
+    },
   };
-  
-  // Fetch data for Profiles and Skills
+
   const fetchData = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication token missing');
@@ -72,84 +82,73 @@ const BubbleChart = () => {
 
       const [profileResponse, skillResponse] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API_URL}/api/links`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }),
         axios.get(`${process.env.REACT_APP_API_URL}/api/link`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
-      if (profileResponse.data?.profiles) {
-        setProfiles(profileResponse.data.profiles);
-      } else {
-        throw new Error('No profiles data found');
-      }
-
-      if (skillResponse.data?.skills) {
-        setSkills(skillResponse.data.skills);
-      } else {
-        throw new Error('No skills data found');
-      }
-
-      generateSeries();
+      setProfiles(profileResponse.data.profiles || []);
+      setSkills(skillResponse.data.skills || []);
     } catch (err) {
-      console.error('Error fetching data:', err);
       setError(err.message || 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
   };
 
-  // Generate chart data for profiles and skills
   const generateSeries = () => {
-    const maxZ = Math.max(
-      ...profiles.map((p) => p.v_id || 70),
-      ...skills.map((s) => (s.skill_id ? s.skill_id * 10 : 100))
-    );
-  
+    const scaleFactor = 10;
     const profileSeries = {
       name: 'Profiles',
       data: profiles.map((profile, index) => ({
         x: `${profile.header_name} - ${profile.header_value}`,
         y: index * 10 + 10,
-        z: Math.min(profile.v_id || 70, maxZ), // Scale within bounds
+        z: Math.min(profile.v_id || 20, 50) * scaleFactor,
+        metadata: profile, // Add metadata for filtering
       })),
     };
-  
+
     const skillSeries = {
       name: 'Skills',
       data: skills.map((skill, index) => ({
         x: skill.skill_name,
         y: index * 10 + 10,
-        z: Math.min(skill.skill_id ? skill.skill_id * 10 : 100, maxZ),
+        z: Math.min(skill.skill_id || 10, 50) * scaleFactor,
+        metadata: skill, // Add metadata for filtering
       })),
     };
-  
+
     setChartSeries([profileSeries, skillSeries]);
   };
-  
-
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  chartOptions.plotOptions.bubble = {
-    maxBubbleRadius: window.innerWidth < 768 ? 20 : 40, // Smaller bubbles on small screens
-    minBubbleRadius: window.innerWidth < 768 ? 3 : 5,
-  };
+  useEffect(() => {
+    if (profiles.length > 0 && skills.length > 0) {
+      generateSeries();
+    }
+  }, [profiles, skills]);
 
-  
+  useEffect(() => {
+    setTimeout(() => {
+      setIsChartReady(true);
+    }, 200);
+  }, []);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="chart-container" style={{ maxWidth: '60%', height: '500px',margin:'auto' }}>
-      <Chart options={chartOptions} series={chartSeries} type="bubble" height="100%" width="100%" />
+    <div className="chart-container" style={{ maxWidth: '70%', height: '500px', margin: 'auto' }}>
+      {isChartReady && chartSeries.length > 0 ? (
+        <Chart options={chartOptions} series={chartSeries} type="bubble" height="500px" />
+      ) : (
+        <p>Loading chart...</p>
+      )}
     </div>
   );
 };

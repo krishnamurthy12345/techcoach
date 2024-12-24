@@ -186,6 +186,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import withAuth from '../../withAuth';
 
 const AdvancedProfileTable = () => {
     const [formsData, setFormsData] = useState({
@@ -369,4 +370,4 @@ const AdvancedProfileTable = () => {
     );
 };
 
-export default AdvancedProfileTable;
+export default withAuth(AdvancedProfileTable);
