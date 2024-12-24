@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './AdvancedProfile.css';
+import withAuth from '../../withAuth';
 
 const AdvancedProfile = () => {
   const [advancedProfileData, setAdvancedProfileData] = useState({});
@@ -72,4 +73,4 @@ const AdvancedProfile = () => {
   );
 };
 
-export default AdvancedProfile;
+export default withAuth(AdvancedProfile);
