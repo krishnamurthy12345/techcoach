@@ -215,14 +215,18 @@ const GetLink = () => {
   // Filter profiles based on filteredData
   const filterProfiles = () => {
     if (!filteredData) return profiles; // Show all if no filter
+    
     return profiles.filter(profile => {
-      if (filteredData.header_name) {
-        return profile.header_name === filteredData.header_name &&
-               profile.header_value === filteredData.header_value;
+      if (filteredData.header_name && filteredData.decision_names) {
+        return (
+          profile.header_name === filteredData.header_name &&
+          filteredData.decision_names.includes(profile.decision_name)
+        );
       }
       return false;
     });
   };
+  
 
   // Filter skills based on filteredData
   const filterSkills = () => {
@@ -278,7 +282,7 @@ const GetLink = () => {
       <BubbleChart onBubbleClick={handleBubbleClick} /> {/* Pass the function to handle bubble click */}
 
       {/* Show filtered profiles based on bubble selection */}
-      <h3>Profiles</h3>
+      <h3 className='getLink-heading'>Profiles</h3>
       <div className="swot-decision">
         {filterProfiles().map((profile, index) => (
           <div
@@ -296,7 +300,7 @@ const GetLink = () => {
       </div>
 
       {/* Show filtered skills based on bubble selection */}
-      <h3 className='mt-3'>Soft Skills</h3>
+      <h3 className='mt-3 getLink-heading'>Soft Skills</h3>
       <div className='skill-decision'>
         {filterSkills().map((skill, index) => (
           <div className='skill-decisions' key={index}>
