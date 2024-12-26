@@ -5,9 +5,10 @@
     justify-content: center;
     margin-top: 20px;
 }
-h3{
+.getLink-heading{
     font-size:x-large;
     font-weight: 600;
+    margin-top: 30px;
 }
 .getlink{
   margin-left: 20px;
