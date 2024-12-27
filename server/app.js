@@ -44,7 +44,7 @@ app.use('/group',commentRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api',advancedProfileRoutes);
 app.use('/link',advancedLinkRoutes);
-app.use('/mobile',mobileNumberRoutes)
+app.use('/api',mobileNumberRoutes)
 
 
 app.listen(PORT, () => {

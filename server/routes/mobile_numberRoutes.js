@@ -7,7 +7,8 @@ const mobileNumberController = require('../Controllers/mobile_numberController')
 router.use(authMiddleware);
 router.use(createUserKey);
 
-router.post('/',mobileNumberController.postMobileInfo);
+router.post('/mobile',mobileNumberController.postMobileInfo);
 router.get('/',mobileNumberController.getMobileInfo);
+router.post('/rating',mobileNumberController.postRatingInfo);
 
 module.exports = router;
