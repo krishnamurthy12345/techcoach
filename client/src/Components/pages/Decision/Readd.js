@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Chip from '@mui/material/Chip';
 import './Readd.css';
 import withAuth from '../../withAuth';
+import { MdStarRate } from "react-icons/md";
 import TrendChart from './Views/TrendChart';
 
 const Readd = () => {
@@ -205,6 +206,13 @@ const Readd = () => {
                   >
                     <MdLink />
                   </IconButton>
+                  <IconButton
+                    component={Link}
+                    to={`/rating/${decision.decision_id}?name=${decision.decision_name}`}
+                    style={{ color: '#526D82' }}
+                  >
+                    <MdStarRate />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             );
@@ -298,7 +306,7 @@ const Readd = () => {
       <div className='container-fluid'>
         <div className='decision-factor-button'>
           <Link to='/getall'>
-          <Button>Decision Factors</Button>
+            <Button>Decision Factors</Button>
           </Link>
         </div>
         <div className='row'>

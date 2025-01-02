@@ -10,5 +10,8 @@ router.use(createUserKey);
 router.post('/mobile',mobileNumberController.postMobileInfo);
 router.get('/',mobileNumberController.getMobileInfo);
 router.post('/rating',mobileNumberController.postRatingInfo);
+router.get('/rating/:id',mobileNumberController.getRatingInfo);
+router.put('/rating/edit/:id',mobileNumberController.putRatingInfo);
+router.get('/rating/overall/:id',mobileNumberController.getOverallRating);
 
 module.exports = router;

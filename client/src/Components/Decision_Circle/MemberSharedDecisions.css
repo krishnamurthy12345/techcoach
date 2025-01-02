@@ -109,3 +109,10 @@ button + button {
     font-size: 16px;
     color: #888;
 }
+.member-rating{
+    background-color: #fcfcfc;
+    max-width: 300px;
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}

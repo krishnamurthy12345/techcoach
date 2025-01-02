@@ -1,0 +1,46 @@
+.rating-card{
+    background-color: #f3f3f3;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+}
+.rating-point{
+    font-size: 35px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.filled-star {
+    color: gold;
+    font-size: 1.5rem;
+}
+
+.empty-star {
+    color: lightgray;
+    font-size: 1.5rem;
+}
+.rate-reviews{
+    text-align: center;
+    gap: 10px;
+}
+.stars{
+    font-size: 22px;
+}
+.rating-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.average-rating {
+    margin-bottom: 20px;
+}
+
+.individual-ratings ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.individual-ratings li {
+    margin-bottom: 10px;
+}
