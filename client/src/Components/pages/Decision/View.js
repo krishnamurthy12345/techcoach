@@ -446,8 +446,6 @@ const View = () => {
 
             </Box>
 
-
-
             <Popover
                 open={isPopoverOpen}
                 anchorEl={null}

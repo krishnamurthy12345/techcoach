@@ -38,6 +38,9 @@ import MemberSharedDecisions from './Components/Decision_Circle/MemberSharedDeci
 import SharedDecisionCircle from './Components/Decision_Circle/SharedDecisionCircle.js';
 import AdvancedProfile from './Components/pages/Profile_Table/AdvancedProfile.js';
 import AdvancedProfileTable from './Components/pages/Profile_Table/AdvancedProfileTable.js';
+import Rating from './Components/pages/Ratings/Rating.js';
+import EditRating from './Components/pages/Ratings/EditRating.js';
+import MemberRating from './Components/pages/Ratings/MemberRating.js';
 
 function App() {
   console.log("one is working")
@@ -105,8 +108,9 @@ function App() {
         <Route path='/softskill' element={<SoftSkill />} />
         <Route path='/skillget' element={<Skillget />} />
         <Route path='/editskill/:id' element={<EditSkill />} />
-        <Route path='/link/:id' element={<AddLink />} />
-        <Route path='/getall' element={<GetLink />} />
+
+        {/* <Route path='/link/:id' element={<AddLink />} />
+        <Route path='/getall' element={<GetLink />} /> */}
 
 
         {/* Decision Routes */}
@@ -139,6 +143,10 @@ function App() {
 
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
+
+        {/* Ratings */}
+        <Route path='/rating/:id' element={<Rating />} />
+        <Route path='/rating/edit/:decisionId' element={<EditRating/>} />
 
       </Routes>
     </div>

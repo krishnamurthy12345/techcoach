@@ -8,6 +8,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import './MemberSharedDecisions.css';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import axios from 'axios';
+import MemberRating from '../pages/Ratings/MemberRating';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
@@ -52,7 +53,7 @@ const MemberSharedDecisions = () => {
                 setGroups(response.data.group);
                 setMembers(response.data.members);
             }
-            console.log('details',response.data)
+            console.log('details', response.data)
         } catch (err) {
             toast.error('An error occurred while fetching the group details.');
             console.error(err);
@@ -204,11 +205,11 @@ const MemberSharedDecisions = () => {
             });
             return updatedComments;
         });
-    
+
         setEditModalOpen(false);
         setEditComment(null);
         setEditContent('');
-    
+
         try {
             const updatedComment = { comment: editContent };
             await updateComment(editComment, updatedComment);
@@ -220,7 +221,7 @@ const MemberSharedDecisions = () => {
             toast.error('Failed to update comment');
         }
     };
-    
+
 
     return (
         <div className='getGroup'>
@@ -254,7 +255,6 @@ const MemberSharedDecisions = () => {
                     )}
                 </div>
             )}
-
             <h6>Shared with Decisions</h6>
             <Grid container spacing={3}>
                 {decisions.length > 0 ? (
@@ -372,6 +372,9 @@ const MemberSharedDecisions = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
+                                <div className='member-rating'>
+                                    <MemberRating decisionId={decision.decision_id}/>
+                                </div>
                             </Grid>
                         );
                     })
