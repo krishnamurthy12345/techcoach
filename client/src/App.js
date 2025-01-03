@@ -40,7 +40,6 @@ import AdvancedProfile from './Components/pages/Profile_Table/AdvancedProfile.js
 import AdvancedProfileTable from './Components/pages/Profile_Table/AdvancedProfileTable.js';
 import Rating from './Components/pages/Ratings/Rating.js';
 import EditRating from './Components/pages/Ratings/EditRating.js';
-import MemberRating from './Components/pages/Ratings/MemberRating.js';
 
 function App() {
   console.log("one is working")
@@ -89,35 +88,35 @@ function App() {
         <Route path='/decisioncircle' element={<DecisionCircle />} />
         <Route path='/innerCircle' element={<InnerCircle />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path = '/advancedProfile' element={<AdvancedProfile />} />
         <Route path='/softskill' element={<SoftSkill />} />
+
 
         {/* Profile Routes */}
         <Route path='/profiletab' element={<ProfileTab />} />
-        <Route path = '/advancedProfile' element={<AdvancedProfile />} />
         <Route path = '/advancedProfileTable' element={<AdvancedProfileTable />} />
+
 
         {/* Soft_Skills Routes */}
         <Route path='/skillget' element={<Skillget />} />
         <Route path='/editskill/:id' element={<EditSkill />} />
+
 
         {/* decision-swot-skill Routes */}
         <Route path='/link/:id' element={<AddLink />} />
         <Route path='/getall' element={<GetLink />} />
 
+
         {/* Soft_Skills Routes */}
-        <Route path='/softskill' element={<SoftSkill />} />
         <Route path='/skillget' element={<Skillget />} />
         <Route path='/editskill/:id' element={<EditSkill />} />
-
-        {/* <Route path='/link/:id' element={<AddLink />} />
-        <Route path='/getall' element={<GetLink />} /> */}
-
 
         {/* Decision Routes */}
         <Route path='/decision' element={<Decision />} />
         <Route path='/decision/:id' element={<Decision />} />
         <Route path='/readd' element={<Readd />} />
         <Route path='/views/:id' element={<View />} />
+
 
         {/* Create Decision Circle Routes */}
         <Route path='/decisioncircle/:id' element={<DecisionCircle />} />
@@ -141,8 +140,10 @@ function App() {
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
         <Route path='/shareAcceptOrNot' element={<AcceptOrNot />} />
 
+
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
+
 
         {/* Ratings */}
         <Route path='/rating/:id' element={<Rating />} />

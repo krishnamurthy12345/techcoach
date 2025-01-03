@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { Pagination, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress, Select, MenuItem } from '@mui/material';
@@ -26,6 +26,7 @@ const Readd = () => {
   const [selectedTag, setSelectedTag] = useState('');
   const [sortCriteria, setSortCriteria] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -304,11 +305,6 @@ const Readd = () => {
 
     return (
       <div className='container-fluid'>
-        <div className='decision-factor-button'>
-          <Link to='/getall'>
-            <Button>Decision Factors</Button>
-          </Link>
-        </div>
         <div className='row'>
           <div className='col-12 col-lg-6 d-flex mt-3 justify-content-center'>
             <TableContainer component={Paper} sx={{ padding: 2, maxWidth: '585px', borderRadius: '10px', marginBottom: '20px' }}>
@@ -689,6 +685,20 @@ const Readd = () => {
             }}
           >
             How Am I Doing?
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/getall')}
+            sx={{
+              backgroundColor: '#ffffff',
+              color: '#526D82',
+              '&:hover': {
+                backgroundColor: '#f5f5f5'
+              },
+              marginLeft: 2
+            }}
+          >
+            Decision Factors
           </Button>
         </Box>
         {(view === 'timeline' || view === 'table') && (

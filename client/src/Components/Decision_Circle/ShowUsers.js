@@ -10,6 +10,7 @@ import { AiFillEdit } from "react-icons/ai";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { Card, CardContent, Typography, Grid, Avatar, Box, TextField, Button, Modal } from '@mui/material';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import MemberRating from '../pages/Ratings/MemberRating';
 
 const ShowUsers = () => {
     const [groups, setGroups] = useState(null);
@@ -198,7 +199,7 @@ const ShowUsers = () => {
             toast.error('Comment cannot be empty');
             return;
         }
-            setComments((prevComments) => {
+        setComments((prevComments) => {
             const updatedComments = { ...prevComments };
             Object.keys(updatedComments).forEach((decisionId) => {
                 updatedComments[decisionId] = updatedComments[decisionId].map((comment) =>
@@ -207,11 +208,11 @@ const ShowUsers = () => {
             });
             return updatedComments;
         });
-    
+
         setEditModalOpen(false);
         setEditComment(null);
         setEditContent('');
-    
+
         try {
             const updatedComment = { comment: editContent };
             await updateComment(editComment, updatedComment);
@@ -222,9 +223,9 @@ const ShowUsers = () => {
             toast.error('Failed to update comment');
         }
     };
-    
+
     return (
-        <div className="getGroupp">
+        <div className='getGroupp'>
             {groups && (
                 <div className="group-details">
                     <h4>{groupName || groups.group_name}</h4>
@@ -266,112 +267,109 @@ const ShowUsers = () => {
                 <h4>Shared by Decisions</h4>
                 <Grid container spacing={3}>
                     {Array.isArray(decisions) && decisions.length > 0 ? (
-                        decisions.map(decision => (
-                            <Grid item xs={12} sm={6} md={12} key={decision.decision_id}>
-                                <Card>
-                                    <CardContent>
-                                        <Typography variant="h6">{decision.decision_name}</Typography>
-                                        <Typography variant="body2">
-                                            <b>Decision Details:</b> {decision.user_statement}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <b>Due Date:</b> {decision.decision_due_date ? new Date(decision.decision_due_date).toISOString().split('T')[0] : ''}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <b>Taken Date:</b> {decision.decision_taken_date ? new Date(decision.decision_taken_date).toISOString().split('T')[0] : ''}
-                                        </Typography>
-                                        <Typography variant="body2" className="mt-2">
-                                            <b>Reasons:</b>
-                                        </Typography>
-                                        <ul>
-                                            {decision.reasons && decision.reasons.length > 0 ? (
-                                                decision.reasons.map((reason, index) => (
-                                                    <li key={index}>
-                                                        <Typography variant="body2">{reason}</Typography>
-                                                    </li>
-                                                ))
-                                            ) : (
-                                                <Typography variant="body2">No reasons provided.</Typography>
-                                            )}
-                                        </ul>
-                                        <Typography variant="body2">
-                                            <b>Selected Tags:</b> {decision.tags && decision.tags.map(tag => tag.tag_name).join(', ')}
-                                        </Typography>
-                                        <Typography variant='h6'>Shared by: {decision.shared_by}</Typography>
+                        decisions.map((decision) => {
+                            return (
+                                <Grid item xs={12} key={decision.decision_id}>
+                                    <Card>
+                                        <CardContent>
+                                            <Typography variant="h6">{decision.decision_name}</Typography>
+                                            <Typography variant="body2"><b>Decision Details:</b> {decision.user_statement}</Typography>
+                                            <Typography variant="body2"><b>Due Date:</b> {decision.decision_due_date ? new Date(decision.decision_due_date).toISOString().split('T')[0] : ''}</Typography>
+                                            <Typography variant="body2"><b>Taken Date:</b> {decision.decision_taken_date ? new Date(decision.decision_taken_date).toISOString().split('T')[0] : ''}</Typography>
+                                            <Typography variant="body2" className="mt-2"><b>Reasons:</b></Typography>
+                                            <ul>
+                                                {decision.reasons && decision.reasons.length > 0 ? (
+                                                    decision.reasons.map((reason, index) => (
+                                                        <li key={index}>
+                                                            <Typography variant="body2">{reason}</Typography>
+                                                        </li>
+                                                    ))
+                                                ) : (
+                                                    <Typography variant="body2">No reasons provided.</Typography>
+                                                )}
+                                            </ul>
+                                            <Typography variant="body2">
+                                                <b>Selected Tags:</b> {decision.tags && decision.tags.map(tag => tag.tag_name).join(', ')}
+                                            </Typography>
+                                            <Typography variant='h6'>Shared by: {decision.shared_by}</Typography>
 
-                                        <h6 className='mt-3'>Comments:</h6>
-                                        <div className="comments-section">
-                                            {comments[decision.decision_id] && comments[decision.decision_id].length > 0 ? (
-                                                comments[decision.decision_id].map(comment => (
-                                                    <div
-                                                        key={comment.id}
-                                                        className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
-                                                        style={{
-                                                            backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
-                                                            textAlign: comment.parentCommentId ? 'left' : 'left',
-                                                            padding: '8px',
-                                                            borderRadius: '8px',
-                                                            marginBottom: '16px',
-                                                            position: 'relative',
-                                                            border: '1px solid #ccc',
-                                                        }}
-                                                    >
-                                                        <Typography>{comment.comment}</Typography>
-                                                        {comment.type_of_member === 'author' && (
-                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                                <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }}
-                                                                    onClick={() => handleEditClick(comment)}
-                                                                />
-                                                                <MdOutlineDeleteForever
-                                                                    style={{ cursor: 'pointer' }}
-                                                                    onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
-                                                                />
+                                            <h6 className='mt-3'>Comments:</h6>
+                                            <div className="comments-section">
+                                                {comments[decision.decision_id] && comments[decision.decision_id].length > 0 ? (
+                                                    comments[decision.decision_id].map(comment => (
+                                                        <div
+                                                            key={comment.id}
+                                                            className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
+                                                            style={{
+                                                                backgroundColor: comment.parentCommentId ? '#e8f5e9' : '#FFF',
+                                                                textAlign: comment.parentCommentId ? 'left' : 'left',
+                                                                padding: '8px',
+                                                                borderRadius: '8px',
+                                                                marginBottom: '16px',
+                                                                position: 'relative',
+                                                                border: '1px solid #ccc',
+                                                            }}
+                                                        >
+                                                            <Typography>{comment.comment}</Typography>
+                                                            {comment.type_of_member === 'author' && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer' }}
+                                                                        onClick={() => handleEditClick(comment)}
+                                                                    />
+                                                                    <MdOutlineDeleteForever
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => handleDeleteComment(comment.id, decision.decision_id)}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                                                <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                                    {comment.displayname[0]}
+                                                                </Avatar>
+                                                                <div>
+                                                                    <Typography variant="caption">
+                                                                        {comment.displayname} | {comment.email} |
+                                                                        {comment.created_at === comment.updated_at
+                                                                            ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                                            : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
+                                                                    </Typography>
+                                                                </div>
                                                             </div>
-                                                        )}
-                                                        <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
-                                                                {comment.displayname[0]}
-                                                            </Avatar>
-                                                            <div>
-                                                                <Typography variant="caption">
-                                                                    {comment.displayname} | {comment.email} |
-                                                                    {comment.created_at === comment.updated_at
-                                                                        ? <span> {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                                        : <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>}
-                                                                </Typography>
+                                                            <div style={{ display: 'flex', justifyContent: comment.parentCommentId ? 'flex-end' : 'flex-start', marginTop: '8px', gap: '10px' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    className="comment-input"
+                                                                    placeholder="Reply  to this comment..."
+                                                                    value={replyComment[decision.decision_id]?.[comment.id] || ''}
+                                                                    onChange={(e) => handleReplyInputChange(decision.decision_id, comment.id, e.target.value)}
+                                                                    style={{ width: '60%', fontSize: '12px', marginRight: '8px' }}
+                                                                // style={{ flexGrow: 1, padding:'8px' }}
+                                                                />
+                                                                <button
+                                                                    className="reply-button"
+                                                                    onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
+                                                                    Reply
+                                                                </button>
+                                                                <button
+                                                                    className="reply-button"
+                                                                    onClick={() => handleMailToReplyComment(decision.decision_id, comment.id, true)}>
+                                                                    Reply & Email
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', justifyContent: comment.parentCommentId ? 'flex-end' : 'flex-start', marginTop: '8px', gap: '10px' }}>
-                                                            <input
-                                                                type="text"
-                                                                className="comment-input"
-                                                                placeholder="Reply  to this comment..."
-                                                                value={replyComment[decision.decision_id]?.[comment.id] || ''}
-                                                                onChange={(e) => handleReplyInputChange(decision.decision_id, comment.id, e.target.value)}
-                                                                style={{ width: '60%', fontSize: '12px', marginRight: '8px' }}
-                                                            // style={{ flexGrow: 1, padding:'8px' }}
-                                                            />
-                                                            <button
-                                                                className="reply-button"
-                                                                onClick={() => handleReplyComment(decision.decision_id, comment.id)}>
-                                                                Reply
-                                                            </button>
-                                                            <button
-                                                                className="reply-button"
-                                                                onClick={() => handleMailToReplyComment(decision.decision_id, comment.id, true)}>
-                                                                Reply & Email
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p>No comments yet</p>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))
+                                                    ))
+                                                ) : (
+                                                    <p>No comments yet</p>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    <div className='member-rating'>
+                                        <MemberRating decisionId={decision.decision_id} />
+                                    </div>
+                                </Grid>
+                            );
+                        })
                     ) : (
                         <Typography style={{ marginTop: '15px', marginLeft: '25px', padding: '5px' }} variant="body2">No decisions available.</Typography>
                     )}

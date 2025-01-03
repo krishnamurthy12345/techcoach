@@ -170,11 +170,11 @@ import BubbleChart from '../Decision/Views/BubbleChart';
 const GetLink = () => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
-  const [filteredData, setFilteredData] = useState(null); // Holds filtered data after bubble click
+  const [filteredData, setFilteredData] = useState(null); 
 
   const handleBubbleClick = (data) => {
     console.log('Selected Bubble Data:', data);
-    setFilteredData(data.metadata); // Use metadata for filtering
+    setFilteredData(data.metadata); 
   };
 
   const fetchProfiles = async () => {
@@ -185,7 +185,7 @@ const GetLink = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setProfiles(response.data.profiles); // Store profiles
+      setProfiles(response.data.profiles); 
       console.log('Fetched profiles:', response.data.profiles);
     } catch (err) {
       console.error('Error fetching profiles:', err);
@@ -200,7 +200,7 @@ const GetLink = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSkills(response.data.skills); // Store skills
+      setSkills(response.data.skills); 
       console.log('Fetched Skills:', response.data.skills);
     } catch (err) {
       console.error('Error fetching skills:', err);
@@ -214,8 +214,8 @@ const GetLink = () => {
 
   // Filter profiles based on filteredData
   const filterProfiles = () => {
-    if (!filteredData) return profiles; // Show all if no filter
-    
+    if (!filteredData) return profiles; 
+
     return profiles.filter(profile => {
       if (filteredData.header_name && filteredData.decision_names) {
         return (
@@ -226,11 +226,11 @@ const GetLink = () => {
       return false;
     });
   };
-  
+
 
   // Filter skills based on filteredData
   const filterSkills = () => {
-    if (!filteredData) return skills; // Show all if no filter
+    if (!filteredData) return skills; 
     return skills.filter(skill => {
       if (filteredData.skill_name) {
         return skill.skill_name === filteredData.skill_name;
@@ -249,8 +249,8 @@ const GetLink = () => {
           },
         });
         toast.success('Decision-SWOT-link deleted successfully');
-        fetchProfiles(); // Re-fetch the profiles after deletion
-        setFilteredData(null); // Reset filtered data
+        fetchProfiles(); 
+        setFilteredData(null); 
       } catch (error) {
         console.error('Error deleting decision-link:', error);
         toast.error('An error occurred while deleting the decision-link');
@@ -268,8 +268,8 @@ const GetLink = () => {
           },
         });
         toast.success('Decision-Skill-link deleted successfully');
-        fetchSkills(); // Re-fetch the skills after deletion
-        setFilteredData(null); // Reset filtered data
+        fetchSkills(); 
+        setFilteredData(null); 
       } catch (error) {
         console.error('Error deleting decision-link:', error);
         toast.error('An error occurred while deleting the decision-link');
@@ -279,7 +279,7 @@ const GetLink = () => {
 
   return (
     <div className='getlink'>
-      <BubbleChart onBubbleClick={handleBubbleClick} /> {/* Pass the function to handle bubble click */}
+      <BubbleChart onBubbleClick={handleBubbleClick} /> 
 
       {/* Show filtered profiles based on bubble selection */}
       <h3 className='getLink-heading'>Profiles</h3>
@@ -290,7 +290,7 @@ const GetLink = () => {
             key={index}
           >
             <h5><strong>{profile.header_name}</strong></h5>
-            <h6><strong>SWOT values:</strong> {profile.header_value}</h6>
+            <h6><strong>{profile.type_of_profile === 'Advanced_Profile' ? 'GVRCO values:' : 'SWOT values:'}</strong>{profile.header_value}</h6>
             <p>
               <strong>Decision Name:</strong> {profile.decision_name}
               <TiDelete className='fs-4' onClick={() => handleDeleteSwot(profile.decision_id)} />
