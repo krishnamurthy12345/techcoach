@@ -1,402 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import Chart from 'react-apexcharts';
-// import axios from 'axios';
-// import './BubbleChart.css';
-
-// const BubbleChart = ({ onBubbleClick }) => {
-//   const [profiles, setProfiles] = useState([]);
-//   const [skills, setSkills] = useState([]);
-//   const [chartSeries, setChartSeries] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState('');
-//   const [isChartReady, setIsChartReady] = useState(false);
-
-//   const chartOptions = {
-//     chart: {
-//       type: 'bubble',
-//       height: '100%',
-//       width: '100%',
-//       events: {
-//         dataPointSelection: (event, chartContext, config) => {
-//           const { seriesIndex, dataPointIndex } = config;
-//           const selectedData = chartSeries[seriesIndex]?.data[dataPointIndex];
-//           if (onBubbleClick && selectedData) {
-//             onBubbleClick(selectedData); 
-//           }
-//         },
-//       },
-//     },
-//     dataLabels: {
-//       enabled: false,
-//     },
-//     fill: {
-//       opacity: 0.8,
-//     },
-//     title: {
-//       text: 'Bubble Chart of Profiles and Skills',
-//       align: 'center',
-//     },
-//     xaxis: {
-//       type: 'category',
-//       tickPlacement: 'on',
-//       title: {
-//         text: 'Categories (Profiles and Skills)',
-//       },
-//       labels: {
-//         rotate: -45,
-//       },
-//     },
-//     yaxis: {
-//       max: 100,
-//       min: 0,
-//       tickAmount: 10,
-//       title: {
-//         text: 'Category Count',
-//       },
-//     },
-//     grid: {
-//       padding: {
-//         left: 20,
-//         right: 20,
-//         top: 20,
-//         bottom: 20,
-//       },
-//     },
-//     plotOptions: {
-//       bubble: {
-//         maxBubbleRadius: 30,
-//         minBubbleRadius: 10,
-//       },
-//     },
-//     tooltip: {
-//       enabled: true,
-//       shared: false,
-//     },
-//   };
-
-//   const fetchData = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       if (!token) {
-//         throw new Error('Authentication token missing');
-//       }
-
-//       const [profileResponse, skillResponse] = await Promise.all([
-//         axios.get(`${process.env.REACT_APP_API_URL}/api/links`, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }),
-//         axios.get(`${process.env.REACT_APP_API_URL}/api/link`, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }),
-//       ]);
-
-//       setProfiles(profileResponse.data.profiles || []);
-//       setSkills(skillResponse.data.skills || []);
-//       console.log('nanan',[profileResponse.data,skillResponse.data])
-//     } catch (err) {
-//       setError(err.message || 'Failed to fetch data');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const generateSeries = () => {
-//     const scaleFactor = 10;
-//     const profileSeries = {
-//       name: 'Profiles',
-//       data: profiles.map((profile, index) => ({
-//         x: `${profile.header_name} - ${profile.header_value}`,
-//         y: index * 10 + 10,
-//         z: Math.min(profile.v_id || 20, 50) * scaleFactor,
-//         metadata: profile, // Add metadata for filtering
-//       })),
-//     };
-
-//     const skillSeries = {
-//       name: 'Skills',
-//       data: skills.map((skill, index) => ({
-//         x: skill.skill_name,
-//         y: index * 10 + 10,
-//         z: Math.min(skill.skill_id || 10, 50) * scaleFactor,
-//         metadata: skill, // Add metadata for filtering
-//       })),
-//     };
-
-//     setChartSeries([profileSeries, skillSeries]);
-//   };
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   useEffect(() => {
-//     if (profiles.length > 0 && skills.length > 0) {
-//       generateSeries();
-//     }
-//   }, [profiles, skills]);
-
-//   useEffect(() => {
-//     setTimeout(() => {
-//       setIsChartReady(true);
-//     }, 200);
-//   }, []);
-
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p>{error}</p>;
-
-//   return (
-//     <div className="Bubble-chart-container" style={{ maxWidth: '70%', height: '500px', margin: 'auto' }}>
-//       {isChartReady && chartSeries.length > 0 ? (
-//         <Chart options={chartOptions} series={chartSeries} type="bubble" height="500px" />
-//       ) : (
-//         <p>Loading chart...</p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default BubbleChart;
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import Chart from 'react-apexcharts';
-// import axios from 'axios';
-// import './BubbleChart.css';
-
-// const BubbleChart = ({ onBubbleClick }) => {
-//   const [profiles, setProfiles] = useState([]);
-//   const [skills, setSkills] = useState([]);
-//   const [chartSeries, setChartSeries] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState('');
-//   const [filter, setFilter] = useState('all'); // 'all', 'profiles', or 'skills'
-//   const [isChartReady, setIsChartReady] = useState(false);
-
-//   const fetchData = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       if (!token) {
-//         throw new Error('Authentication token missing');
-//       }
-
-//       const [profileResponse, skillResponse] = await Promise.all([
-//         axios.get(`${process.env.REACT_APP_API_URL}/api/links`, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }),
-//         axios.get(`${process.env.REACT_APP_API_URL}/api/link`, {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }),
-//       ]);
-
-//       setProfiles(profileResponse.data.profiles || []);
-//       setSkills(skillResponse.data.skills || []);
-//     } catch (err) {
-//       setError(err.message || 'Failed to fetch data');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const assignColor = (type) => {
-//     const colors = {
-//       Goals: '#FF5733',
-//       Values: '#33FF57',
-//       Constraints: '#3357FF',
-//       Resolutions: '#FF33C4',
-//       OtherFactors: '#FFD700',
-//       Skills: '#FF9933',
-//     };
-//     return colors[type] || '#CCCCCC'; // Default color
-//   };
-
-//   const generateSeries = () => {
-//     const scaleFactor = 10; // Scale factor for bubble size
-  
-//     // Function to count unique decision names for each category
-//     const countUniqueDecisions = (items) => {
-//       return items.reduce((acc, item) => {
-//         // Group by header_name or skill_name
-//         const category = item.header_name || item.skill_name;
-//         const decisionName = item.decision_name;
-  
-//         if (!acc[category]) {
-//           acc[category] = new Set(); // Use Set to count unique decision names
-//         }
-//         acc[category].add(decisionName); // Add decision name to Set (duplicates are ignored)
-  
-//         return acc;
-//       }, {});
-//     };
-  
-//     // Filter profiles and skills based on the selected filter
-//     const filteredProfiles = filter === 'all' || filter === 'profiles' ? profiles : [];
-//     const filteredSkills = filter === 'all' || filter === 'skills' ? skills : [];
-  
-//     // Count unique decisions for profiles and skills
-//     const profileDecisionCounts = countUniqueDecisions(filteredProfiles);
-//     const skillDecisionCounts = countUniqueDecisions(filteredSkills);
-  
-//     // Create series for profiles
-//     const profileSeries = Object.entries(profileDecisionCounts).map(([category, decisionNames], index) => ({
-//       name: category,
-//       color: assignColor(category),
-//       data: [
-//         {
-//           x: category,
-//           y: index * 10 + 10,
-//           z: decisionNames.size * scaleFactor, // Use the size of the Set for bubble size
-//           metadata: { header_name: category, decision_count: decisionNames.size, decision_names: [...decisionNames] },
-//         },
-//       ],
-//     }));
-  
-//     // Create series for skills
-//     const skillSeries = Object.entries(skillDecisionCounts).map(([category, decisionNames], index) => ({
-//       name: category,
-//       color: '#FF9933',
-//       data: [
-//         {
-//           x: category,
-//           y: index * 10 + 20,
-//           z: decisionNames.size * scaleFactor, // Use the size of the Set for bubble size
-//           metadata: { skill_name: category, decision_count: decisionNames.size, decision_names: [...decisionNames] },
-//         },
-//       ],
-//     }));
-  
-//     // Update chart series
-//     setChartSeries([...profileSeries, ...skillSeries]);
-//   };
-  
-//   const chartOptions = {
-//     chart: {
-//       type: 'bubble',
-//       height: '100%',
-//       width: '100%',
-//       responsive: [
-//         {
-//           breakpoint: 768,
-//           options: {
-//             chart: {
-//               height: '400px',
-//             },
-//             legend: {
-//               position: 'top',
-//               fontSize: '10px',
-//               markers: {
-//                 size: 5,
-//               },
-//             },
-//           },
-//         },
-//         {
-//           breakpoint: 480,
-//           options: {
-//             chart: {
-//               height: '300px',
-//             },
-//             legend: {
-//               position: 'bottom',
-//               fontSize: '10px',
-//               markers: {
-//                 size: 6,
-//               },
-//             },
-//           },
-//         },
-//       ],
-//       events: {
-//         dataPointSelection: (event, chartContext, config) => {
-//           const { seriesIndex, dataPointIndex } = config;
-//           const selectedData = chartSeries[seriesIndex]?.data[dataPointIndex];
-//           if (onBubbleClick && selectedData) {
-//             onBubbleClick(selectedData);
-//           }
-//         },
-//       },
-//     },
-//     dataLabels: { enabled: false },
-//     fill: { opacity: 0.8 },
-//     title: {
-//       text: 'Bubble Chart of Profiles and Skills',
-//       align: 'center',
-//     },
-//     xaxis: {
-//       title: { text: 'Categories (Profiles and Skills)' },
-//       labels: { rotate: -45 },
-//     },
-//     yaxis: {
-//       max: 100,
-//       min: 0,
-//       tickAmount: 10,
-//       title: { text: 'Category Count' },
-//     },
-//     grid: {
-//       padding: { left: 20, right: 20, top: 20, bottom: 20 },
-//     },
-//     plotOptions: {
-//       bubble: { maxBubbleRadius: 30, minBubbleRadius: 15 },
-//     },
-//     legend: {
-//       position: 'bottom',
-//       markers: {
-//         size: 10,
-//       },
-//     },
-//     tooltip: {
-//       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-//         const data = w.config.series[seriesIndex].data[dataPointIndex];
-//         return `
-//           <div class="tooltip-custom">
-//             <strong>Value: ${data.metadata.header_value || data.x}</strong><br />
-//             Size: ${data.z}<br />
-//             Decision Count: ${data.metadata.decision_count || 0}<br />
-//           </div>`;
-//       },
-//     },
-//   };
-  
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   useEffect(() => {
-//     if (profiles.length > 0 || skills.length > 0) {
-//       generateSeries();
-//     }
-//   }, [profiles, skills, filter]);
-
-//   useEffect(() => {
-//     setTimeout(() => {
-//       setIsChartReady(true);
-//     }, 200);
-//   }, []);
-
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p className="error-message">{error}</p>;
-
-//   return (
-//     <div className="Bubble-chart-container" style={{ maxWidth: '70%', height: '500px', margin: 'auto' }}>
-//       <div className="filter-container">
-//         <button onClick={() => setFilter('all')}>All</button>
-//         <button onClick={() => setFilter('profiles')}>Profiles</button>
-//         <button onClick={() => setFilter('skills')}>Skills</button>
-//       </div>
-//       {isChartReady && chartSeries.length > 0 ? (
-//         <Chart options={chartOptions} series={chartSeries} type="bubble" height="500px" />
-//       ) : (
-//         <p>Loading chart...</p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default BubbleChart;
-
-
-
 import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import axios from 'axios';
@@ -408,7 +9,7 @@ const BubbleChart = ({ onBubbleClick }) => {
   const [chartSeries, setChartSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all'); // 'all', 'profiles', or 'skills'
+  const [filter, setFilter] = useState('all'); 
   const [isChartReady, setIsChartReady] = useState(false);
 
   const fetchData = async () => {
@@ -419,16 +20,18 @@ const BubbleChart = ({ onBubbleClick }) => {
       }
 
       const [profileResponse, skillResponse] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/links`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/link/bubbleChartProfiles`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/link`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/link/bubbleChartSkills`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
+    console.log('Profile Response:', profileResponse.data);
+    console.log('Skill Response:', skillResponse.data);
 
       setProfiles(profileResponse.data.profiles || []);
-      setSkills(skillResponse.data.skills || []);
+      setSkills(skillResponse.data.decisions || []);
     } catch (err) {
       setError(err.message || 'Failed to fetch data');
     } finally {
@@ -438,38 +41,56 @@ const BubbleChart = ({ onBubbleClick }) => {
 
   const assignColor = (type) => {
     const colors = {
-      Goals: '#FF5733',        // Orange Red
-      Values: '#33FF57',       // Green
-      Constraints: '#3357FF',  // Blue
-      Resolutions: '#FF33C4',  // Pink
-      OtherFactors: '#FFD700', // Gold
-      Skills: '#FF9933',       // Dark Orange
-      Opportunity: '#8A2BE2',  // Purple
-      Attitude: '#00BFFF',     // Deep Sky Blue
-      Strength: '#228B22',     // Forest Green
-      Weakness: '#DC143C',     // Crimson
-      Threat: '#8B0000',       // Dark Red
+      Goals: '#FF5733',        
+      Values: '#33FF57',       
+      Constraints: '#3357FF',  
+      Resolutions: '#FF33C4',  
+      OtherFactors: '#FFD700', 
+      Skills: '#FF9933',       
+      Opportunity: '#8A2BE2',  
+      Attitude: '#00BFFF',     
+      Strength: '#228B22',     
+      Weakness: '#DC143C',     
+      Threat: '#8B0000',     
     };
     return colors[type] || '#CCCCCC'; 
   };
   
 
   const generateSeries = () => {
-    const scaleFactor = 15; 
+    const baseSize = 5;    
+    const scaleFactor = 10;
   
-    // Prepare individual data points for profiles and skills
-    const profileData = (filter === 'all' || filter === 'profiles' ? profiles : []).map((profile, index) => ({
+    const profileMap = profiles.reduce((acc, profile) => {
+      const key = profile.header_name;
+      if (!acc[key]) {
+        acc[key] = { ...profile, decision_count: 0 };
+      }
+      acc[key].decision_count += parseInt(profile.decision_count, 10);
+      return acc;
+    }, {});
+  
+    const profileData = (filter === 'all' || filter === 'profiles' ? Object.values(profileMap) : []).map((profile) => ({
       x: profile.header_name,
-      y: index * 10 + 10,
-      z: scaleFactor,
-      fillColor: assignColor(profile.header_name), 
+      y: profile.decision_count,
+      z: baseSize + profile.decision_count * scaleFactor, 
+      fillColor: assignColor(profile.header_name),
       metadata: { header_name: profile.header_name, decision_name: profile.decision_name },
     }));
   
-    const skillData = (filter === 'all' || filter === 'skills' ? skills : []).map((skill, index) => ({
+    const skillMap = skills.reduce((acc, skill) => {
+      const key = skill.skill_name;
+      if (!acc[key]) {
+        acc[key] = { ...skill, decision_count: 0 };
+      }
+      acc[key].decision_count += parseInt(skill.skill_count, 10);
+      return acc;
+    }, {});
+  
+    const skillData = (filter === 'all' || filter === 'skills' ? Object.values(skillMap) : []).map((skill) => ({
       x: skill.skill_name,
-      y: index * 10 + 20,
-      z: scaleFactor,
+      y: skill.decision_count,
+      z: baseSize + skill.decision_count * scaleFactor,
       fillColor: assignColor('Skills'),
       metadata: { skill_name: skill.skill_name, decision_name: skill.decision_name },
     }));
@@ -482,7 +103,7 @@ const BubbleChart = ({ onBubbleClick }) => {
     ]);
   };
   
-
+    
   const chartOptions = {
     chart: {
       type: 'bubble',
@@ -518,16 +139,16 @@ const BubbleChart = ({ onBubbleClick }) => {
     fill: { opacity: 0.8 },
     title: { text: 'Bubble Chart of Profiles and Skills', align: 'center' },
     xaxis: {
-      title: { text: 'Categories (Profiles and Skills)' },
+      title: { text: 'Categories (Profiles ,Advanced Prfiles and Skills)' },
       labels: { rotate: -45 },
     },
     yaxis: {
-      max: 120,   // Increased max value
-      min: 10,   // Decreased min value
+      max: 80,  
+      min: -10,  
       tickAmount: 12,
       title: { text: 'Category Count' },
     },
-    grid: { padding: { left: 30, right: 30, top: 30, bottom: 30 } }, // Increased padding
+    grid: { padding: { left: 30, right: 30, top: 30, bottom: 30 } },
     plotOptions: { bubble: { maxBubbleRadius: 25, minBubbleRadius: 10 } },
     legend: { position: 'bottom', markers: { size: 10 } },
     tooltip: {
@@ -549,10 +170,10 @@ const BubbleChart = ({ onBubbleClick }) => {
   }, []);
 
   useEffect(() => {
-    if (profiles.length > 0 || skills.length > 0) {
+    if (profiles.length > 0 && skills.length > 0) {
       generateSeries();
     }
-  }, [profiles, skills, filter]);
+  }, [profiles, skills,filter]);
 
   useEffect(() => {
     setTimeout(() => {
