@@ -42,7 +42,7 @@
 
 @media (max-width: 768px) {
   .Bubble-chart-container {
-    height: 400px; /* Reduce height for smaller screens */
+    height: 400px;
   }
 
   .filter-container button {
@@ -53,7 +53,7 @@
 
 @media (max-width: 480px) {
   .Bubble-chart-container {
-    height: 300px; /* Further reduce height for very small screens */
+    height: 300px; 
   }
 
   .filter-container {

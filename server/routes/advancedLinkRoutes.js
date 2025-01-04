@@ -10,6 +10,8 @@ router.use(createUserKey);
 
 router.post('/advancedLink',advancedLinkController.postAdvancedProfile);
 router.get('/advancedLink',advancedLinkController.getAllAdvancedProfileLink);
+router.get('/bubbleChartProfiles',advancedLinkController.bubbleChartProfiles);
+router.get('/bubbleChartSkills',advancedLinkController.bubbleChartSkills);
 router.delete('/advancedLink/:id',advancedLinkController.deleteAdvancedProfileLink);
 
 

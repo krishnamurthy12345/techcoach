@@ -198,7 +198,7 @@ const getAllProfileLink = async (req, res) => {
             JOIN 
                 techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
             WHERE 
-                d.user_id = ?`,
+                d.user_id = ? AND h.type_of_profile = 'Profile' `,
             [userId]
         );
 
