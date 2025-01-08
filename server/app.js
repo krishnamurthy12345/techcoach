@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const advancedProfileRoutes = require('./routes/advancedProfileRoutes');
 const advancedLinkRoutes = require('./routes/advancedLinkRoutes');
 const mobileNumberRoutes = require('./routes/mobile_numberRoutes');
+const emojiRoutes = require('./routes/emojiRoutes');
 
 require('dotenv').config();
 
@@ -44,7 +45,8 @@ app.use('/group',commentRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api',advancedProfileRoutes);
 app.use('/link',advancedLinkRoutes);
-app.use('/api',mobileNumberRoutes)
+app.use('/api',mobileNumberRoutes);
+app.use('/api',emojiRoutes);
 
 
 app.listen(PORT, () => {

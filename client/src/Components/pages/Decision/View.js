@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Button, Avatar, IconButton, Popover, TextField,Modal } from '@mui/material';
+import { Box, Typography, Button, Avatar, IconButton, Popover, TextField, Modal } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded,innerCirclePostReplyComment } from '../../Group/Network_Call';
-import { getDecisionComments,updateComment } from '../../Decision_Circle/Networkk_Call';
+import { checkInnerCircleExists, getInnerCircleDetails, getSharedComments, postReplyComment, deleteCommentAdded, EditCommentAdded, innerCirclePostReplyComment } from '../../Group/Network_Call';
+import { getDecisionComments, updateComment } from '../../Decision_Circle/Networkk_Call';
 import { useNavigate } from 'react-router-dom';
 import { AiFillEdit } from "react-icons/ai";
-
 import ShareModal from '../../Group/ShareModel';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
 import withAuth from '../../withAuth';
+import EmojiReaction from './EmojiReaction/EmojiReaction';
+import './View.css';
+import GetAllEmoji from './EmojiReaction/GetAllEmoji';
 
 const View = () => {
     const [decision, setDecision] = useState({});
@@ -24,12 +26,11 @@ const View = () => {
     const [replies, setReplies] = useState({});
     const navigate = useNavigate();
 
-
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editedCommentContent, setEditedCommentContent] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [editComment,setEditComment] = useState(null);
+    const [editComment, setEditComment] = useState(null);
     const [isEditModalOpen, setEditModalOpen] = useState(false);  // Controls modal visibility
     const [editContent, setEditContent] = useState('');
 
@@ -145,7 +146,7 @@ const View = () => {
     };
 
     const handleReplySubmit = async (commentId, groupId) => {
-        console.log("handleReplySubmit - commentId:", commentId, "groupId:", groupId); 
+        console.log("handleReplySubmit - commentId:", commentId, "groupId:", groupId);
         try {
             const reply = await postReplyComment(commentId, replies[commentId], groupId, id);
             console.log("response from post reply", reply);
@@ -160,7 +161,7 @@ const View = () => {
         }
     };
 
-    const handleReplySendEmail = async (commentId,groupId) => {
+    const handleReplySendEmail = async (commentId, groupId) => {
         const replyText = replies[commentId];
         console.log("handleReplySendEmail - commentId:", commentId, "groupId:", groupId);
         try {
@@ -172,7 +173,7 @@ const View = () => {
                 groupId,
                 id
             })
-            console.log('replyMail',replymail);
+            console.log('replyMail', replymail);
             setReplies(prevReplies => ({
                 ...prevReplies,
                 [commentId]: ''
@@ -210,30 +211,28 @@ const View = () => {
         setIsPopoverOpen(false);
     };
 
-    const handleEditClick =(commentId) =>{
+    const handleEditClick = (commentId) => {
         setEditComment(commentId.id);
         setEditContent(commentId.comment);
         setEditModalOpen(true);
-       }
+    }
 
-
-       const handleSaveEditComment = async() =>{
+    const handleSaveEditComment = async () => {
         try {
-            const updatedComment = {comment: editContent};
-            await updateComment(editComment,updatedComment);
+            const updatedComment = { comment: editContent };
+            await updateComment(editComment, updatedComment);
             toast.success('Comment Updated successfully');
             fetchDecisionComments();
             setEditModalOpen(false);
             setEditComment(null);
             setEditContent('')
         } catch (error) {
-            console.error('Failed to update comment:',error);
+            console.error('Failed to update comment:', error);
             toast.error('Failed to update comment');
         } finally {
             setEditModalOpen(false);
         }
-       }
-
+    }
 
     const handleDeleteReply = async (replyId) => {
         console.log("Delete reply", replyId);
@@ -248,7 +247,6 @@ const View = () => {
     };
 
     // console.log("shared comments", sharedComments);
-
     const memberComments = sharedComments.filter(comment => comment.type_of_member === "member");
     const authorComments = sharedComments.filter(comment => comment.type_of_member === "author");
 
@@ -259,29 +257,15 @@ const View = () => {
             padding: "1rem", backgroundColor: "white", margin: "2rem", borderRadius: "0.5rem",
             ...(isPopoverOpen && { filter: 'blur(2px)' })
         }}>
-            <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Name:</b> {decision.decision_name}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Details:</b> {decision.user_statement}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Reasons:</b> {decision.decision_reason && decision.decision_reason.join(', ')}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-                <Typography variant="body1"><b>Decision Due Date:</b> {decision.decision_due_date}</Typography>
-            </Box>
-
+            <Box sx={{ mb: 2 }}><Typography variant="body1"><b>Decision Name:</b> {decision.decision_name}</Typography></Box>
+            <Box sx={{ mb: 2 }}><Typography variant="body1"><b>Decision Details:</b> {decision.user_statement}</Typography></Box>
+            <Box sx={{ mb: 2 }}><Typography variant="body1"><b>Decision Reasons:</b> {decision.decision_reason && decision.decision_reason.join(', ')}</Typography></Box>
+            <Box sx={{ mb: 2 }}><Typography variant="body1"><b>Decision Due Date:</b> {decision.decision_due_date}</Typography></Box>
             {decision.decision_taken_date && (
-                <Box sx={{ mb: 2 }}>
-                    <Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography>
-                </Box>
+                <Box sx={{ mb: 2 }}><Typography variant="body1"><b>Decision Taken Date:</b> {decision.decision_taken_date}</Typography></Box>
             )}
-
             <Box sx={{ mb: 2 }}>
-                <Typography variant="body1">
-                    <b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}
-                </Typography>
+                <Typography variant="body1"><b>Selected Tags:</b> {decision.tagsArray && decision.tagsArray.map(tag => tag.tag_name).join(', ')}</Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
                 <Link to='/readd'>
@@ -304,19 +288,25 @@ const View = () => {
                 {memberComments.length > 0 ? (
                     memberComments.map(memberComment => (
                         <>
-                            <Box key={memberComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{memberComment.displayname[0]}</Avatar>
-                                    <Box>
-                                        <Typography variant="body1">{memberComment.comment}</Typography>
-                                        <Typography variant="caption" color="textSecondary">
-                                            {memberComment.displayname} | {memberComment.email} |
-                                            {memberComment.created_at === memberComment.updated_at
-                                                ? <span> {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}</span>
-                                                : <span> Edited at {formatDistanceToNow(parseISO(memberComment.updated_at), { addSuffix: true })}</span>}
-                                        </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Box key={memberComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, width: '90%' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{memberComment.displayname[0]}</Avatar>
+                                        <Box>
+                                            <Typography variant="body1">{memberComment.comment}</Typography>
+                                            <Typography variant="caption" color="textSecondary">
+                                                {memberComment.displayname} | {memberComment.email} |
+                                                {memberComment.created_at === memberComment.updated_at
+                                                    ? <span> {formatDistanceToNow(parseISO(memberComment.created_at), { addSuffix: true })}</span>
+                                                    : <span> Edited at {formatDistanceToNow(parseISO(memberComment.updated_at), { addSuffix: true })}</span>}
+                                            </Typography>
+                                        </Box>
                                     </Box>
+                                    <GetAllEmoji commentId={memberComment.id}/>
                                 </Box>
+                                <div>
+                                    <EmojiReaction commentId={memberComment.id} />
+                                </div>
                             </Box>
                             <Box>
                                 {authorComments.map(authorComment => {
@@ -364,13 +354,12 @@ const View = () => {
                                                 marginRight: "0.5rem"
                                             }}
                                         />
-                                        <div style={{ display: 'flex', gap: '8px',height:'50px' }}>
-                                        <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
-                                        <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId,id)}>Reply & Email</Button>
+                                        <div style={{ display: 'flex', gap: '8px', height: '50px' }}>
+                                            <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
+                                            <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId, id)}>Reply & Email</Button>
                                         </div>
                                     </Box>
                                 )}
-
                             </Box>
                         </>
                     ))
@@ -385,63 +374,75 @@ const View = () => {
                             {comments[id]
                                 ?.sort((a, b) => (a.type_of_member === 'member' ? -1 : 1))
                                 .map(comment => (
-                                    <div
-                                        key={comment.id}
-                                        className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
-                                        style={{
-                                            width: '90%', 
-                                            backgroundColor: comment.type_of_member === 'author' ? '#e8f5e9' : '#FFF',
-                                            textAlign: 'left', 
-                                            padding: '8px',
-                                            borderRadius: '8px',
-                                            marginBottom: '16px',
-                                            position: 'relative',
-                                            border: '1px solid #ccc',
-                                            marginLeft: comment.type_of_member === 'member' ? '0' : 'auto', 
-                                            marginRight: comment.type_of_member === 'author' ? '0' : 'auto', 
-                                        }}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
-                                            <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
-                                                {comment.comment}
-                                            </Typography>
-                                            {comment.type_of_member === 'author' && (
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer',fontSize:'22px' }} 
-                                                    onClick={() => handleEditClick(comment)} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
-                                                {comment.displayname[0]}
-                                            </Avatar>
-                                            <div>
-                                                <Typography variant="caption">
-                                                    {comment.displayname} | {comment.email} |
-                                                    {comment.created_at === comment.updated_at ? (
-                                                        <span>{formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
-                                                    ) : (
-                                                        <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
-                                                    )}
+                                    <div style={{ display: 'flex' }}>
+                                        <div
+                                            key={comment.id}
+                                            className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
+                                            style={{
+                                                width: '90%',
+                                                backgroundColor: comment.type_of_member === 'author' ? '#e8f5e9' : '#FFF',
+                                                textAlign: 'left',
+                                                padding: '8px',
+                                                borderRadius: '8px',
+                                                marginBottom: '16px',
+                                                position: 'relative',
+                                                border: '1px solid #ccc',
+                                                marginLeft: comment.type_of_member === 'member' ? '0' : 'auto',
+                                                marginRight: comment.type_of_member === 'author' ? '0' : 'auto',
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                                                <Typography variant="body1" className="comment-text" style={{ fontWeight: 'bold', flex: 1 }}>
+                                                    {comment.comment}
                                                 </Typography>
+                                                {comment.type_of_member === 'author' && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <AiFillEdit style={{ marginRight: '8px', cursor: 'pointer', fontSize: '22px' }}
+                                                            onClick={() => handleEditClick(comment)} />
+                                                    </div>
+                                                )}
                                             </div>
+                                            <div className="comment-content" style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                                <Avatar sx={{ bgcolor: "#526D82", color: "white", marginRight: 2 }}>
+                                                    {comment.displayname[0]}
+                                                </Avatar>
+                                                <div>
+                                                    <Typography variant="caption">
+                                                        {comment.displayname} | {comment.email} |
+                                                        {comment.created_at === comment.updated_at ? (
+                                                            <span>{formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}</span>
+                                                        ) : (
+                                                            <span>Edited {formatDistanceToNow(parseISO(comment.updated_at), { addSuffix: true })}</span>
+                                                        )}
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                            {comment.type_of_member === 'member' && (
+                                            <div>
+                                                <GetAllEmoji commentId={comment.id} emoji="😊" />
+                                            </div>
+                                        )}
                                         </div>
+                                        {comment.type_of_member === 'member' && (
+                                            <div>
+                                                <EmojiReaction commentId={comment.id} emoji="😊" />
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                         </ul>
                     )}
                 </div>
 
-                <Modal open={isEditModalOpen} onClose={() =>setEditModalOpen(false)}>
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-                <Typography variant="h6" mb={2}>Edit Comment</Typography>
-                    <TextField fullWidth multiline rows={4} value={editContent} onChange={(e) => setEditContent(e.target.value)} />
-                    <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-                        <Button variant="contained" color="primary" onClick={handleSaveEditComment}>Save</Button>
-                        <Button variant="outlined" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
+                    <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                        <Typography variant="h6" mb={2}>Edit Comment</Typography>
+                        <TextField fullWidth multiline rows={4} value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                            <Button variant="contained" color="primary" onClick={handleSaveEditComment}>Save</Button>
+                            <Button variant="outlined" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                        </Box>
                     </Box>
-                </Box>
                 </Modal>
 
             </Box>
@@ -451,20 +452,14 @@ const View = () => {
                 anchorEl={null}
                 onClose={handlePopoverClose}
                 anchorOrigin={{
-                    vertical: 'center',
-                    horizontal: 'center',
+                    vertical: 'center', horizontal: 'center',
                 }}
                 transformOrigin={{
-                    vertical: 'center',
-                    horizontal: 'center',
+                    vertical: 'center', horizontal: 'center',
                 }}
                 PaperProps={{
                     sx: {
-                        position: 'fixed',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        p: 2
+                        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', p: 2
                     }
                 }}
             >
@@ -476,20 +471,12 @@ const View = () => {
                         value={editedCommentContent}
                         onChange={(e) => setEditedCommentContent(e.target.value)}
                     />
-                    <Button onClick={() => handleSaveEdit(editingCommentId, editedCommentContent)}>
-                        Save
-                    </Button>
+                    <Button onClick={() => handleSaveEdit(editingCommentId, editedCommentContent)}>Save</Button>
                 </Box>
             </Popover>
 
             <ShareModal
-                showModal={showModal}
-                handleClose={handleClose}
-                innerGroup={innerGroup}
-                innerCircleDetails={innerCircleDetails}
-                decision={decision}
-                id={id}
-            />
+                showModal={showModal} handleClose={handleClose} innerGroup={innerGroup} innerCircleDetails={innerCircleDetails} decision={decision} id={id} />
             <ToastContainer />
         </Box>
     );

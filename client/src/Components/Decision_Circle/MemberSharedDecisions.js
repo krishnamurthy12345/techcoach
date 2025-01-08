@@ -9,6 +9,7 @@ import './MemberSharedDecisions.css';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import axios from 'axios';
 import MemberRating from '../pages/Ratings/MemberRating';
+import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
@@ -325,6 +326,11 @@ const MemberSharedDecisions = () => {
                                                                 </Box>
                                                             </Box>
                                                         </div>
+                                                        {comment.type_of_member === 'member' && (
+                                                        <div>
+                                                            <EmojiReaction commentId={comment.id} emoji="😊" />
+                                                        </div>
+                                                    )}
                                                     </div>
                                                 ))
                                             ) : (

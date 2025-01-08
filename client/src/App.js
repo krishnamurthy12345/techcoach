@@ -40,6 +40,8 @@ import AdvancedProfile from './Components/pages/Profile_Table/AdvancedProfile.js
 import AdvancedProfileTable from './Components/pages/Profile_Table/AdvancedProfileTable.js';
 import Rating from './Components/pages/Ratings/Rating.js';
 import EditRating from './Components/pages/Ratings/EditRating.js';
+import EmojiReaction from './Components/pages/Decision/EmojiReaction/EmojiReaction.js';
+import GetAllEmoji from './Components/pages/Decision/EmojiReaction/GetAllEmoji.js';
 
 function App() {
   console.log("one is working")
@@ -148,6 +150,10 @@ function App() {
         {/* Ratings */}
         <Route path='/rating/:id' element={<Rating />} />
         <Route path='/rating/edit/:decisionId' element={<EditRating/>} />
+
+        {/* EmojiReaction Routes */}
+        <Route path='/emoji' element={<EmojiReaction />} />
+        <Route path='/emoji/:comment_id/:emoji_id' element={<GetAllEmoji />} />
 
       </Routes>
     </div>
