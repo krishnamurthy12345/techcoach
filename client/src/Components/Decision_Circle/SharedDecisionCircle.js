@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import withAuth from '../withAuth';
 import axios from 'axios';
+import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction';
 
 const SharedDecisionCircle = () => {
     const [sharedDecisionCircles, setSharedDecisionCircles] = useState([]);
@@ -58,7 +59,7 @@ const SharedDecisionCircle = () => {
                 });
 
                 if (response.status === 200 && response.data.tasks.length > 0) {
-                    const email = response.data.tasks[0].email; 
+                    const email = response.data.tasks[0].email;
                     setCurrentUserEmail(email);
                 } else {
                     console.error('User details not found');
@@ -305,10 +306,10 @@ const SharedDecisionCircle = () => {
                                                                 style={{
                                                                     border: '1px solid #ccc',
                                                                     maxWidth: '70%',
-                                                                    marginLeft: comment.type_of_member === 'member' ? '0' : 'auto', 
+                                                                    marginLeft: comment.type_of_member === 'member' ? '0' : 'auto',
                                                                     marginRight: comment.type_of_member === 'author' ? '0' : 'auto',
                                                                     marginBottom: '16px',
-                                                                    backgroundColor: comment.type_of_member === 'author' ? '#f0f8ff' : 'transparent', 
+                                                                    backgroundColor: comment.type_of_member === 'author' ? '#f0f8ff' : 'transparent',
                                                                     padding: '8px',
                                                                 }}
                                                             >
@@ -349,8 +350,14 @@ const SharedDecisionCircle = () => {
                                                                         </Box>
                                                                     }
                                                                 />
+                                                                {comment.type_of_member === 'member' && (
+                                                                    <div>
+                                                                        <EmojiReaction commentId={comment.commentId} emoji="😊" />
+                                                                    </div>
+                                                                )}
                                                             </ListItem>
                                                         ))}
+
                                                 </List>
 
                                                 <Box mt={2}>
