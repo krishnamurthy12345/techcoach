@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './GetAllEmoji.css';
 import { useParams } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 function GetAllEmoji({ commentId }) {
     const [reactions, setReactions] = useState([]);
@@ -28,23 +29,25 @@ function GetAllEmoji({ commentId }) {
     const removeReaction = async (emoji_id) => {
         const token = localStorage.getItem('token');
         try {
-          const response = await axios.delete(
-            `${process.env.REACT_APP_API_URL}/api/emoji/${commentId}/${emoji_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          console.log('Reaction removed:', response.data);
-          setReactions((prevReactions) =>
-            prevReactions.filter((reaction) => reaction.emoji_id !== emoji_id)
-          );
+            const response = await axios.delete(
+                `${process.env.REACT_APP_API_URL}/api/emoji/${commentId}/${emoji_id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log('Reaction removed:', response.data);
+            setReactions((prevReactions) =>
+                prevReactions.filter((reaction) => reaction.emoji_id !== emoji_id)
+            );
+            toast.success("Reaction Removed Successfully");
         } catch (error) {
-          console.error('Failed to remove reaction:', error);
+            console.error('Failed to remove reaction:', error);
+            toast.error('Failed to remove reaction:', error);
         }
-      };
-      
+    };
+
     useEffect(() => {
         fetchAllEmoji();
     }, [commentId]);
@@ -74,6 +77,7 @@ function GetAllEmoji({ commentId }) {
                     </ul>
                 </div>
             )}
+            <ToastContainer />
         </div>
     );
 }

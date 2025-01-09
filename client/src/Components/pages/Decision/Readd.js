@@ -690,7 +690,7 @@ const Readd = () => {
             variant="outlined"
             onClick={() => navigate('/getall')}
             sx={{
-              backgroundColor: '#ffffff',
+              backgroundColor: view === 'decisionFactors' ? '#526D82' : undefined,
               color: '#526D82',
               '&:hover': {
                 backgroundColor: '#f5f5f5'

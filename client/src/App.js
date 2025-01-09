@@ -42,6 +42,7 @@ import Rating from './Components/pages/Ratings/Rating.js';
 import EditRating from './Components/pages/Ratings/EditRating.js';
 import EmojiReaction from './Components/pages/Decision/EmojiReaction/EmojiReaction.js';
 import GetAllEmoji from './Components/pages/Decision/EmojiReaction/GetAllEmoji.js';
+import EditEmoji from './Components/pages/Decision/EmojiReaction/EditEmoji.js';
 
 function App() {
   console.log("one is working")
@@ -154,6 +155,7 @@ function App() {
         {/* EmojiReaction Routes */}
         <Route path='/emoji' element={<EmojiReaction />} />
         <Route path='/emoji/:comment_id/:emoji_id' element={<GetAllEmoji />} />
+        <Route path='/emoji/edit/:comment_id/:emoji_id' element={<EditEmoji />} />
 
       </Routes>
     </div>

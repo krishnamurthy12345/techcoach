@@ -13,6 +13,7 @@ router.get('/emoji/:comment_id', emojiController.getReactions );
 router.get('/emoji/decision/:id', emojiController.getAllReactionsByDecision );
 router.delete('/emoji/:comment_id/:emoji_id', emojiController.removeReaction );
 router.get('/masterEmoji', emojiController.getMasterEmojis );
+router.put('/emoji/edit/:comment_id/:emoji_id', emojiController.editReaction );
 
 
 module.exports = router;
