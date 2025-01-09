@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { BiSolidSmile } from "react-icons/bi";
 import './EmojiReaction.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 function EmojiReaction({ commentId }) {
     const [emojis, setEmojis] = useState([]);
@@ -48,6 +49,7 @@ function EmojiReaction({ commentId }) {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             console.log('Reaction added:', response.data);
+            toast.success("Reaction Added Successfully");
             setReactions((prev) => [...prev, response.data]);
             fetchEmoji();
         } catch (error) {
@@ -93,14 +95,17 @@ function EmojiReaction({ commentId }) {
                     <p>Reactions:</p>
                     <ul className="reaction-ul">
                         {reactions.map((reaction) => (
-                            <li key={reaction.reaction_id} className="reaction-li" >
+                            <li key={reaction.reaction_id} className="reaction-li">
                                 <span className="emoji">{reaction.emoji_symbol}</span>
+                                {/* <span className="emoji-name">{reaction.emoji_name}</span> */}
+                                {/* <span className="reacted-at">{new Date(reaction.reacted_at).toLocaleString()}</span> */}
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
 
+            <ToastContainer />
         </div>
     );
 }

@@ -158,5 +158,52 @@ const getMasterEmojis = async (req, res) => {
     }
 };
 
+const editReaction = async (req, res) => {
+  const { comment_id, emoji_id } = req.params;
+  console.log('Comment ID:', comment_id);
+  console.log('New Emoji ID:', emoji_id);
+  
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.beginTransaction();
 
-module.exports = { postReactions, getReactions, getAllReactionsByDecision, removeReaction,getMasterEmojis }
+    const userId = req.user.id;
+
+    // Check if the reaction exists
+    const checkQuery = `
+      SELECT reaction_id FROM techcoach_lite.techcoach_comment_reactions
+      WHERE comment_id = ? AND user_id = ?
+    `;
+    const existingReaction = await conn.execute(checkQuery, [comment_id, userId]);
+
+    if (existingReaction.length === 0) {
+      return res.status(404).json({ message: 'No reaction found to edit' });
+    }
+
+    // Update the reaction
+    const updateQuery = `
+      UPDATE techcoach_lite.techcoach_comment_reactions
+      SET emoji_id = ?
+      WHERE comment_id = ? AND user_id = ?
+    `;
+    const result = await conn.execute(updateQuery, [emoji_id, comment_id, userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ message: 'Failed to update reaction' });
+    }
+
+    await conn.commit();
+    res.status(200).json({ message: 'Reaction updated successfully' });
+  } catch (error) {
+    if (conn) await conn.rollback();
+    console.error('Error editing reaction:', error);
+    res.status(500).json({ message: 'Failed to edit reaction', error: error.message });
+  } finally {
+    if (conn) await conn.release();
+  }
+};
+
+
+
+module.exports = { postReactions, getReactions, getAllReactionsByDecision, removeReaction,getMasterEmojis, editReaction }

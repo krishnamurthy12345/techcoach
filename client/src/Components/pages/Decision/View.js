@@ -12,7 +12,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
 import withAuth from '../../withAuth';
 import EmojiReaction from './EmojiReaction/EmojiReaction';
-import './View.css';
+// import './View.css';
 import GetAllEmoji from './EmojiReaction/GetAllEmoji';
 
 const View = () => {
@@ -308,13 +308,13 @@ const View = () => {
                                     <EmojiReaction commentId={memberComment.id} />
                                 </div>
                             </Box>
-                            <Box>
+                            <Box sx={{p:2}}>
                                 {authorComments.map(authorComment => {
                                     if (authorComment.parentCommentId === memberComment.id) {
                                         return (
-                                            <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc" }}>
+                                            <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc",'@media (max-width: 600px)': { ml: 2, p: 1 }, }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2 }}>{authorComment.displayname[0]}</Avatar>
+                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2,fontSize: { xs: '1rem', sm: '1.5rem' }, }}>{authorComment.displayname[0]}</Avatar>
                                                     <Box sx={{ flex: 1 }}>
                                                         <Typography variant="body1">{authorComment.comment}</Typography>
                                                         <Typography variant="caption" color="textSecondary">
@@ -354,9 +354,9 @@ const View = () => {
                                                 marginRight: "0.5rem"
                                             }}
                                         />
-                                        <div style={{ display: 'flex', gap: '8px', height: '50px' }}>
-                                            <Button variant="contained" onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
-                                            <Button variant="contained" onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId, id)}>Reply & Email</Button>
+                                        <div style={{ display: 'flex', gap: '8px', flexDirection: { xs: 'column', sm: 'row' },height: 'auto',}}>
+                                            <Button variant="contained" sx={{ width: { xs: '100%', sm: 'auto' } }} onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
+                                            <Button variant="contained" sx={{ width: { xs: '100%', sm: 'auto' } }} onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId, id)}>Reply & Email</Button>
                                         </div>
                                     </Box>
                                 )}
@@ -389,6 +389,7 @@ const View = () => {
                                                 border: '1px solid #ccc',
                                                 marginLeft: comment.type_of_member === 'member' ? '0' : 'auto',
                                                 marginRight: comment.type_of_member === 'author' ? '0' : 'auto',
+                                                '@media (max-width: 600px)': { marginLeft: '0', marginRight: '0', padding: '6px' },
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
