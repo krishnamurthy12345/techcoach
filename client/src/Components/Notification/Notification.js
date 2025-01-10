@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Typography, Card, CardContent, Avatar, Tooltip, Box, Checkbox, Switch } from '@mui/material';
+import { Button, Typography, Card, CardContent, Avatar, Tooltip, Box, Checkbox, Switch, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 import { acceptOrRejectInnerCircle, getInnerCircleAcceptNotification } from '../../Components/Group/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
-import { postNumber } from './Network_call';
+import { updateNumber, getNumber } from './Network_call';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import './Notification.css';
 import withAuth from '../withAuth';
+import { BsFillTelephonePlusFill } from "react-icons/bs";
+import { Link } from 'react-router-dom';
+
 
 const Notification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -14,7 +17,7 @@ const Notification = () => {
     const [iconClick, setIconClick] = useState(false)
     const [phone, setPhone] = useState('');
     const [isWhatsapp, setIsWhatsapp] = useState(false);
-
+    const [isEditable, setIsEditable] = useState(false);
     const getNotification = async () => {
         try {
             const innerCircleResponse = await getInnerCircleAcceptNotification();
@@ -51,50 +54,90 @@ const Notification = () => {
         setIconClick((prev) => !prev);
     }
 
-    const handleSave = async () => {
+    const fetchNumber = async () => {
+        try {
+            const result = await getNumber();
+            if (result && result.data) {
+                setPhone(result.data.mobile_number);
+                setIsWhatsapp(result.data.is_whatsapp === 1);
+            } else {
+                console.log('No mobile number found');
+            }
+        } catch (error) {
+            console.log('Fetching error:', error);
+            // toast.error('Failed to fetch mobile number');
+        }
+    }
+    useEffect(() => {
+        fetchNumber();
+    }, []);
+
+    const handleUpdate = async () => {
         try {
             if (!phone) {
                 toast.error('Please enter a valid phone number');
                 return;
             }
-    
-            const response = await postNumber(phone,isWhatsapp);
+
+            const response = await updateNumber(phone, isWhatsapp);
             toast.success(response.message || 'Mobile number saved successfully');
-            setPhone(''); 
+            setPhone('');
             setIsWhatsapp(false);
         } catch (error) {
             toast.error('Failed to save mobile number');
         }
     };
-    
+
+    const handleRadioChange = (event) => {
+        setIsEditable(event.target.value === 'enable');
+    };
+
+
     return (
         <div>
             <div className='notification-toggle-icon'>
                 <Switch className='notification-icon' onClick={handleClick} />
             </div>
+
             {iconClick && (
-                <div style={{ padding: '20px' }} className='notification-input'>
-                    <PhoneInput
-                        country="us"
-                        value={phone}
-                        onChange={(value) => setPhone(value)}
-                    />
-                    <Box display="flex" alignItems="center" mt={2}>
-                    <Checkbox
-                            checked={isWhatsapp}
-                            onChange={(e) => setIsWhatsapp(e.target.checked)} // Update WhatsApp status
+                <>
+                    <div>
+                        <Link to='/numberAdd'>
+                            <BsFillTelephonePlusFill className='phoneIcon' />
+                        </Link>
+                    </div>
+                    <div style={{ padding: '20px' }} className='notification-input'>
+
+                        <RadioGroup row onChange={handleRadioChange} value={isEditable ? 'enable' : 'disable'}>
+                            <FormControlLabel value="enable" control={<Radio />} label="Enable" />
+                            <FormControlLabel value="disable" control={<Radio />} label="Disable" />
+                        </RadioGroup>
+
+                        <PhoneInput
+                            country="us"
+                            value={phone}
+                            onChange={(value) => setPhone(value)}
+                            disabled={!isEditable}
                         />
-                    <Typography variant="body2">This number is registered on WhatsApp also</Typography>
-                    </Box>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        style={{ marginTop: '10px' }}
-                        onClick={handleSave}
-                    >
-                        Save
-                    </Button>
-                </div>
+                        <Box display="flex" alignItems="center" mt={2}>
+                            <Checkbox
+                                checked={isWhatsapp}
+                                onChange={(e) => setIsWhatsapp(e.target.checked)}
+                                disabled={!isEditable}
+                            />
+                            <Typography variant="body2">This number is registered on WhatsApp also</Typography>
+                        </Box>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            style={{ marginTop: '10px' }}
+                            onClick={handleUpdate}
+                            disabled={!isEditable}
+                        >
+                            Update
+                        </Button>
+                    </div>
+                </>
             )}
             <h3>Inner Circle Notifications</h3>
             {/* Inner Circle Notifications */}

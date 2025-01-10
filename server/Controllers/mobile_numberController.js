@@ -45,20 +45,65 @@ const getMobileInfo = async (req, res) => {
     let conn;
     try {
         conn = await getConnection();
-        const userId = req.user.id; 
+        const userId = req.user.id;
 
-        const mobileInfo = await conn.query(
-            'SELECT mobile_number FROM techcoach_lite.techcoach_mobile_number_info WHERE user_id = ?',
+        const result = await conn.query(
+            'SELECT mobile_number, is_whatsapp FROM techcoach_lite.techcoach_mobile_number_info WHERE user_id = ?',
             [userId]
         );
 
-        if (mobileInfo.length === 0) {
+        if (result.length === 0) {
             return res.status(404).json({ message: 'No mobile number found for this user' });
         }
 
-        return res.status(200).json({ mobile_number: mobileInfo[0].mobile_number });
+        return res.status(200).json({ 
+            message: 'Mobile number retrieved successfully', 
+            data: result[0] 
+        });
     } catch (error) {
-        console.error('Error fetching the mobile number:', error);
+        console.error('Error retrieving the mobile number:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
+
+const updateMobileInfo = async (req, res) => {
+    const { mobile_number, is_whatsapp } = req.body;
+
+    if (!mobile_number) {
+        return res.status(400).json({ message: 'Mobile number is required' });
+    }
+    if (is_whatsapp === undefined) {
+        return res.status(400).json({ message: 'is_whatsapp field is required' });
+    }
+
+    let conn;
+    try {
+        conn = await getConnection();
+        const userId = req.user.id;
+
+        // Check if the mobile number exists for the user
+        const existingNumber = await conn.query(
+            'SELECT * FROM techcoach_lite.techcoach_mobile_number_info WHERE user_id = ?',
+            [userId]
+        );
+
+        if (existingNumber.length === 0) {
+            return res.status(404).json({ message: 'No mobile number found for this user' });
+        }
+
+        // Update the existing record
+        await conn.query(
+            'UPDATE techcoach_lite.techcoach_mobile_number_info SET mobile_number = ?, is_whatsapp = ? WHERE user_id = ?',
+            [mobile_number, is_whatsapp, userId]
+        );
+
+        return res.status(200).json({ message: 'Mobile number updated successfully' });
+    } catch (error) {
+        console.error('Error updating the mobile number:', error);
         return res.status(500).json({ message: 'Internal Server Error' });
     } finally {
         if (conn) conn.release();
@@ -219,4 +264,4 @@ const getOverallRating = async (req, res) => {
 
 
 
-module.exports = { postMobileInfo,getMobileInfo,postRatingInfo,getRatingInfo,putRatingInfo,getOverallRating}
+module.exports = { postMobileInfo,getMobileInfo,updateMobileInfo,postRatingInfo,getRatingInfo,putRatingInfo,getOverallRating}

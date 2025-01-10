@@ -43,6 +43,7 @@ import EditRating from './Components/pages/Ratings/EditRating.js';
 import EmojiReaction from './Components/pages/Decision/EmojiReaction/EmojiReaction.js';
 import GetAllEmoji from './Components/pages/Decision/EmojiReaction/GetAllEmoji.js';
 import EditEmoji from './Components/pages/Decision/EmojiReaction/EditEmoji.js';
+import AddMobileNumber from './Components/Notification/AddMobileNumber.js';
 
 function App() {
   console.log("one is working")
@@ -146,6 +147,7 @@ function App() {
 
         {/* Notification */}
         <Route path='/notification' element={<Notification />} />
+        <Route path='/numberAdd' element={<AddMobileNumber />} />
 
 
         {/* Ratings */}

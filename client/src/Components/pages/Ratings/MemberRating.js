@@ -4,6 +4,7 @@ import axios from 'axios';
 import { GrEdit } from "react-icons/gr";
 import './MemberRating.css';
 import {useNavigate} from 'react-router-dom';
+import withAuth from '../../withAuth';
 
 const MemberRating = ({ decisionId }) => {
     const navigate = useNavigate();  
@@ -120,4 +121,4 @@ const MemberRating = ({ decisionId }) => {
     );
 };
 
-export default MemberRating;
+export default withAuth(MemberRating);

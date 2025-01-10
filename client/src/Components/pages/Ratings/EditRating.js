@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FaRegStar, FaStar } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
 import './MemberRating.css';
+import withAuth from '../../withAuth';
 
 const EditRating = () => {
     const { decisionId } = useParams();
@@ -101,4 +102,4 @@ const EditRating = () => {
     );
 };
 
-export default EditRating;
+export default withAuth(EditRating);

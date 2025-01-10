@@ -48,6 +48,16 @@
 .notification-input button:active {
     transform: scale(0.98);
 }
+
+.phoneIcon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 50%;
+    margin: 0 auto;
+    color: #45a049;
+    font-size: 20px;
+}
 @media (max-width: 768px) {
     .notification-toggle-icon {
         margin-left: 20px;

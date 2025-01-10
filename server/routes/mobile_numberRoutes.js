@@ -8,7 +8,8 @@ router.use(authMiddleware);
 router.use(createUserKey);
 
 router.post('/mobile',mobileNumberController.postMobileInfo);
-router.get('/',mobileNumberController.getMobileInfo);
+router.get('/mobile',mobileNumberController.getMobileInfo);
+router.put('/mobile',mobileNumberController.updateMobileInfo);
 router.post('/rating',mobileNumberController.postRatingInfo);
 router.get('/rating/:id',mobileNumberController.getRatingInfo);
 router.put('/rating/edit/:id',mobileNumberController.putRatingInfo);

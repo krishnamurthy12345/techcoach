@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import './Rating.css';
 import { FaStar } from "react-icons/fa";
+import withAuth from '../../withAuth';
 
 const Rating = () => {
     const [data, setData] = useState(null);
@@ -150,4 +151,4 @@ const Rating = () => {
     );
 };
 
-export default Rating;
+export default withAuth(Rating);

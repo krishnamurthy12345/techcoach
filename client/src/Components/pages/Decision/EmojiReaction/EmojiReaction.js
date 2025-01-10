@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { BiSolidSmile } from "react-icons/bi";
 import './EmojiReaction.css';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../../../withAuth';
 
 function EmojiReaction({ commentId }) {
     const [emojis, setEmojis] = useState([]);
@@ -104,10 +105,10 @@ function EmojiReaction({ commentId }) {
                     </ul>
                 </div>
             )}
-
+            
             <ToastContainer />
         </div>
     );
 }
 
-export default EmojiReaction;
+export default withAuth(EmojiReaction);
