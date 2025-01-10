@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import './GetAllEmoji.css';
 import { useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import withAuth from '../../../withAuth';
 
 function GetAllEmoji({ commentId }) {
     const [reactions, setReactions] = useState([]);
@@ -82,4 +83,4 @@ function GetAllEmoji({ commentId }) {
     );
 }
 
-export default GetAllEmoji;
+export default withAuth(GetAllEmoji);
