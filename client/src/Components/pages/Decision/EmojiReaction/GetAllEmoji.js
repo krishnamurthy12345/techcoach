@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './GetAllEmoji.css';
 import { useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import withAuth from '../../../withAuth';
 
 function GetAllEmoji({ commentId }) {
@@ -10,7 +10,7 @@ function GetAllEmoji({ commentId }) {
     const { id } = useParams();
 
     const fetchAllEmoji = async () => {
-        try {
+        try { 
             const token = localStorage.getItem('token');
             const response = await axios.get(
                 `${process.env.REACT_APP_API_URL}/api/emoji/decision/${id}`,
@@ -27,27 +27,27 @@ function GetAllEmoji({ commentId }) {
         }
     };
 
-    const removeReaction = async (emoji_id) => {
-        const token = localStorage.getItem('token');
-        try {
-            const response = await axios.delete(
-                `${process.env.REACT_APP_API_URL}/api/emoji/${commentId}/${emoji_id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            console.log('Reaction removed:', response.data);
-            setReactions((prevReactions) =>
-                prevReactions.filter((reaction) => reaction.emoji_id !== emoji_id)
-            );
-            toast.success("Reaction Removed Successfully");
-        } catch (error) {
-            console.error('Failed to remove reaction:', error);
-            toast.error('Failed to remove reaction:', error);
-        }
-    };
+    // const removeReaction = async (emoji_id) => {
+    //     const token = localStorage.getItem('token');
+    //     try {
+    //         const response = await axios.delete(
+    //             `${process.env.REACT_APP_API_URL}/api/emoji/${commentId}/${emoji_id}`,
+    //             {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             }
+    //         );
+    //         console.log('Reaction removed:', response.data);
+    //         setReactions((prevReactions) =>
+    //             prevReactions.filter((reaction) => reaction.emoji_id !== emoji_id)
+    //         );
+    //         toast.success("Reaction Removed Successfully");
+    //     } catch (error) {
+    //         console.error('Failed to remove reaction:', error);
+    //         toast.error('Failed to remove reaction:', error);
+    //     }
+    // };
 
     useEffect(() => {
         fetchAllEmoji();
@@ -67,12 +67,6 @@ function GetAllEmoji({ commentId }) {
                             <li key={reaction.reaction_id} className="reactions-li">
                                 <span className="emoji">{reaction.emoji_symbol}</span>
                                 <span className="displayname">{reaction.displayname}</span>
-                                <button
-                                    className="remove-reaction-btn"
-                                    onClick={() => removeReaction(reaction.emoji_id)}
-                                >
-                                    Remove
-                                </button>
                             </li>
                         ))}
                     </ul>
