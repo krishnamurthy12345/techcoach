@@ -44,9 +44,10 @@ const getReactions = async (req, res) => {
       conn = await getConnection(); 
   
       const query = `
-        SELECT r.reaction_id, r.comment_id, r.user_id, e.emoji_symbol, e.emoji_name, r.reacted_at
+        SELECT r.reaction_id, r.comment_id, r.user_id, e.emoji_symbol,e.emoji_id, e.emoji_name, r.reacted_at, u.displayname,u.email
         FROM techcoach_lite.techcoach_comment_reactions AS r
         INNER JOIN techcoach_lite.techcoach_emojis AS e ON r.emoji_id = e.emoji_id
+        INNER JOIN techcoach_lite.techcoach_users AS u ON r.user_id = u.user_id
         WHERE r.comment_id = ?
       `;
   
@@ -158,52 +159,52 @@ const getMasterEmojis = async (req, res) => {
     }
 };
 
-const editReaction = async (req, res) => {
-  const { comment_id, emoji_id } = req.params;
-  console.log('Comment ID:', comment_id);
-  console.log('New Emoji ID:', emoji_id);
+// const editReaction = async (req, res) => {
+//   const { comment_id, emoji_id } = req.params;
+//   console.log('Comment ID:', comment_id);
+//   console.log('New Emoji ID:', emoji_id);
   
-  let conn;
-  try {
-    conn = await getConnection();
-    await conn.beginTransaction();
+//   let conn;
+//   try {
+//     conn = await getConnection();
+//     await conn.beginTransaction();
 
-    const userId = req.user.id;
+//     const userId = req.user.id;
 
-    // Check if the reaction exists
-    const checkQuery = `
-      SELECT reaction_id FROM techcoach_lite.techcoach_comment_reactions
-      WHERE comment_id = ? AND user_id = ?
-    `;
-    const existingReaction = await conn.execute(checkQuery, [comment_id, userId]);
+//     // Check if the reaction exists
+//     const checkQuery = `
+//       SELECT reaction_id FROM techcoach_lite.techcoach_comment_reactions
+//       WHERE comment_id = ? AND user_id = ?
+//     `;
+//     const existingReaction = await conn.execute(checkQuery, [comment_id, userId]);
 
-    if (existingReaction.length === 0) {
-      return res.status(404).json({ message: 'No reaction found to edit' });
-    }
+//     if (existingReaction.length === 0) {
+//       return res.status(404).json({ message: 'No reaction found to edit' });
+//     }
 
-    // Update the reaction
-    const updateQuery = `
-      UPDATE techcoach_lite.techcoach_comment_reactions
-      SET emoji_id = ?
-      WHERE comment_id = ? AND user_id = ?
-    `;
-    const result = await conn.execute(updateQuery, [emoji_id, comment_id, userId]);
+//     // Update the reaction
+//     const updateQuery = `
+//       UPDATE techcoach_lite.techcoach_comment_reactions
+//       SET emoji_id = ?
+//       WHERE comment_id = ? AND user_id = ?
+//     `;
+//     const result = await conn.execute(updateQuery, [emoji_id, comment_id, userId]);
 
-    if (result.affectedRows === 0) {
-      return res.status(400).json({ message: 'Failed to update reaction' });
-    }
+//     if (result.affectedRows === 0) {
+//       return res.status(400).json({ message: 'Failed to update reaction' });
+//     }
 
-    await conn.commit();
-    res.status(200).json({ message: 'Reaction updated successfully' });
-  } catch (error) {
-    if (conn) await conn.rollback();
-    console.error('Error editing reaction:', error);
-    res.status(500).json({ message: 'Failed to edit reaction', error: error.message });
-  } finally {
-    if (conn) await conn.release();
-  }
-};
+//     await conn.commit();
+//     res.status(200).json({ message: 'Reaction updated successfully' });
+//   } catch (error) {
+//     if (conn) await conn.rollback();
+//     console.error('Error editing reaction:', error);
+//     res.status(500).json({ message: 'Failed to edit reaction', error: error.message });
+//   } finally {
+//     if (conn) await conn.release();
+//   }
+// };
 
 
 
-module.exports = { postReactions, getReactions, getAllReactionsByDecision, removeReaction,getMasterEmojis, editReaction }
+module.exports = { postReactions, getReactions, getAllReactionsByDecision, removeReaction,getMasterEmojis}

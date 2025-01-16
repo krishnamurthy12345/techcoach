@@ -185,3 +185,11 @@
         font-size: 12px;
     }
 }
+.delete-icon {
+    color: red;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.delete-icon:hover {
+    color: darkred;
+}
