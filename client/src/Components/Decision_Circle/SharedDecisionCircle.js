@@ -8,6 +8,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import withAuth from '../withAuth';
 import axios from 'axios';
 import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction';
+import CommentRating from '../pages/CommentRating/CommentRating';
 
 const SharedDecisionCircle = () => {
     const [sharedDecisionCircles, setSharedDecisionCircles] = useState([]);
@@ -355,9 +356,13 @@ const SharedDecisionCircle = () => {
                                                                         <EmojiReaction commentId={comment.commentId} emoji="😊" />
                                                                     </div>
                                                                 )}
+                                                                {comment.type_of_member === 'member' && (
+                                                                    <div>
+                                                                        <CommentRating commentId={comment.commentId}  />
+                                                                    </div>
+                                                                )}
                                                             </ListItem>
                                                         ))}
-
                                                 </List>
 
                                                 <Box mt={2}>

@@ -43,6 +43,9 @@ import EditRating from './Components/pages/Ratings/EditRating.js';
 import EmojiReaction from './Components/pages/Decision/EmojiReaction/EmojiReaction.js';
 import GetAllEmoji from './Components/pages/Decision/EmojiReaction/GetAllEmoji.js';
 import AddMobileNumber from './Components/Notification/AddMobileNumber.js';
+import CommentRating from './Components/pages/CommentRating/CommentRating.js';
+import CommentRatingView from './Components/pages/CommentRating/CommentRatingView.js';
+import CommentRatingEdit from './Components/pages/CommentRating/CommentRatingEdit.js';
 
 function App() {
   console.log("one is working")
@@ -156,6 +159,11 @@ function App() {
         {/* EmojiReaction Routes */}
         <Route path='/emoji/:comment_id/:emoji_id' element={<EmojiReaction />} />
         <Route path='/emoji/:comment_id/:emoji_id' element={<GetAllEmoji />} />
+
+        {/* CommentRating Routes */}
+        <Route path='/commentRating' element={<CommentRating />} />
+        <Route path='/commentRating/overAll/:commentId' element={<CommentRatingView />} />
+        <Route path='/commentRating/edit/:commentId' element={<CommentRatingEdit />} />
 
       </Routes>
     </div>

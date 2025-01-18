@@ -14,6 +14,7 @@ import withAuth from '../../withAuth';
 import EmojiReaction from './EmojiReaction/EmojiReaction';
 // import './View.css';
 import GetAllEmoji from './EmojiReaction/GetAllEmoji';
+import CommentRating from '../CommentRating/CommentRating';
 
 const View = () => {
     const [decision, setDecision] = useState({});
@@ -302,19 +303,20 @@ const View = () => {
                                             </Typography>
                                         </Box>
                                     </Box>
-                                    <GetAllEmoji commentId={memberComment.id}/>
+                                    <GetAllEmoji commentId={memberComment.id} />
                                 </Box>
                                 <div>
                                     <EmojiReaction commentId={memberComment.id} />
+                                    <CommentRating commentId={memberComment.id} />
                                 </div>
                             </Box>
-                            <Box sx={{p:2}}>
+                            <Box sx={{ p: 2 }}>
                                 {authorComments.map(authorComment => {
                                     if (authorComment.parentCommentId === memberComment.id) {
                                         return (
-                                            <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc",'@media (max-width: 600px)': { ml: 2, p: 1 }, }}>
+                                            <Box key={authorComment.id} sx={{ p: 2, border: '1px solid #ccc', mb: 2, borderRadius: 2, ml: 4, backgroundColor: "#edf6fc", '@media (max-width: 600px)': { ml: 2, p: 1 }, }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2,fontSize: { xs: '1rem', sm: '1.5rem' }, }}>{authorComment.displayname[0]}</Avatar>
+                                                    <Avatar sx={{ bgcolor: "#526D82", color: "white", mr: 2, fontSize: { xs: '1rem', sm: '1.5rem' }, }}>{authorComment.displayname[0]}</Avatar>
                                                     <Box sx={{ flex: 1 }}>
                                                         <Typography variant="body1">{authorComment.comment}</Typography>
                                                         <Typography variant="caption" color="textSecondary">
@@ -354,7 +356,7 @@ const View = () => {
                                                 marginRight: "0.5rem"
                                             }}
                                         />
-                                        <div style={{ display: 'flex', gap: '8px', flexDirection: { xs: 'column', sm: 'row' },height: 'auto',}}>
+                                        <div style={{ display: 'flex', gap: '8px', flexDirection: { xs: 'column', sm: 'row' }, height: 'auto', }}>
                                             <Button variant="contained" sx={{ width: { xs: '100%', sm: 'auto' } }} onClick={() => handleReplySubmit(memberComment.id, memberComment.groupId)}>Reply</Button>
                                             <Button variant="contained" sx={{ width: { xs: '100%', sm: 'auto' } }} onClick={() => handleReplySendEmail(memberComment.id, memberComment.groupId, id)}>Reply & Email</Button>
                                         </div>
@@ -379,7 +381,7 @@ const View = () => {
                                             key={comment.id}
                                             className={`comment-box ${comment.parentCommentId ? 'reply-comment' : 'original-comment'}`}
                                             style={{
-                                                width: '90%',
+                                                width: '80%',
                                                 backgroundColor: comment.type_of_member === 'author' ? '#e8f5e9' : '#FFF',
                                                 textAlign: 'left',
                                                 padding: '8px',
@@ -419,16 +421,21 @@ const View = () => {
                                                 </div>
                                             </div>
                                             {comment.type_of_member === 'member' && (
-                                            <div>
-                                                <GetAllEmoji commentId={comment.id} emoji="😊" />
-                                            </div>
-                                        )}
+                                                <div>
+                                                    <GetAllEmoji commentId={comment.id} emoji="😊" />
+                                                </div>
+                                            )}
                                         </div>
                                         {comment.type_of_member === 'member' && (
                                             <div>
                                                 <EmojiReaction commentId={comment.id} emoji="😊" />
                                             </div>
                                         )}
+                                        {comment.type_of_member === 'member' && (
+                                                <div>
+                                                    <CommentRating commentId={comment.id} />
+                                                </div>
+                                            )}
                                     </div>
                                 ))}
                         </ul>

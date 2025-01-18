@@ -10,6 +10,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import axios from 'axios';
 import MemberRating from '../pages/Ratings/MemberRating';
 import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction';
+import CommentRating from '../pages/CommentRating/CommentRating';
 
 const MemberSharedDecisions = () => {
     const [groups, setGroups] = useState(null);
@@ -288,7 +289,7 @@ const MemberSharedDecisions = () => {
                                                         <div
                                                             className="comment-container"
                                                             style={{
-                                                                maxWidth: '70%',
+                                                                maxWidth: '60%',
                                                                 padding: '10px',
                                                                 borderRadius: '8px',
                                                                 border: '1px solid #ccc',
@@ -327,10 +328,16 @@ const MemberSharedDecisions = () => {
                                                             </Box>
                                                         </div>
                                                         {comment.type_of_member === 'member' && (
-                                                        <div>
-                                                            <EmojiReaction commentId={comment.id} emoji="😊" />
-                                                        </div>
-                                                    )}
+                                                            <div>
+                                                                <EmojiReaction commentId={comment.id} emoji="😊" />
+                                                            </div>
+                                                        )}
+                                                        {comment.type_of_member === 'member' && (
+                                                            <div>
+                                                                <CommentRating commentId={comment.id} emoji="😊" />
+                                                            </div>
+                                                        )}
+
                                                     </div>
                                                 ))
                                             ) : (
@@ -379,7 +386,7 @@ const MemberSharedDecisions = () => {
                                     </CardContent>
                                 </Card>
                                 <div className='member-rating'>
-                                    <MemberRating decisionId={decision.decision_id}/>
+                                    <MemberRating decisionId={decision.decision_id} />
                                 </div>
                             </Grid>
                         );
