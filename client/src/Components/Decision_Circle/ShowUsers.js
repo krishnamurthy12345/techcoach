@@ -11,7 +11,8 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { Card, CardContent, Typography, Grid, Avatar, Box, TextField, Button, Modal } from '@mui/material';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import MemberRating from '../pages/Ratings/MemberRating';
-import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction'
+import EmojiReaction from '../pages/Decision/EmojiReaction/EmojiReaction';
+import CommentRating from '../pages/CommentRating/CommentRating';
 
 const ShowUsers = () => {
     const [groups, setGroups] = useState(null);
@@ -360,6 +361,11 @@ const ShowUsers = () => {
                                                             {comment.type_of_member === 'member' && (
                                                                 <div>
                                                                     <EmojiReaction commentId={comment.id} emoji="😊" />
+                                                                </div>
+                                                            )}
+                                                            {comment.type_of_member === 'member' && (
+                                                                <div>
+                                                                    <CommentRating commentId={comment.id} emoji="😊" />
                                                                 </div>
                                                             )}
                                                         </div>
