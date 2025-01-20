@@ -3,8 +3,6 @@
   border-radius: 10px;
   padding: 10px;
   text-align: center;
-  margin: auto;
-  max-width: 100%;
 }
 
 .filter-container {
@@ -41,10 +39,6 @@
 }
 
 @media (max-width: 768px) {
-  .Bubble-chart-container {
-    height: 400px;
-  }
-
   .filter-container button {
     padding: 6px 12px;
     font-size: 12px;
@@ -52,10 +46,6 @@
 }
 
 @media (max-width: 480px) {
-  .Bubble-chart-container {
-    height: 300px; 
-  }
-
   .filter-container {
     flex-direction: column;
   }

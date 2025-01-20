@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, Grid, Button } from '@mui/material';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import withAuth from '../withAuth';
 import { getUserListForDecisionCircle, sendDecisionCircleInvitation } from './Networkk_Call';
 import axios from 'axios';
