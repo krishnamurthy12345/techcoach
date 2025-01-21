@@ -10,6 +10,7 @@ router.use(createUserKey);
 
 router.get("/fetchUserList", multigroupController.getUserList);
 router.post("/decisionCircleCreation", multigroupController.decisionCircleCreation);
+router.post("/decisionCircle/users/:groupId", multigroupController.getDecisionCircleAlreadyUsers);
 router.get("/getUserDecisionCircles",multigroupController.getUserDecisionCircles);
 // router.get("/getdecisionCircle/:group_id",multigroupController.getdecisionCircle);
 router.get("/getdecisionCirclesByUser",multigroupController.getdecisionCirclesByUser);
