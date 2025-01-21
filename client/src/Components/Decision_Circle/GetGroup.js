@@ -95,9 +95,11 @@ const GetGroup = () => {
                                 <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><FaUsersViewfinder className='show-icon' />
                                 </Link>
                                 <div className='group-button'>
-                                    <Link to={`/decisiongroup/${group.group_name}?id=${group.id}`}><MdGroupAdd className='add-icon' />
+                                    <Link to={`/decisiongroup/${group.id}?group_name=${group.group_name}`}>
+                                    <MdGroupAdd className='add-icon' />
                                     </Link>
-                                    <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}><MdGroupRemove className='remove-icon' />
+                                    <Link to={`/getdecisioncircle/${group.id}?group_name=${group.group_name}`}>
+                                    <MdGroupRemove className='remove-icon' />
                                     </Link>
                                 </div>
                             </div>

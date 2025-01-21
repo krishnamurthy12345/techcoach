@@ -31,58 +31,112 @@ const getUserList = async (req, res) => {
 };
 
 const decisionCircleCreation = async (req, res) => {
-    const { created_by, type_of_group = 'decision_circle', group_name, members } = req.body;
-    console.log('Request data:', { created_by, type_of_group, group_name, members });
-  
+    const { group_id, members } = req.body;
+    console.log('Request data:', { group_id, members });
+
     let conn;
-    
+
     try {
-      conn = await getConnection();
-      await conn.beginTransaction();
-  
-      const existingGroup = await conn.query(
-        `SELECT id FROM techcoach_lite.techcoach_groups WHERE group_name = ? AND created_by =?`,
-        [group_name,created_by]
-      );
-      console.log('Existing group query result:', existingGroup);
-  
-      let groupId;
-      if (existingGroup.length > 0) {
-        groupId = existingGroup[0].id;
-        console.log('Group exists, using existing groupId:', groupId);
-      } else {
-        const groupResult = await conn.query(
-          `INSERT INTO techcoach_lite.techcoach_groups (created_by, type_of_group, group_name) VALUES (?, ?, ?)`,
-          [created_by, type_of_group, group_name]
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const created_by = req.user.id;
+
+        const existingGroup = await conn.query(
+            `SELECT * FROM techcoach_lite.techcoach_groups WHERE id = ? AND created_by =?`,
+            [group_id, created_by]
         );
-        groupId = groupResult.insertId;
-        console.log('Group created, new groupId:', groupId);
-      }
-  
-      if (!groupId) {
-        throw new Error('Group ID is missing after creation/check');
-      }
-  
-      const values = members.map(() => "(?, ?, ?)").join(", ");
-      const parameters = members.flatMap(memberId => [groupId, memberId, 'accepted']);
-  
-      await conn.query(
-        `INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) VALUES ${values}`,
-        parameters
-      );
-  
-      await conn.commit();
-      res.status(201).json({ message: 'Decision circle created successfully', groupId: groupId.toString() });
-      console.log('Group ID:', groupId);
+        console.log('Existing group query result:', existingGroup);
+
+        let groupId;
+        if (existingGroup.length > 0) {
+            groupId = existingGroup[0].id;
+            console.log('Group exists, using existing groupId:', groupId);
+        } else {
+            const groupResult = await conn.query(
+                `INSERT INTO techcoach_lite.techcoach_groups (created_by, type_of_group, id) VALUES (?, ?, ?)`,
+                [created_by, type_of_group, group_id]
+            );
+            groupId = groupResult.insertId;
+            console.log('Group created, new groupId:', groupId);
+        }
+
+        if (!groupId) {
+            throw new Error('Group ID is missing after creation/check');
+        }
+
+        const values = members.map(() => "(?, ?, ?)").join(", ");
+        const parameters = members.flatMap(memberId => [groupId, memberId, 'accepted']);
+
+        await conn.query(
+            `INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status) VALUES ${values}`,
+            parameters
+        );
+
+        await conn.commit();
+        res.status(201).json({ message: 'Decision circle created successfully', groupId: groupId.toString() });
+        console.log('Group ID:', groupId);
     } catch (error) {
-      console.error('Error creating decision circle:', error);
-      if (conn) await conn.rollback();
-      res.status(500).json({ error: 'An error occurred while creating the decision circle' });
+        console.error('Error creating decision circle:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while creating the decision circle' });
     } finally {
-      if (conn) conn.release();
+        if (conn) conn.release();
     }
 };
-  
+
+
+const getDecisionCircleAlreadyUsers = async (req, res) => {
+    let groupId = parseInt(req.params.groupId, 10); 
+    const { memberId } = req.body;
+
+    // Validate groupId and memberId
+    if (isNaN(groupId) || isNaN(memberId)) {
+        return res.status(400).json({ message: 'Invalid groupId or memberId' });
+    }
+
+    // console.log('Group ID:', groupId);
+    // console.log('Member ID:', memberId);
+
+    let conn;
+    try {
+        conn = await getConnection();
+        await conn.beginTransaction();
+
+        const existingMember = await conn.query(
+            `
+        SELECT *
+        FROM techcoach_lite.techcoach_group_members
+        WHERE group_id = ? AND member_id = ?
+        `,
+            [groupId, memberId]
+        );
+
+        if (existingMember.length > 0) {
+            await conn.rollback();
+            return res.status(409).json({ message: 'User is already a member of this group' });
+        }
+
+        await conn.query(
+            `
+        INSERT INTO techcoach_lite.techcoach_group_members (group_id, member_id, status)
+        VALUES (?, ?, ?)
+        `,
+            [groupId, memberId, 'accepted']
+        );
+
+        await conn.commit();
+        res.status(201).json({ message: 'User added to the group successfully' });
+    } catch (error) {
+        console.error('Error adding user to group:', error);
+        if (conn) await conn.rollback();
+        res.status(500).json({ error: 'An error occurred while adding the user to the group' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
 const getUserDecisionCircles = async (req, res) => {
     const created_by = req.user.id;
     console.log('Retrieved user_id:', created_by);
@@ -391,12 +445,12 @@ const removeUsersFromGroup = async (req, res) => {
 };
 
 const getGroupDetails = async (req, res) => {
-    const groupId = req.params.groupId; 
+    const groupId = req.params.groupId;
     let conn;
 
     try {
-        conn = await getConnection(); 
-        await conn.beginTransaction(); 
+        conn = await getConnection();
+        await conn.beginTransaction();
 
         const query = `
             SELECT 
@@ -414,13 +468,13 @@ const getGroupDetails = async (req, res) => {
                 g.id = ?
         `;
 
-        const [rows] = await conn.execute(query, [groupId]); 
+        const [rows] = await conn.execute(query, [groupId]);
 
-        await conn.commit(); 
+        await conn.commit();
         res.status(200).json(rows);
     } catch (error) {
         if (conn) {
-            await conn.rollback(); 
+            await conn.rollback();
         }
         console.error('Error fetching group details:', error);
         res.status(500).json({ error: 'An error occurred while fetching group details.' });
@@ -945,7 +999,7 @@ const decisionCirclePostComment = async (req, res) => {
 };
 
 const decisionCircleReplyComment = async (req, res) => {
-    const { parentCommentId,decision, reply, groupId } = req.body;
+    const { parentCommentId, decision, reply, groupId } = req.body;
     // console.log('decision:', decision);
     // console.log('groupId:', groupId);
     const memberId = req.user.id;
@@ -978,14 +1032,14 @@ const decisionCircleReplyComment = async (req, res) => {
             WHERE gm.group_id = ?;
         `;
 
-        const groupMembers = await conn.query(groupAndPosterQuery, [parentCommentId,groupId]);
+        const groupMembers = await conn.query(groupAndPosterQuery, [parentCommentId, groupId]);
 
         if (!groupMembers || groupMembers.length === 0) {
             console.log("No group members or original poster found.");
             return res.status(400).json({ message: 'Invalid group or comment ID.' });
         }
 
-       // Fetch replying user's details
+        // Fetch replying user's details
         const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
         const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
 
@@ -1194,7 +1248,7 @@ const getdecisionSharedDecisionCirclebyuser = async (req, res) => {
         GROUP BY tsd.decisionId
         `;
 
-        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId,userId]);
+        const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId, userId]);
 
         if (!Array.isArray(sharedDecisions)) {
             res.status(500).json({ error: 'Unexpected data format: sharedDecisions is not an array' });
@@ -1396,6 +1450,7 @@ GROUP BY tsd.decisionId
 module.exports = {
     getUserList,
     decisionCircleCreation,
+    getDecisionCircleAlreadyUsers,
     getUserDecisionCircles,
     getdecisionCirclesByUser,
     getdecisionCirclesByUserAndMember,

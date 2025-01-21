@@ -17,12 +17,38 @@ const getUserListForDecisionCircle = async () => {
     }
 };
 
-const decisionCircleCreation = async (group_id, members) => {
+const getDecisionCircleAlreadyUsers = async (groupId, memberId) => {
+    const token = localStorage.getItem('token');
+  
+    console.log('API Call - Group ID:', groupId, 'Member ID:', memberId);
+  
+    if (isNaN(groupId) || !memberId) {
+      console.error('Invalid groupId or memberId for API call:', { groupId, memberId });
+      throw new Error('Invalid groupId or memberId');
+    }
+  
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/group/decisionCircle/users/${groupId}`,
+        { memberId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching existing users:', error.response?.data || error.message);
+      throw error;
+    }
+};
+  
+const decisionCircleCreation = async (groupId, members) => {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.post(
             `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-            { group_id, members },
+            { group_id: groupId,
+              members },
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -594,6 +620,7 @@ const deleteComment = async (commentId) => {
 
 export {
     getUserListForDecisionCircle,
+    getDecisionCircleAlreadyUsers,
     decisionCircleCreation,
     getUserDecisionCircles,
     getdecisionCirclesByUser,

@@ -89,7 +89,7 @@ const ShowUsers = () => {
 
     const handleAddPersonClick = () => {
         if (groups && groups.length > 0 && groups[0].group_name && groups[0].id) {
-            navigate(`/decisiongroup/${groups[0].group_name}?id=${groups[0].id}`);
+            navigate(`/decisiongroup/${groups[0].id}?group_name=${groups[0].group_name}`);
         } else {
             toast.error('Group details are not available.');
         }

@@ -127,7 +127,6 @@ function App() {
         {/* Create Decision Circle Routes */}
         <Route path='/decisioncircle/:id' element={<DecisionCircle />} />
         <Route path='/getdecisioncircle' element={<GetGroup />} />
-        <Route path='/decisiongroup' element={<DecisionGroup />} />
         <Route path='/decisiongroup/:id' element={<DecisionGroup />} />
         <Route path='/getdecisioncircle/:groupId' element={<ShowUsers />} />
         <Route path='/sharecircle/:id' element={<ShareCircle />}/>
