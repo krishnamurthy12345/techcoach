@@ -15,7 +15,6 @@ router.get("/getUserDecisionCircles",multigroupController.getUserDecisionCircles
 // router.get("/getdecisionCircle/:group_id",multigroupController.getdecisionCircle);
 router.get("/getdecisionCirclesByUser",multigroupController.getdecisionCirclesByUser);
 router.get("/getdecisionCirclesByUserAndMember",multigroupController.getdecisionCirclesByUserAndMember);
-// router.get("/getAllGroups", multigroupController.getAllGroups);
 router.get("/getUsersForGroup/:groupId", multigroupController.getUsersForGroup);
 router.get("/getGroupDetails/:groupId", multigroupController.getGroupDetails);
 router.delete("/removeUsersFromGroup/:groupId/:userId", multigroupController.removeUsersFromGroup);

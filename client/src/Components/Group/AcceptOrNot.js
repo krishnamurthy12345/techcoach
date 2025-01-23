@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, Box, Button, CircularProgress } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import DoneIcon from '@mui/icons-material/Done'; 
+import DoneIcon from '@mui/icons-material/Done';
 import { useNavigate } from 'react-router-dom';
 import { shareDecisionInInnerCircle, getSharedMembers, mailToInnerCircleDecisionShare } from './Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
@@ -11,6 +11,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [sharedMembers, setSharedMembers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [buttonDisabled, setButtonDisabled] = useState(false);
     const navigate = useNavigate();
 
     console.log("innerrrr", decision);
@@ -20,6 +21,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
     };
 
     const handleSubmit = async () => {
+        setButtonDisabled(true);
         const payload = {
             decisionId: id,
             groupId: innerCircleDetails.group.id,
@@ -30,8 +32,8 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
             const response = await shareDecisionInInnerCircle(payload);
             if (response.status === 200) {
                 toast('Decision shared successfully!');
-                setSelectedMember(null); 
-                await getSharedMembersList(); 
+                setSelectedMember(null);
+                await getSharedMembersList();
 
                 const selectedMemberDetails = innerCircleDetails.members.find(member => member.user_id === selectedMember);
                 const memberEmail = selectedMemberDetails?.email;
@@ -53,12 +55,14 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                     console.log("response from the mail", responseToMail);
                 }
 
-            }  else {
+            } else {
                 toast('Failed to share decision.');
             }
         } catch (error) {
             console.error('Error sharing decision:', error);
             toast('An error occurred while sharing the decision.');
+        } finally {
+            setButtonDisabled(false);
         }
     };
 
@@ -78,13 +82,13 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
             console.error('Error in fetching the shared members:', error);
             toast('An error occurred while fetching the shared member decision');
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         getSharedMembersList();
-    }, [innerCircleDetails.group.id]); 
+    }, [innerCircleDetails.group.id]);
 
     if (loading) {
         return (
@@ -104,14 +108,14 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                         const isClickable = member.status === "Accepted" && !sharedMember;
 
                         return (
-                            <ListItem 
-                                key={member.user_id} 
+                            <ListItem
+                                key={member.user_id}
                                 button={isClickable}
-                                onClick={() => isClickable && handleMemberClick(member.user_id)} 
+                                onClick={() => isClickable && handleMemberClick(member.user_id)}
                                 selected={selectedMember === member.user_id}
                                 style={{
                                     cursor: isClickable ? "pointer" : "default",
-                                    backgroundColor: sharedMember ? "#d3d3d3" : "white" 
+                                    backgroundColor: sharedMember ? "#d3d3d3" : "white"
                                 }}
                             >
                                 <ListItemAvatar>
@@ -119,18 +123,18 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
                                         {member.displayname.charAt(0)}
                                     </Avatar>
                                 </ListItemAvatar>
-                                <ListItemText 
-                                    primary={member.displayname} 
-                                    secondary={member.email} 
+                                <ListItemText
+                                    primary={member.displayname}
+                                    secondary={member.email}
                                 />
                                 {selectedMember === member.user_id && (
                                     <CheckIcon color="primary" />
                                 )}
                                 {sharedMember && (
-                                    <DoneIcon color="action" /> 
+                                    <DoneIcon color="action" />
                                 )}
                                 <Typography variant="caption" color={member.status === "Accepted" ? "primary" : "error"}>
-                                    {member.status === "Accepted" ? "Accepted":"Not Acceptedcd "}
+                                    {member.status === "Accepted" ? "Accepted" : "Not Acceptedcd "}
                                 </Typography>
                             </ListItem>
                         );
@@ -147,8 +151,8 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
             <Typography><strong>Taken Date:</strong> {decision.decision_taken_date}</Typography>
             {selectedMember && (
                 <Box mt={2}>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
-                        Share Decision
+                    <Button variant="contained" color="primary" onClick={handleSubmit} disabled={buttonDisabled}>
+                        {buttonDisabled ? "Sharing..." : "Share Decision"}
                     </Button>
                 </Box>
             )}
