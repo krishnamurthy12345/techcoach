@@ -578,19 +578,136 @@ const decisionshareDecisionCircle = async (req, res) => {
 };
 
 
-const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) => {
-    console.log('hshsh',group_id);
-    console.log('iiii',decision_id);
+// const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) => {
+//     console.log('hshsh',group_id);
+//     console.log('iiii',decision_id);
 
-     // Helper to truncate text
-     const truncateText = (text, maxLength) => {
+//      // Helper to truncate text
+//      const truncateText = (text, maxLength) => {
+//         if (typeof text !== 'string') return '';
+//         if (!text || text.length <= maxLength) return text;
+//         const firstPart = text.substring(0, 10);
+//         const lastPart = text.substring(text.length - 10);
+//         return `${firstPart}...${lastPart}`;
+//     };
+
+//     try {
+//         // Fetch decision details
+//         const decisionQuery = `
+//             SELECT decision_name, decision_due_date, decision_taken_date
+//             FROM techcoach_lite.techcoach_decision
+//             WHERE decision_id = ?;
+//         `;
+//         const [decision] = await conn.query(decisionQuery, [decision_id]);
+
+//         if (!decision) {
+//             throw new Error('Decision not found');
+//         }
+
+//         const { decision_name, decision_due_date, decision_taken_date } = decision;
+//         const truncatedDecisionText = truncateText(decision_name, 20);
+
+
+//         // Fetch user details
+//         const userQuery = `
+//             SELECT displayname AS shared_user_name
+//             FROM techcoach_lite.techcoach_users
+//             WHERE user_id = ?;
+//         `;
+//         const [user] = await conn.query(userQuery, [user_id]);
+
+//         if (!user) {
+//             throw new Error('Shared user not found');
+//         }
+
+//         const { shared_user_name } = user;
+
+//         // Fetch members to notify
+//         const memberQuery = `
+//             SELECT 
+//                 u.displayname AS member_name, 
+//                 u.email AS member_email
+//             FROM techcoach_lite.techcoach_group_members gm
+//             JOIN techcoach_lite.techcoach_users u ON gm.member_id = u.user_id
+//             JOIN techcoach_lite.techcoach_groups g ON gm.group_id = g.id
+//             WHERE gm.group_id = ?
+//               AND u.email IS NOT NULL
+//               AND gm.member_id !=?
+//             `;
+
+//         const members = await conn.query(memberQuery, [group_id,user_id]);
+
+//         if (members.length === 0) {
+//             console.warn('No valid email addresses found for the given group_id');
+//             throw new Error('No valid email addresses found');
+//         }
+
+//         // Prepare and send emails
+//         const emailPromises = members.map(async (member) => {
+//             const { member_name, member_email } = member;
+
+//             const emailPayload = {
+//                 from: { address: "Decision-Coach@www.careersheets.in" },
+//                 to: [{ email_address: { address: member_email } }],
+//                 subject: `New Shared Decision in Your Circle by ${shared_user_name}`,
+//                 htmlbody: `
+//                     <div style="font-family: Arial, sans-serif; color: #333;">
+//                         <p>Dear ${member_name},</p>
+//                         <p>${shared_user_name} has posted a new decision in the decision circle you're part of.</p>
+//                         <p>Please log in to view the details and provide your input.</p>
+//                         <p>Here are the details of the decision:</p>
+//                         <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+//                             <p><strong>Decision Name:</strong> ${truncatedDecisionText}</p>
+//                             <p><strong>Due Date:</strong> ${decision_due_date ? new Date(decision_due_date).toLocaleDateString() : 'N/A'}</p>
+//                             <p><strong>Taken Date:</strong> ${decision_taken_date ? new Date(decision_taken_date).toLocaleDateString() : 'N/A'}</p>
+//                         </div>
+//                         <p style="text-align: center;">
+//                             <a href="https://decisioncoach.onrender.com" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Click here to access the application</a>
+//                         </p>
+//                         <p>Regards,</p>
+//                         <p>Team @ Decision Coach</p>
+//                     </div>
+//                 `,
+//             };
+
+//             const zeptoMailApiUrl = 'https://api.zeptomail.in/v1.1/email';
+//             const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
+
+//             try {
+//                 await axios.post(zeptoMailApiUrl, emailPayload, {
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         Authorization: `Zoho-enczapikey ${zeptoMailApiKey}`,
+//                     },
+//                 });
+//                     console.log(`Email sent to: ${member_email}`);
+
+//             } catch (error) {
+//                 console.error(`Failed to send email to ${member_name}:`, error.response?.data || error.message);
+//                 throw new Error(`Failed to send email to ${member_name}`);
+//             }
+//         });
+
+//         await Promise.all(emailPromises);
+
+//     } catch (error) {
+//         console.error('Error Triggering Emails:', error);
+//         throw error;
+//     }
+// };
+
+const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) => {
+    console.log('Triggering email notifications for group:', group_id);
+    console.log('Decision ID:', decision_id);
+
+    const truncateText = (text, maxLength) => {
         if (typeof text !== 'string') return '';
         if (!text || text.length <= maxLength) return text;
         const firstPart = text.substring(0, 10);
         const lastPart = text.substring(text.length - 10);
         return `${firstPart}...${lastPart}`;
     };
-    
+
     try {
         // Fetch decision details
         const decisionQuery = `
@@ -600,13 +717,10 @@ const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) =
         `;
         const [decision] = await conn.query(decisionQuery, [decision_id]);
 
-        if (!decision) {
-            throw new Error('Decision not found');
-        }
+        if (!decision) throw new Error('Decision not found');
 
         const { decision_name, decision_due_date, decision_taken_date } = decision;
         const truncatedDecisionText = truncateText(decision_name, 20);
-
 
         // Fetch user details
         const userQuery = `
@@ -616,35 +730,64 @@ const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) =
         `;
         const [user] = await conn.query(userQuery, [user_id]);
 
-        if (!user) {
-            throw new Error('Shared user not found');
-        }
+        if (!user) throw new Error('Shared user not found');
 
         const { shared_user_name } = user;
 
-        // Fetch members to notify
+        // Fetch group members (excluding the shared user)
         const memberQuery = `
             SELECT 
+                g.id,
+                g.created_by,
+                g.group_name,
                 u.displayname AS member_name, 
                 u.email AS member_email
             FROM techcoach_lite.techcoach_group_members gm
-            JOIN techcoach_lite.techcoach_users u ON gm.member_id = u.user_id
             JOIN techcoach_lite.techcoach_groups g ON gm.group_id = g.id
+            JOIN techcoach_lite.techcoach_users u ON gm.member_id = u.user_id
             WHERE gm.group_id = ?
               AND u.email IS NOT NULL
-              AND gm.member_id !=?
-            `;
-            
-        const members = await conn.query(memberQuery, [group_id,user_id]);
+              AND gm.member_id != ?; -- Exclude the shared user
+        `;
+        const members = await conn.query(memberQuery, [group_id, user_id]);
 
-        if (members.length === 0) {
-            console.warn('No valid email addresses found for the given group_id');
+        // Check if group creator should be notified
+        const groupCreatorQuery = `
+            SELECT created_by
+            FROM techcoach_lite.techcoach_groups
+            WHERE id = ?;
+        `;
+        const [groupCreator] = await conn.query(groupCreatorQuery, [group_id]);
+        const groupCreatorId = groupCreator ? groupCreator.created_by : null;
+
+        // Ensure group creator gets an email unless they are the shared user
+        const emailRecipients = members.filter(
+            (member) => member.member_id !== user_id
+        );
+
+        if (groupCreatorId && groupCreatorId !== user_id) {
+            const groupCreatorDetailsQuery = `
+                SELECT displayname AS member_name, email AS member_email
+                FROM techcoach_lite.techcoach_users
+                WHERE user_id = ? AND email IS NOT NULL;
+            `;
+            const [groupCreatorDetails] = await conn.query(
+                groupCreatorDetailsQuery,
+                [groupCreatorId]
+            );
+            if (groupCreatorDetails) {
+                emailRecipients.push(groupCreatorDetails);
+            }
+        }
+
+        if (emailRecipients.length === 0) {
+            console.warn('No valid email addresses found for the group');
             throw new Error('No valid email addresses found');
         }
 
         // Prepare and send emails
-        const emailPromises = members.map(async (member) => {
-            const { member_name, member_email } = member;
+        const emailPromises = emailRecipients.map(async (recipient) => {
+            const { member_name, member_email } = recipient;
 
             const emailPayload = {
                 from: { address: "Decision-Coach@www.careersheets.in" },
@@ -680,8 +823,7 @@ const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) =
                         Authorization: `Zoho-enczapikey ${zeptoMailApiKey}`,
                     },
                 });
-                    console.log(`Email sent to: ${member_email}`);
-
+                console.log(`Email sent to: ${member_email}`);
             } catch (error) {
                 console.error(`Failed to send email to ${member_name}:`, error.response?.data || error.message);
                 throw new Error(`Failed to send email to ${member_name}`);
@@ -689,7 +831,6 @@ const triggerEmailNotifications = async (group_id, decision_id, user_id, conn) =
         });
 
         await Promise.all(emailPromises);
-
     } catch (error) {
         console.error('Error Triggering Emails:', error);
         throw error;
